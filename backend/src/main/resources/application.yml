@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: book-price-aggregator
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bookaggregator
+    username: bookuser
+    password: change_me
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    kz.nurbolat.bookaggregator: DEBUG
