@@ -27,24 +27,25 @@ services:
       timeout: 5s
       retries: 5
 
-  # backend подключим на M0, когда появится Dockerfile и pom.xml
-  # backend:
-  #   build: ./backend
-  #   container_name: bpa-backend
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   environment:
-  #     SPRING_PROFILES_ACTIVE: docker
-  #     DB_URL: ${DB_URL}
-  #     DB_USERNAME: ${DB_USERNAME}
-  #     DB_PASSWORD: ${DB_PASSWORD}
-  #     REDIS_HOST: ${REDIS_HOST}
-  #     REDIS_PORT: ${REDIS_PORT}
-  #   ports:
-  #     - "8080:8080"
+  backend:
+    build: ./backend
+    container_name: bpa-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    ports:
+      - "8080:8080"
 
 volumes:
   pgdata:
