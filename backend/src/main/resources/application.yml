@@ -1,24 +1,33 @@
 spring:
   application:
     name: book-price-aggregator
+
   datasource:
     url: jdbc:postgresql://localhost:5432/bookaggregator
     username: bookuser
-    password: change_me
+    password: changeme
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
   flyway:
     enabled: true
+    locations: classpath:db/migration
     baseline-on-migrate: true
+
   data:
     redis:
       host: localhost
       port: 6379
+      timeout: 2000ms
 
 server:
   port: 8080
@@ -28,7 +37,12 @@ management:
     web:
       exposure:
         include: health,info
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
     kz.nurbolat.bookaggregator: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: INFO
