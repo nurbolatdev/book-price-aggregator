@@ -1,11 +1,13 @@
 package kz.nurbolat.bookaggregator.book;
 
+import kz.nurbolat.bookaggregator.book.dto.BookResponse;
 import kz.nurbolat.bookaggregator.offer.Offer;
 import kz.nurbolat.bookaggregator.offer.OfferRepository;
 import kz.nurbolat.bookaggregator.source.BookSource;
 import kz.nurbolat.bookaggregator.source.BookSourceResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +27,11 @@ public class BookSearchService {
     private final BookRepository bookRepository;
     private final OfferRepository offerRepository;
 
-    public List<Book> search(String query) {
+    @Cacheable(value = "book-search", key = "#query.toLowerCase().trim()")
+    @Transactional
+    public List<BookResponse> search(String query) {
+        log.debug("Cache miss — fetching from sources for query: {}", query);
+
         List<CompletableFuture<List<BookSourceResult>>> futures = sources.stream()
                 .map(source -> fetchAsync(source, query))
                 .toList();
@@ -35,7 +41,14 @@ public class BookSearchService {
                 .flatMap(List::stream)
                 .toList();
 
-        return saveAndReturn(allResults);
+        List<Book> books = saveResults(allResults);
+
+        return books.stream()
+                .map(book -> BookResponse.from(
+                        book,
+                        offerRepository.findByBookIdOrderByPriceAsc(book.getId())
+                ))
+                .toList();
     }
 
     @Async
@@ -49,8 +62,7 @@ public class BookSearchService {
         }
     }
 
-    @Transactional
-    private List<Book> saveAndReturn(List<BookSourceResult> results) {
+    private List<Book> saveResults(List<BookSourceResult> results) {
         List<Book> books = new ArrayList<>();
 
         for (BookSourceResult result : results) {
