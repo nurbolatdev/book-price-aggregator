@@ -23,17 +23,7 @@ public class BookController {
         if (query.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-
-        List<Book> books = bookSearchService.search(query);
-
-        List<BookResponse> response = books.stream()
-                .map(book -> BookResponse.from(
-                        book,
-                        offerRepository.findByBookIdOrderByPriceAsc(book.getId())
-                ))
-                .toList();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(bookSearchService.search(query));
     }
 
     @GetMapping("/{id}")
