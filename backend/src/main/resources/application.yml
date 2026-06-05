@@ -41,6 +41,11 @@ management:
     health:
       show-details: always
 
+security:
+  jwt:
+    secret: ${JWT_SECRET:my-super-secret-key-for-dev-only-32chars}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
 sources:
   google-books:
     base-url: https://www.googleapis.com/books/v1
