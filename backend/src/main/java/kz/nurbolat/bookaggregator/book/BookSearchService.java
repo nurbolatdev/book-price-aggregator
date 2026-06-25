@@ -32,16 +32,34 @@ public class BookSearchService {
     public List<BookResponse> search(String query) {
         log.debug("Cache miss — fetching from sources for query: {}", query);
 
+        // Phase 1: discovery sources (Google Books) find real books
         List<CompletableFuture<List<BookSourceResult>>> futures = sources.stream()
+                .filter(BookSource::isDiscoverySource)
                 .map(source -> fetchAsync(source, query))
                 .toList();
 
-        List<BookSourceResult> allResults = futures.stream()
+        List<BookSourceResult> discovered = futures.stream()
                 .map(CompletableFuture::join)
                 .flatMap(List::stream)
                 .toList();
 
-        List<Book> books = saveResults(allResults);
+        if (discovered.isEmpty()) {
+            return List.of();
+        }
+
+        List<Book> books = saveResults(discovered);
+
+        // Phase 2: price sources (Kaspi, Ozon) enrich each real book with offers
+        List<BookSource> priceSources = sources.stream()
+                .filter(s -> !s.isDiscoverySource())
+                .toList();
+
+        for (BookSource source : priceSources) {
+            for (Book book : books) {
+                source.enrichBook(book.getTitle(), book.getAuthor(), book.getIsbn())
+                        .forEach(result -> saveOffer(book, result));
+            }
+        }
 
         return books.stream()
                 .map(book -> BookResponse.from(

@@ -17,24 +17,32 @@ public class KaspiMockAdapter implements BookSource {
     }
 
     @Override
+    public boolean isDiscoverySource() {
+        return false;
+    }
+
+    @Override
     public List<BookSourceResult> search(String query) {
+        return List.of();
+    }
+
+    @Override
+    public List<BookSourceResult> enrichBook(String title, String author, String isbn) {
         BigDecimal basePrice = BigDecimal.valueOf(2000 + RANDOM.nextInt(8000));
         BigDecimal originalPrice = RANDOM.nextBoolean()
                 ? basePrice.multiply(BigDecimal.valueOf(1.2))
                 : null;
 
-        return List.of(
-                BookSourceResult.builder()
-                        .title(query)
-                        .author("Автор книги")
-                        .isbn(null)
-                        .source(getName())
-                        .price(basePrice)
-                        .originalPrice(originalPrice)
-                        .currency("KZT")
-                        .inStock(RANDOM.nextBoolean())
-                        .url("https://kaspi.kz/shop/search/?q=" + query.replace(" ", "+"))
-                        .build()
-        );
+        return List.of(BookSourceResult.builder()
+                .title(title)
+                .author(author)
+                .isbn(isbn)
+                .source(getName())
+                .price(basePrice)
+                .originalPrice(originalPrice)
+                .currency("KZT")
+                .inStock(RANDOM.nextBoolean())
+                .url("https://kaspi.kz/shop/search/?q=" + title.replace(" ", "+"))
+                .build());
     }
 }
