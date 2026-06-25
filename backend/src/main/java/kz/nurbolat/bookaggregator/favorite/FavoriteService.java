@@ -22,6 +22,7 @@ public class FavoriteService {
     private final OfferRepository offerRepository;
     private final SecurityUtils securityUtils;
 
+    @Transactional(readOnly = true)
     public List<BookResponse> getFavorites() {
         User user = securityUtils.getCurrentUser();
         return favoriteRepository.findByUserId(user.getId()).stream()
