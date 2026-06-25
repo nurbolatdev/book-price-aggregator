@@ -21,6 +21,7 @@ dist/
 # Env / secrets
 .env
 *.local
+application-local.yml
 
 # Logs / OS
 *.log
