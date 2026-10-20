@@ -1,5 +1,7 @@
 package kz.nurbolat.bookaggregator.user;
 
+import kz.nurbolat.bookaggregator.common.error.AppException;
+import kz.nurbolat.bookaggregator.common.error.ErrorCode;
 import kz.nurbolat.bookaggregator.security.JwtService;
 import kz.nurbolat.bookaggregator.user.dto.AuthResponse;
 import kz.nurbolat.bookaggregator.user.dto.LoginRequest;
@@ -7,6 +9,7 @@ import kz.nurbolat.bookaggregator.user.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +27,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new AppException(ErrorCode.EMAIL_TAKEN);
         }
 
         User user = new User();
@@ -40,9 +43,13 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+        } catch (AuthenticationException e) {
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+        }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String token = jwtService.generateToken(userDetails);
