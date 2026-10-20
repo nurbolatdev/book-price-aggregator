@@ -1,0 +1,96 @@
+# 04. Правила разработки
+
+## 1. Код (Java)
+- Java 21: `record` для DTO и сообщений очередей, `switch` с pattern matching, `var` — где тип очевиден.
+- Lombok: `@RequiredArgsConstructor`, `@Getter/@Setter` на сущностях, `@Slf4j`. **Не** `@Data` на JPA-сущностях (equals/hashCode ломают Hibernate).
+- Внедрение зависимостей только через конструктор.
+- Деньги — `BigDecimal` (scale 2), сравнение через `compareTo`, никогда `double`.
+- Время — `Instant` в коде и `TIMESTAMPTZ` в БД; текущее время берём из бина `Clock` (удобно в тестах).
+- Константы конфигурации — через `@ConfigurationProperties` (record), не россыпь `@Value`.
+- Никаких `System.out`, `printStackTrace`, пустых `catch`.
+- Комментарии — зачем, а не что. Публичные методы сервисов — короткий Javadoc, если логика неочевидна.
+
+## 2. Слои
+```
+Controller  → только HTTP: валидация (@Valid), вызов сервиса, маппинг в DTO-ответ
+Service     → бизнес-логика, транзакции (@Transactional на публичных методах сервиса)
+Repository  → Spring Data JPA; сложные запросы — @Query (JPQL) или native для pg_trgm
+Entity      → JPA, без бизнес-логики сверх простых методов состояния
+dto/        → record-классы Request/Response
+```
+- `open-in-view: false` (уже стоит) — значит, всё нужное для ответа загружаем в сервисе (fetch join / `@EntityGraph` / DTO-проекции).
+- `@Transactional(readOnly = true)` для чтения.
+- `@Async` и `@Cacheable` работают только при вызове **из другого бина** (прокси Spring). Не вызывать такие методы через `this`.
+- `@Cacheable` — только на методах **без побочных эффектов** (чтение).
+
+## 3. Ошибки
+- Бизнес-исключения наследуют `AppException(ErrorCode code, String message)`.
+- `GlobalExceptionHandler` превращает их в формат ошибки из `docs/03-api-contract.md`.
+- 500 — без stack trace в ответе; stack trace — в лог с `traceId`.
+
+## 4. Логи
+- Уровни: `ERROR` — нужна реакция; `WARN` — деградация (магазин не ответил); `INFO` — ключевые события (запуск парсера, письмо отправлено); `DEBUG` — детали.
+- В каждый лог запроса — `traceId` (MDC, фильтр в M12). В сообщения очередей — `messageId`, в лог парсера — `runId` и `store`.
+- Не логировать пароли, токены, полные email (маскировать: `n***@example.com`).
+- Важные события для админки дополнительно пишутся в `system_events` через `SystemEventService`.
+
+## 5. Тесты
+| Тип | Инструмент | Что покрывать | Имя |
+|---|---|---|---|
+| Unit | JUnit 5, Mockito, AssertJ | сервисы, условия маячков, нормализация текста, матчинг | `*Test` |
+| Интеграционные | `@SpringBootTest` + **Testcontainers** (PostgreSQL, Redis, RabbitMQ) | репозитории, миграции, очереди, контроллеры (MockMvc) | `*IT` |
+| Парсеры | сохранённые HTML/JSON в `src/test/resources/fixtures/<store>/` | извлечение цены, названия, ISBN, наличия | `*ParserTest` |
+| Внешний HTTP | WireMock | Google Books, поведение при таймаутах/429 | |
+
+- Базовый класс `AbstractIntegrationTest` с контейнерами (один набор контейнеров на весь прогон, `@ServiceConnection`).
+- Тест не ходит в реальный интернет. Никогда.
+- Шаблон теста: given / when / then, одно поведение — один тест, имя `shouldXxxWhenYyy`.
+- Цель покрытия сервисного слоя — ≥ 70% (JaCoCo в M21).
+
+## 6. Git
+- Ветки: `feature/mNN-short-name` (backend), `feature/fN-short-name` (frontend), `fix/short-name`, `docs/short-name`.
+- От свежего `main`, PR обратно в `main`, merge commit (как в истории M0–M11).
+- **Сначала все коммиты вехи, потом PR.** Не открывать PR на середине.
+- Не коммитить: `.env`, `target/`, `node_modules/`, IDE-файлы, дампы БД, локальные файлы инструментов разработчика.
+- **Порядок работы:** одна веха в работе; backend M12–M21 полностью, затем frontend F1–F7. Следующая веха начинается только после мерджа предыдущей.
+
+### Коммиты
+Формат Conventional Commits, на английском, повелительное наклонение, ≤ 72 символа:
+```
+<type>: <что сделано>
+
+[тело: зачем, если неочевидно]
+```
+Типы: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`, `perf`.
+Примеры:
+```
+feat: add pg_trgm fuzzy search for books
+fix: call fetchAsync through proxy so @Async works
+refactor: move isbn and publisher from books to editions
+test: add Flip parser fixtures for price and stock
+chore: add rabbitmq and mailpit to docker-compose
+```
+Сообщение коммита — только суть изменения: без служебных трейлеров (`Co-Authored-By` и т.п.), подписей и ссылок на сторонние сервисы. Автор коммитов — владелец репозитория.
+
+Одна логическая правка — один коммит. Миграция и код, который от неё зависит, — в одном коммите (сборка не должна ломаться между коммитами).
+
+### Описание PR (шаблон)
+```markdown
+## Веха MNN — <название>
+### Что сделано
+- ...
+### Как проверить
+1. docker compose up -d ...
+2. curl ... → ожидаемый ответ
+### Миграции
+V.. — ...
+### Критерии приёмки
+- [x] ...
+### Что осталось / заметки
+- ...
+```
+
+## 7. Конфигурация
+- Профили: по умолчанию (`application.yml`, локальная разработка), `docker`, `test`.
+- Все настройки приложения — под префиксом `app.` (`app.parser.*`, `app.mail.*`, `app.jwt.*`, `app.cache.*`).
+- Новая переменная окружения → добавить в `.env.example` с комментарием и в `docker-compose.yml`.
