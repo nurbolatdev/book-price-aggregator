@@ -73,6 +73,8 @@ sources:
     api-key: ${GOOGLE_BOOKS_API_KEY:}
 
 logging:
+  pattern:
+    level: "%5p [%X{traceId:-}]"
   level:
     kz.nurbolat.bookaggregator: DEBUG
     org.springframework.web: INFO
