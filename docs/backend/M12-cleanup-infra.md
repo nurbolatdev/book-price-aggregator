@@ -23,62 +23,62 @@
 ## Задачи
 
 ### 1. Сборка
-- [ ] Добавить Maven Wrapper в `backend/` (`mvn -N wrapper:wrapper -Dmaven=3.9.9`), закоммитить `mvnw`, `mvnw.cmd`, `.mvn/wrapper/`.
-- [ ] Обновить Spring Boot до последнего патча 3.3.x.
-- [ ] Добавить зависимости в `backend/pom.xml`:
+- [x] Добавить Maven Wrapper в `backend/` (`mvn -N wrapper:wrapper -Dmaven=3.9.9`), закоммитить `mvnw`, `mvnw.cmd`, `.mvn/wrapper/`.
+- [x] Обновить Spring Boot до последнего патча 3.3.x.
+- [x] Добавить зависимости в `backend/pom.xml`:
   - `org.springframework.boot:spring-boot-starter-amqp`
   - `org.springdoc:springdoc-openapi-starter-webmvc-ui` (2.6.x)
   - test: `spring-boot-testcontainers`, `org.testcontainers:junit-jupiter`, `org.testcontainers:postgresql`, `org.testcontainers:rabbitmq`, `com.redis:testcontainers-redis` (или `GenericContainer` для redis), `org.springframework.amqp:spring-rabbit-test`
   - Версии Testcontainers — через `testcontainers-bom` в `dependencyManagement`.
 
 ### 2. Docker Compose (`docker-compose.yml`)
-- [ ] Добавить сервис `rabbitmq` — образ `rabbitmq:3.13-management-alpine`, порты `127.0.0.1:5672:5672`, `127.0.0.1:15672:15672`, healthcheck `rabbitmq-diagnostics -q ping`, volume `rabbitdata`.
-- [ ] Добавить `mailpit` — образ `axllent/mailpit`, порты `127.0.0.1:1025:1025` (SMTP), `127.0.0.1:8025:8025` (UI).
-- [ ] Postgres и Redis: порты только на `127.0.0.1` (нужны для `spring-boot:run` с хоста).
-- [ ] `backend.depends_on` += `rabbitmq` (healthy), `mailpit`; передать новые переменные.
-- [ ] `.env.example`: `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `MAIL_HOST`, `MAIL_PORT`, `APP_BASE_URL` (с комментариями).
+- [x] Добавить сервис `rabbitmq` — образ `rabbitmq:3.13-management-alpine`, порты `127.0.0.1:5672:5672`, `127.0.0.1:15672:15672`, healthcheck `rabbitmq-diagnostics -q ping`, volume `rabbitdata`.
+- [x] Добавить `mailpit` — образ `axllent/mailpit`, порты `127.0.0.1:1025:1025` (SMTP), `127.0.0.1:8025:8025` (UI).
+- [x] Postgres и Redis: порты только на `127.0.0.1` (нужны для `spring-boot:run` с хоста).
+- [x] `backend.depends_on` += `rabbitmq` (healthy), `mailpit`; передать новые переменные.
+- [x] `.env.example`: `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USER`, `RABBITMQ_PASSWORD`, `MAIL_HOST`, `MAIL_PORT`, `APP_BASE_URL` (с комментариями).
 
 ### 3. Конфигурация (`application.yml`, `application-docker.yml`)
-- [ ] `spring.threads.virtual.enabled: true` (виртуальные потоки Java 21 для Tomcat и `@Async`).
-- [ ] `spring.rabbitmq.*` (localhost/guest в dev, переменные в docker).
-- [ ] `spring.mail.host/port` → Mailpit.
-- [ ] `springdoc.swagger-ui.path: /swagger-ui.html`.
-- [ ] Создать `config/AppProperties` (`@ConfigurationProperties("app")`, record): `baseUrl`, вложенные блоки добавятся в следующих вехах.
-- [ ] Бин `Clock` (`Clock.systemUTC()`) в `config/TimeConfig`.
+- [x] `spring.threads.virtual.enabled: true` (виртуальные потоки Java 21 для Tomcat и `@Async`).
+- [x] `spring.rabbitmq.*` (localhost/guest в dev, переменные в docker).
+- [x] `spring.mail.host/port` → Mailpit.
+- [x] `springdoc.swagger-ui.path: /swagger-ui.html`.
+- [x] Создать `config/AppProperties` (`@ConfigurationProperties("app")`, record): `baseUrl`, вложенные блоки добавятся в следующих вехах.
+- [x] Бин `Clock` (`Clock.systemUTC()`) в `config/TimeConfig`.
 
 ### 4. Удалить фейковые данные и баги
-- [ ] Удалить `KaspiMockAdapter`, `OzonMockAdapter`.
-- [ ] `GoogleBooksAdapter`: не выдумывать цену — адаптер возвращает только метаданные; предложение (offer) из Google Books **не создаётся**. Переименовать/перенести в `metadata/GoogleBooksClient` можно в M14, здесь — минимальная правка.
-- [ ] `BookSearchService`: убрать `@Cacheable` с метода, который пишет в БД; убрать фазу «enrich price sources»; асинхронный вызов источников вынести в отдельный бин (или убрать — источник один). Временное решение до M14.
-- [ ] Удалить `PriceRefreshScheduler` (заменяется в M17). Удалить `@EnableScheduling`, если больше не нужен.
-- [ ] Удалить пустые `.gitkeep` в пакетах, где уже есть код.
+- [x] Удалить `KaspiMockAdapter`, `OzonMockAdapter`.
+- [x] `GoogleBooksAdapter`: не выдумывать цену — адаптер возвращает только метаданные; предложение (offer) из Google Books **не создаётся**. Переименовать/перенести в `metadata/GoogleBooksClient` можно в M14, здесь — минимальная правка.
+- [x] `BookSearchService`: убрать `@Cacheable` с метода, который пишет в БД; убрать фазу «enrich price sources»; асинхронный вызов источников вынести в отдельный бин (или убрать — источник один). Временное решение до M14.
+- [x] Удалить `PriceRefreshScheduler` (заменяется в M17). Удалить `@EnableScheduling`, если больше не нужен.
+- [x] Удалить пустые `.gitkeep` в пакетах, где уже есть код.
 
 ### 5. API v1 и ошибки
-- [ ] Все контроллеры: `/api/...` → `/api/v1/...`; обновить матчеры в `SecurityConfig`.
-- [ ] Единственное разрешённое изменение фронтенда в этой вехе: `frontend/src/api/client.js` — `baseURL` на `/api/v1`.
-- [ ] `common/error/ErrorCode` (enum со статусом HTTP), `AppException`, `NotFoundException extends AppException`.
-- [ ] `GlobalExceptionHandler` → формат ошибки из `docs/03-api-contract.md` (`timestamp, status, code, message, path, fieldErrors`). Обработать: `AppException`, `MethodArgumentNotValidException`, `ConstraintViolationException`, `HttpMessageNotReadableException`, `AccessDeniedException`, всё прочее → 500 `INTERNAL_ERROR`.
-- [ ] JSON-ответы для 401/403 от Spring Security: свои `AuthenticationEntryPoint` и `AccessDeniedHandler` в том же формате.
-- [ ] `config/OpenApiConfig`: название, версия, схема `bearerAuth` (JWT).
+- [x] Все контроллеры: `/api/...` → `/api/v1/...`; обновить матчеры в `SecurityConfig`.
+- [x] Единственное разрешённое изменение фронтенда в этой вехе: `frontend/src/api/client.js` — `baseURL` на `/api/v1`.
+- [x] `common/error/ErrorCode` (enum со статусом HTTP), `AppException`, `NotFoundException extends AppException`.
+- [x] `GlobalExceptionHandler` → формат ошибки из `docs/03-api-contract.md` (`timestamp, status, code, message, path, fieldErrors`). Обработать: `AppException`, `MethodArgumentNotValidException`, `ConstraintViolationException`, `HttpMessageNotReadableException`, `AccessDeniedException`, всё прочее → 500 `INTERNAL_ERROR`.
+- [x] JSON-ответы для 401/403 от Spring Security: свои `AuthenticationEntryPoint` и `AccessDeniedHandler` в том же формате.
+- [x] `config/OpenApiConfig`: название, версия, схема `bearerAuth` (JWT).
 
 ### 6. Наблюдаемость (минимум)
-- [ ] `common/web/TraceIdFilter` — берёт `X-Request-Id` или генерирует UUID, кладёт в MDC `traceId`, возвращает в заголовке ответа.
-- [ ] Паттерн логов с `%X{traceId}` (`logback-spring.xml` или `logging.pattern.console`).
+- [x] `common/web/TraceIdFilter` — берёт `X-Request-Id` или генерирует UUID, кладёт в MDC `traceId`, возвращает в заголовке ответа.
+- [x] Паттерн логов с `%X{traceId}` (`logback-spring.xml` или `logging.pattern.console`).
 
 ### 7. Тесты
-- [ ] `src/test/java/.../support/AbstractIntegrationTest` — Testcontainers PostgreSQL 16, Redis 7, RabbitMQ 3.13 с `@ServiceConnection`, контейнеры `static`, переиспользуются всеми тестами.
-- [ ] `src/test/resources/application-test.yml`.
-- [ ] `ApplicationIT` — контекст поднимается, Flyway применил миграции.
-- [ ] `AuthControllerIT` — регистрация, вход, неверный пароль → 401 в формате ошибки, повторный email → 409.
-- [ ] `GlobalExceptionHandlerTest` (MockMvc slice) — валидация даёт `fieldErrors`.
+- [x] `src/test/java/.../support/AbstractIntegrationTest` — Testcontainers PostgreSQL 16, Redis 7, RabbitMQ 3.13 с `@ServiceConnection`, контейнеры `static`, переиспользуются всеми тестами.
+- [x] `src/test/resources/application-test.yml`.
+- [x] `ApplicationIT` — контекст поднимается, Flyway применил миграции.
+- [x] `AuthControllerIT` — регистрация, вход, неверный пароль → 401 в формате ошибки, повторный email → 409.
+- [x] `GlobalExceptionHandlerTest` (MockMvc slice) — валидация даёт `fieldErrors`.
 
 ## Критерии приёмки
-- [ ] `docker compose up -d` поднимает postgres, redis, rabbitmq, mailpit, backend, frontend; все healthy.
-- [ ] `http://localhost:15672` (RabbitMQ UI) и `http://localhost:8025` (Mailpit) открываются.
-- [ ] `http://localhost:8080/swagger-ui.html` показывает все эндпоинты под `/api/v1`, есть кнопка Authorize (JWT).
-- [ ] В коде нет `Random` для цен, нет моков, нет цены 2500.
-- [ ] Ошибки API приходят в едином формате, в ответе есть заголовок `X-Request-Id`.
-- [ ] `cd backend && ./mvnw -q verify` — зелёный, есть минимум 3 интеграционных теста.
+- [x] `docker compose up -d` поднимает postgres, redis, rabbitmq, mailpit, backend, frontend; все healthy.
+- [x] `http://localhost:15672` (RabbitMQ UI) и `http://localhost:8025` (Mailpit) открываются.
+- [x] `http://localhost:8080/swagger-ui.html` показывает все эндпоинты под `/api/v1`, есть кнопка Authorize (JWT).
+- [x] В коде нет `Random` для цен, нет моков, нет цены 2500.
+- [x] Ошибки API приходят в едином формате, в ответе есть заголовок `X-Request-Id`.
+- [x] `cd backend && ./mvnw -q verify` — зелёный, есть минимум 3 интеграционных теста.
 
 ## План коммитов
 1. `build: add maven wrapper and bump spring boot patch`
