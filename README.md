@@ -1,4 +1,13 @@
-# Book Price Aggregator
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-full-dark.svg">
+    <img src="docs/brand/logo-full.svg" alt="KitapRadar" width="360">
+  </picture>
+</p>
+
+<p align="center">Сравнение цен на книги в магазинах Казахстана и «маячки» на снижение цены</p>
+
+# KitapRadar (Book Price Aggregator)
 
 Веб-приложение для сравнения цен на книги между несколькими онлайн-магазинами. Система собирает предложения из разных источников, находит лучшую цену и позволяет отслеживать снижение цен на книги из избранного.
 
