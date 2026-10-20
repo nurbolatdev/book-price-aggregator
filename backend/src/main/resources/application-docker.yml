@@ -9,8 +9,21 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:1025}
+
   jpa:
     show-sql: false
+
+app:
+  base-url: ${APP_BASE_URL}
 
 logging:
   level:
