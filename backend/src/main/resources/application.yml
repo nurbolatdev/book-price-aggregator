@@ -2,6 +2,10 @@ spring:
   application:
     name: book-price-aggregator
 
+  threads:
+    virtual:
+      enabled: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/bookaggregator
     username: bookuser
@@ -29,6 +33,16 @@ spring:
       port: 6379
       timeout: 2000ms
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  mail:
+    host: localhost
+    port: 1025
+
 server:
   port: 8080
 
@@ -45,6 +59,13 @@ security:
   jwt:
     secret: ${JWT_SECRET:my-super-secret-key-for-dev-only-32chars}
     expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:3000}
 
 sources:
   google-books:
