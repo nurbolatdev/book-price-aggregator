@@ -6,15 +6,12 @@ import kz.nurbolat.bookaggregator.source.BookSource;
 import kz.nurbolat.bookaggregator.source.BookSourceResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -25,18 +22,15 @@ public class BookSearchService {
     private final BookRepository bookRepository;
     private final OfferRepository offerRepository;
 
-    @Cacheable(value = "book-search", key = "#query.toLowerCase().trim()")
+    /**
+     * Looks the query up in metadata sources and stores new books.
+     * Not cached because it writes to the database; replaced by catalog search in M14.
+     */
     @Transactional
     public List<BookResponse> search(String query) {
-        log.debug("Cache miss — fetching from sources for query: {}", query);
-
         // Google Books provides metadata only; offers come from store parsers
-        List<CompletableFuture<List<BookSourceResult>>> futures = sources.stream()
-                .map(source -> fetchAsync(source, query))
-                .toList();
-
-        List<BookSourceResult> discovered = futures.stream()
-                .map(CompletableFuture::join)
+        List<BookSourceResult> discovered = sources.stream()
+                .map(source -> fetchFromSource(source, query))
                 .flatMap(List::stream)
                 .toList();
 
@@ -54,14 +48,13 @@ public class BookSearchService {
                 .toList();
     }
 
-    @Async
-    public CompletableFuture<List<BookSourceResult>> fetchAsync(BookSource source, String query) {
+    private List<BookSourceResult> fetchFromSource(BookSource source, String query) {
         log.debug("Fetching from source: {}", source.getName());
         try {
-            return CompletableFuture.completedFuture(source.search(query));
+            return source.search(query);
         } catch (Exception e) {
-            log.error("Source {} failed: {}", source.getName(), e.getMessage());
-            return CompletableFuture.completedFuture(List.of());
+            log.warn("Source {} failed: {}", source.getName(), e.getMessage());
+            return List.of();
         }
     }
 
