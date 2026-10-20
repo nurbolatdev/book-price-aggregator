@@ -6,8 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
+/**
+ * A price point of an offer; recorded only when the price changes.
+ */
 @Entity
 @Table(name = "price_history")
 @Getter
@@ -19,13 +22,16 @@ public class PriceHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "offer_id", nullable = false)
     private Offer offer;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
+    @Column(name = "old_price", precision = 10, scale = 2)
+    private BigDecimal oldPrice;
+
     @Column(name = "recorded_at", nullable = false, updatable = false)
-    private LocalDateTime recordedAt = LocalDateTime.now();
+    private Instant recordedAt;
 }
