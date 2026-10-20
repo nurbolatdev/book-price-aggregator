@@ -2,7 +2,9 @@ package kz.nurbolat.bookaggregator.book;
 
 import kz.nurbolat.bookaggregator.book.dto.BookResponse;
 import kz.nurbolat.bookaggregator.book.dto.OfferResponse;
-import kz.nurbolat.bookaggregator.common.ResourceNotFoundException;
+import kz.nurbolat.bookaggregator.common.error.AppException;
+import kz.nurbolat.bookaggregator.common.error.ErrorCode;
+import kz.nurbolat.bookaggregator.common.error.NotFoundException;
 import kz.nurbolat.bookaggregator.offer.OfferRepository;
 import kz.nurbolat.bookaggregator.offer.PriceHistoryRepository;
 import kz.nurbolat.bookaggregator.offer.dto.PriceHistoryResponse;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
 public class BookController {
 
@@ -25,7 +27,7 @@ public class BookController {
     @GetMapping("/search")
     ResponseEntity<List<BookResponse>> search(@RequestParam String query) {
         if (query.isBlank()) {
-            return ResponseEntity.badRequest().build();
+            throw new AppException(ErrorCode.VALIDATION_FAILED, "Параметр query не должен быть пустым");
         }
         return ResponseEntity.ok(bookSearchService.search(query));
     }
@@ -33,7 +35,7 @@ public class BookController {
     @GetMapping("/{id}")
     ResponseEntity<BookResponse> getById(@PathVariable Long id) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found: " + id));
+                .orElseThrow(() -> new NotFoundException("Book not found: " + id));
 
         return ResponseEntity.ok(BookResponse.from(
                 book,
@@ -44,7 +46,7 @@ public class BookController {
     @GetMapping("/{id}/offers")
     ResponseEntity<List<OfferResponse>> getOffers(@PathVariable Long id) {
         if (!bookRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Book not found: " + id);
+            throw new NotFoundException("Book not found: " + id);
         }
         List<OfferResponse> offers = offerRepository.findByBookIdOrderByPriceAsc(id)
                 .stream()
@@ -56,7 +58,7 @@ public class BookController {
     @GetMapping("/{id}/price-history")
     ResponseEntity<List<PriceHistoryResponse>> getPriceHistory(@PathVariable Long id) {
         if (!bookRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Book not found: " + id);
+            throw new NotFoundException("Book not found: " + id);
         }
         List<PriceHistoryResponse> history = offerRepository.findByBookIdOrderByPriceAsc(id)
                 .stream()

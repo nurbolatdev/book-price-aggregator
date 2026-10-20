@@ -3,7 +3,7 @@ package kz.nurbolat.bookaggregator.favorite;
 import kz.nurbolat.bookaggregator.book.Book;
 import kz.nurbolat.bookaggregator.book.BookRepository;
 import kz.nurbolat.bookaggregator.book.dto.BookResponse;
-import kz.nurbolat.bookaggregator.common.ResourceNotFoundException;
+import kz.nurbolat.bookaggregator.common.error.NotFoundException;
 import kz.nurbolat.bookaggregator.offer.OfferRepository;
 import kz.nurbolat.bookaggregator.security.SecurityUtils;
 import kz.nurbolat.bookaggregator.user.User;
@@ -37,7 +37,7 @@ public class FavoriteService {
     public void addFavorite(Long bookId) {
         User user = securityUtils.getCurrentUser();
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found: " + bookId));
+                .orElseThrow(() -> new NotFoundException("Book not found: " + bookId));
 
         if (favoriteRepository.existsByUserIdAndBookId(user.getId(), bookId)) {
             return;

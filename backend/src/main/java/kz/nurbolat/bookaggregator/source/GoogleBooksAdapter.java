@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,6 @@ public class GoogleBooksAdapter implements BookSource {
     @SuppressWarnings("unchecked")
     private BookSourceResult mapToResult(Map<String, Object> item) {
         Map<String, Object> info = (Map<String, Object>) item.get("volumeInfo");
-        Map<String, Object> saleInfo = (Map<String, Object>) item.getOrDefault("saleInfo", Map.of());
 
         String title = (String) info.getOrDefault("title", "Unknown");
         List<String> authors = (List<String>) info.getOrDefault("authors", List.of());
@@ -90,10 +88,6 @@ public class GoogleBooksAdapter implements BookSource {
         Map<String, Object> imageLinks = (Map<String, Object>) info.getOrDefault("imageLinks", Map.of());
         String coverUrl = (String) imageLinks.get("thumbnail");
 
-        String buyLink = (String) saleInfo.getOrDefault("buyLink", "https://books.google.com");
-
-        BigDecimal price = extractPrice(saleInfo);
-
         return BookSourceResult.builder()
                 .title(title)
                 .author(author)
@@ -102,23 +96,6 @@ public class GoogleBooksAdapter implements BookSource {
                 .description(description)
                 .coverUrl(coverUrl)
                 .source(getName())
-                .price(price)
-                .currency("KZT")
-                .inStock(true)
-                .url(buyLink)
                 .build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private BigDecimal extractPrice(Map<String, Object> saleInfo) {
-        try {
-            Map<String, Object> listPrice = (Map<String, Object>) saleInfo.get("listPrice");
-            if (listPrice != null && listPrice.containsKey("amount")) {
-                double amount = ((Number) listPrice.get("amount")).doubleValue();
-                return BigDecimal.valueOf(amount);
-            }
-        } catch (Exception ignored) {
-        }
-        return BigDecimal.valueOf(2500);
     }
 }

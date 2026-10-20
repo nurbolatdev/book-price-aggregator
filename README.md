@@ -78,7 +78,7 @@ docker compose up --build
 ```
 
 Приложение будет доступно по адресу: **http://localhost**  
-API: **http://localhost:8080/api**  
+API: **http://localhost:8080/api/v1** · Swagger UI: **http://localhost:8080/swagger-ui.html**  
 Health check: **http://localhost:8080/actuator/health**
 
 ## Локальная разработка
@@ -104,18 +104,18 @@ Frontend доступен на `http://localhost:3000`, запросы к `/api`
 
 | Метод | URL | Доступ | Описание |
 |-------|-----|--------|----------|
-| POST | `/api/auth/register` | Публичный | Регистрация |
-| POST | `/api/auth/login` | Публичный | Вход |
-| GET | `/api/books/search?query=` | Публичный | Поиск книг |
-| GET | `/api/books/{id}` | Публичный | Детали книги |
-| GET | `/api/books/{id}/offers` | Публичный | Предложения по книге |
-| GET | `/api/books/{id}/price-history` | Публичный | История цен |
-| GET | `/api/favorites` | JWT | Список избранного |
-| POST | `/api/favorites/{bookId}` | JWT | Добавить в избранное |
-| DELETE | `/api/favorites/{bookId}` | JWT | Удалить из избранного |
-| GET | `/api/alerts` | JWT | Список алертов |
-| POST | `/api/alerts/{bookId}` | JWT | Создать алерт |
-| DELETE | `/api/alerts/{bookId}` | JWT | Удалить алерт |
+| POST | `/api/v1/auth/register` | Публичный | Регистрация |
+| POST | `/api/v1/auth/login` | Публичный | Вход |
+| GET | `/api/v1/books/search?query=` | Публичный | Поиск книг |
+| GET | `/api/v1/books/{id}` | Публичный | Детали книги |
+| GET | `/api/v1/books/{id}/offers` | Публичный | Предложения по книге |
+| GET | `/api/v1/books/{id}/price-history` | Публичный | История цен |
+| GET | `/api/v1/favorites` | JWT | Список избранного |
+| POST | `/api/v1/favorites/{bookId}` | JWT | Добавить в избранное |
+| DELETE | `/api/v1/favorites/{bookId}` | JWT | Удалить из избранного |
+| GET | `/api/v1/alerts` | JWT | Список алертов |
+| POST | `/api/v1/alerts/{bookId}` | JWT | Создать алерт |
+| DELETE | `/api/v1/alerts/{bookId}` | JWT | Удалить алерт |
 
 ## Архитектура
 

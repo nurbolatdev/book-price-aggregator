@@ -26,7 +26,7 @@
 
 | Веха | Название | Ветка | Статус |
 |---|---|---|---|
-| [M12](backend/M12-cleanup-infra.md) | Чистка, баги, инфраструктура (RabbitMQ, Mailpit, Testcontainers) | `feature/m12-cleanup-infra` | ⬜ не начато |
+| [M12](backend/M12-cleanup-infra.md) | Чистка, баги, инфраструктура (RabbitMQ, Mailpit, Testcontainers) | `feature/m12-cleanup-infra` | 🟡 в работе |
 | [M13](backend/M13-data-model-v2.md) | Модель данных v2: издания, магазины, маячки | `feature/m13-data-model-v2` | ⬜ |
 | [M14](backend/M14-catalog-search.md) | Каталог и быстрый поиск (pg_trgm, фильтры, кэш) | `feature/m14-catalog-search` | ⬜ |
 | [M15](backend/M15-parser-framework.md) | Каркас парсеров + первый магазин (Flip.kz) | `feature/m15-parser-framework` | ⬜ |

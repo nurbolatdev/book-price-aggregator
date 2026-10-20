@@ -1,0 +1,19 @@
+# Infrastructure (PostgreSQL, Redis, RabbitMQ) is provided by Testcontainers via @ServiceConnection.
+
+security:
+  jwt:
+    secret: test-secret-key-that-is-long-enough-for-hs256
+    expiration-ms: 3600000
+
+app:
+  base-url: http://localhost:3000
+
+sources:
+  google-books:
+    # Tests never reach the real internet
+    base-url: http://localhost:1/books/v1
+    api-key: ""
+
+logging:
+  level:
+    kz.nurbolat.bookaggregator: INFO

@@ -2,7 +2,7 @@ package kz.nurbolat.bookaggregator.pricealert;
 
 import kz.nurbolat.bookaggregator.book.Book;
 import kz.nurbolat.bookaggregator.book.BookRepository;
-import kz.nurbolat.bookaggregator.common.ResourceNotFoundException;
+import kz.nurbolat.bookaggregator.common.error.NotFoundException;
 import kz.nurbolat.bookaggregator.security.SecurityUtils;
 import kz.nurbolat.bookaggregator.user.User;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class PriceAlertService {
     public PriceAlert createAlert(Long bookId, BigDecimal targetPrice) {
         User user = securityUtils.getCurrentUser();
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found: " + bookId));
+                .orElseThrow(() -> new NotFoundException("Book not found: " + bookId));
 
         if (priceAlertRepository.existsByUserIdAndBookId(user.getId(), bookId)) {
             PriceAlert existing = priceAlertRepository.findByUserIdAndBookId(user.getId(), bookId).orElseThrow();
