@@ -1,3 +1,5 @@
+<img src="brand/logo-full.svg" alt="KitapRadar" width="240">
+
 # Документация KitapRadar
 
 Порядок чтения: `00` → `01` → `02` → `03` → `04` → `05` → задания вех.
@@ -11,6 +13,7 @@
 | [04-conventions.md](04-conventions.md) | Код, ошибки, логи, тесты, Git, коммиты |
 | [05-parsing-policy.md](05-parsing-policy.md) | Как парсим магазины и сопоставляем издания |
 | [adr/](adr/) | Архитектурные решения |
+| [brand/](brand/README.md) | Логотип, иконки, цвета, правила использования |
 | [frontend/ROADMAP.md](frontend/ROADMAP.md) | План frontend-вех |
 
 ## Статус вех

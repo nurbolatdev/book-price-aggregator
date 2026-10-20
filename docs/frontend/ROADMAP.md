@@ -20,7 +20,7 @@
 
 | Веха | Содержание | Экраны макета |
 |---|---|---|
-| F1 | Фундамент: токены в Tailwind (цвета, шрифты Unbounded/Onest, радиусы), layout, роутинг с `React.lazy`, API-клиент (axios + перехватчик refresh-токена), TanStack Query provider, Error Boundary, toasts, skeleton-компоненты | — |
+| F1 | Фундамент: логотип и favicon из `docs/brand/` (по инструкции в `docs/brand/README.md`), токены в Tailwind (цвета, шрифты Unbounded/Onest, радиусы), layout, роутинг с `React.lazy`, API-клиент (axios + перехватчик refresh-токена), TanStack Query provider, Error Boundary, toasts, skeleton-компоненты | — |
 | F2 | Главная и поиск: поиск с debounce 300 мс и подсказками, фильтры в URL (shareable), сортировка, пагинация/«Показать ещё», «подешевели за неделю» | 1, 2 |
 | F3 | Карточка издания: выбор издания, лучшая цена, таблица магазинов, график истории (Recharts lazy), похожие; мобильная версия с нижней панелью. **Удаление старого избранного** (frontend + backend `/api/v1/favorites`, миграция drop `favorites`) | 3, 7 |
 | F4 | Auth: регистрация, вход, подтверждение email, повторная отправка, сброс пароля, профиль и настройки уведомлений | 8 |
