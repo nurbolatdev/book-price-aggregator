@@ -4,7 +4,6 @@ import kz.nurbolat.bookaggregator.book.Book;
 import kz.nurbolat.bookaggregator.book.BookRepository;
 import kz.nurbolat.bookaggregator.book.dto.BookResponse;
 import kz.nurbolat.bookaggregator.common.error.NotFoundException;
-import kz.nurbolat.bookaggregator.offer.OfferRepository;
 import kz.nurbolat.bookaggregator.security.SecurityUtils;
 import kz.nurbolat.bookaggregator.user.User;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +18,13 @@ public class FavoriteService {
 
     private final FavoriteRepository favoriteRepository;
     private final BookRepository bookRepository;
-    private final OfferRepository offerRepository;
     private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public List<BookResponse> getFavorites() {
         User user = securityUtils.getCurrentUser();
         return favoriteRepository.findByUserId(user.getId()).stream()
-                .map(fav -> BookResponse.from(
-                        fav.getBook(),
-                        offerRepository.findByBookIdOrderByPriceAsc(fav.getBook().getId())
-                ))
+                .map(fav -> BookResponse.from(fav.getBook()))
                 .toList();
     }
 

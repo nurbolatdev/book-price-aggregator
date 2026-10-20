@@ -76,14 +76,7 @@ public class GoogleBooksAdapter implements BookSource {
         String publisher = (String) info.get("publisher");
         String description = (String) info.get("description");
 
-        List<String> industryIds = (List<Map<String, String>>) info.getOrDefault("industryIdentifiers", List.of())
-                instanceof List<?> list ? list.stream()
-                .filter(id -> id instanceof Map)
-                .map(id -> (Map<String, String>) id)
-                .filter(id -> "ISBN_13".equals(id.get("type")))
-                .map(id -> id.get("identifier"))
-                .toList() : List.of();
-        String isbn = industryIds.isEmpty() ? null : industryIds.get(0);
+        String isbn = extractIsbn((List<Map<String, String>>) info.getOrDefault("industryIdentifiers", List.of()));
 
         Map<String, Object> imageLinks = (Map<String, Object>) info.getOrDefault("imageLinks", Map.of());
         String coverUrl = (String) imageLinks.get("thumbnail");
@@ -95,7 +88,30 @@ public class GoogleBooksAdapter implements BookSource {
                 .publisher(publisher)
                 .description(description)
                 .coverUrl(coverUrl)
+                .year(extractYear((String) info.get("publishedDate")))
+                .pages(info.get("pageCount") instanceof Number count ? count.intValue() : null)
+                .language((String) info.get("language"))
                 .source(getName())
                 .build();
+    }
+
+    private static String extractIsbn(List<Map<String, String>> identifiers) {
+        // Prefer ISBN-13, fall back to ISBN-10 (converted to 13 digits when the edition is saved)
+        for (String type : List.of("ISBN_13", "ISBN_10")) {
+            for (Map<String, String> id : identifiers) {
+                if (type.equals(id.get("type"))) {
+                    return id.get("identifier");
+                }
+            }
+        }
+        return null;
+    }
+
+    private static Integer extractYear(String publishedDate) {
+        // Google returns "2023", "2023-05" or "2023-05-17"
+        if (publishedDate == null || !publishedDate.matches("\\d{4}.*")) {
+            return null;
+        }
+        return Integer.valueOf(publishedDate.substring(0, 4));
     }
 }

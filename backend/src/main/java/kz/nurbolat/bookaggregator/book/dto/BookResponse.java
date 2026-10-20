@@ -1,44 +1,42 @@
 package kz.nurbolat.bookaggregator.book.dto;
 
 import kz.nurbolat.bookaggregator.book.Book;
-import kz.nurbolat.bookaggregator.offer.Offer;
-import lombok.Builder;
-import lombok.Getter;
+import kz.nurbolat.bookaggregator.edition.Edition;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
-@Getter
-@Builder
-public class BookResponse {
+/**
+ * Book with its editions. Prices come back on the edition level in M14.
+ *
+ * @param coverUrl cover of the first edition that has one, for list views
+ */
+public record BookResponse(
+        Long id,
+        String title,
+        String author,
+        String description,
+        String coverUrl,
+        List<EditionResponse> editions
+) {
 
-    private Long id;
-    private String title;
-    private String author;
-    private String isbn;
-    private String publisher;
-    private String coverUrl;
-    private String description;
-    private List<OfferResponse> offers;
-    private BigDecimal bestPrice;
-
-    public static BookResponse from(Book book, List<Offer> offers) {
-        BigDecimal bestPrice = offers.stream()
-                .filter(Offer::isInStock)
-                .map(Offer::getPrice)
-                .min(BigDecimal::compareTo)
+    /**
+     * Must be called inside a transaction: reads the lazy editions collection.
+     */
+    public static BookResponse from(Book book) {
+        List<Edition> editions = book.getEditions();
+        String coverUrl = editions.stream()
+                .map(Edition::getCoverUrl)
+                .filter(Objects::nonNull)
+                .findFirst()
                 .orElse(null);
-
-        return BookResponse.builder()
-                .id(book.getId())
-                .title(book.getTitle())
-                .author(book.getAuthor())
-                .isbn(book.getIsbn())
-                .publisher(book.getPublisher())
-                .coverUrl(book.getCoverUrl())
-                .description(book.getDescription())
-                .offers(offers.stream().map(OfferResponse::from).toList())
-                .bestPrice(bestPrice)
-                .build();
+        return new BookResponse(
+                book.getId(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getDescription(),
+                coverUrl,
+                editions.stream().map(EditionResponse::from).toList()
+        );
     }
 }

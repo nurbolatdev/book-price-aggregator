@@ -13,6 +13,9 @@ public class BookSourceResult {
     private String publisher;
     private String coverUrl;
     private String description;
+    private Integer year;
+    private Integer pages;
+    private String language;
 
     private String source;
 }
