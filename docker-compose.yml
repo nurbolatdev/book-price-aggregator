@@ -1,7 +1,10 @@
+# Fixed project, container, image and volume names: repeated runs reuse the same resources
+name: kitapradar
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: bpa-postgres
+    container_name: kitapradar-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -18,9 +21,12 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: bpa-redis
+    container_name: kitapradar-redis
+    # Cache only: keep /data in memory so no anonymous volume is created on every recreate
+    tmpfs:
+      - /data
     ports:
-      - "127.0.0.1:6379:6379"
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -29,7 +35,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: bpa-rabbitmq
+    container_name: kitapradar-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
@@ -46,14 +52,15 @@ services:
 
   mailpit:
     image: axllent/mailpit
-    container_name: bpa-mailpit
+    container_name: kitapradar-mailpit
     ports:
       - "127.0.0.1:1025:1025"
       - "127.0.0.1:8025:8025"
 
   backend:
     build: ./backend
-    container_name: bpa-backend
+    image: kitapradar-backend:latest
+    container_name: kitapradar-backend
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,7 +100,8 @@ services:
 
   frontend:
     build: ./frontend
-    container_name: bpa-frontend
+    image: kitapradar-frontend:latest
+    container_name: kitapradar-frontend
     depends_on:
       backend:
         condition: service_healthy
@@ -107,4 +115,6 @@ services:
 
 volumes:
   pgdata:
+    name: kitapradar-pgdata
   rabbitdata:
+    name: kitapradar-rabbitdata

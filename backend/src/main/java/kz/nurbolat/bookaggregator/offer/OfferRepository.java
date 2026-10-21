@@ -3,12 +3,11 @@ package kz.nurbolat.bookaggregator.offer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OfferRepository extends JpaRepository<Offer, Long> {
 
-    List<Offer> findByBookIdOrderByPriceAsc(Long bookId);
+    Optional<Offer> findByStoreIdAndExternalId(Long storeId, String externalId);
 
-    List<Offer> findByBookIdAndSource(Long bookId, String source);
-
-    void deleteByBookIdAndSource(Long bookId, String source);
+    List<Offer> findByEditionIdOrderByPriceAsc(Long editionId);
 }
