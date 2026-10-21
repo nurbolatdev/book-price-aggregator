@@ -2,6 +2,7 @@ package kz.nurbolat.bookaggregator.search;
 
 import kz.nurbolat.bookaggregator.edition.Binding;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem.OfferChip;
+import kz.nurbolat.bookaggregator.search.dto.Suggestion;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
@@ -69,6 +70,36 @@ class SearchRepository {
         Long count = jdbc.queryForObject(resultsSql(query, params) + " SELECT COUNT(*) FROM results",
                 params, Long.class);
         return Objects.requireNonNullElse(count, 0L);
+    }
+
+    /**
+     * Books for autocomplete: title prefix matches first, then by word similarity of title or author.
+     * Books with the same normalized title and author are shown once.
+     */
+    List<Suggestion> findSuggestions(String normalizedQuery, int limit) {
+        MapSqlParameterSource params = new MapSqlParameterSource("q", normalizedQuery)
+                .addValue("prefix", normalizedQuery + "%")
+                .addValue("limit", limit);
+        String sql = """
+                SELECT id, title, author
+                FROM (
+                    SELECT DISTINCT ON (b.title_norm, COALESCE(b.author_norm, ''))
+                           b.id, b.title, b.author,
+                           b.title_norm LIKE :prefix AS prefix_match,
+                           GREATEST(word_similarity(:q, b.title_norm),
+                                    word_similarity(:q, COALESCE(b.author_norm, ''))) AS score
+                    FROM books b
+                    WHERE b.title_norm LIKE :prefix
+                       OR b.title_norm % :q
+                       OR :q <% b.title_norm
+                       OR :q <% b.author_norm
+                    ORDER BY b.title_norm, COALESCE(b.author_norm, ''), b.id
+                ) unique_books
+                ORDER BY prefix_match DESC, score DESC, title
+                LIMIT :limit
+                """;
+        return jdbc.query(sql, params, (rs, rowNum) ->
+                Suggestion.of(rs.getLong("id"), rs.getString("title"), rs.getString("author")));
     }
 
     /**
