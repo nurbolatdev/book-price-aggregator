@@ -66,11 +66,9 @@ springdoc:
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:3000}
-
-sources:
   google-books:
-    base-url: https://www.googleapis.com/books/v1
     api-key: ${GOOGLE_BOOKS_API_KEY:}
+    timeout: 5s
 
 logging:
   pattern:

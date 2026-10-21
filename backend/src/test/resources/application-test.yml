@@ -7,8 +7,6 @@ security:
 
 app:
   base-url: http://localhost:3000
-
-sources:
   google-books:
     # Tests never reach the real internet
     base-url: http://localhost:1/books/v1
