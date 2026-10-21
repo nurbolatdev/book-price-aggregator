@@ -12,6 +12,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @EntityGraph(attributePaths = "editions")
     Optional<Book> findWithEditionsById(Long id);
 
+    Optional<Book> findFirstByTitleNormAndAuthorNorm(String titleNorm, String authorNorm);
+
     Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     Page<Book> findByAuthorContainingIgnoreCase(String author, Pageable pageable);
