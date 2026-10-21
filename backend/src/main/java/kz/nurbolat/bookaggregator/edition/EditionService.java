@@ -2,6 +2,7 @@ package kz.nurbolat.bookaggregator.edition;
 
 import kz.nurbolat.bookaggregator.book.Book;
 import kz.nurbolat.bookaggregator.common.error.NotFoundException;
+import kz.nurbolat.bookaggregator.config.RedisConfig;
 import kz.nurbolat.bookaggregator.edition.EditionPriceRepository.EditionPrice;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse.BestOffer;
@@ -12,6 +13,7 @@ import kz.nurbolat.bookaggregator.edition.dto.PriceVerdict;
 import kz.nurbolat.bookaggregator.offer.Offer;
 import kz.nurbolat.bookaggregator.offer.OfferService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +37,9 @@ public class EditionService {
 
     /**
      * Edition card in four queries: edition with book, offers with stores, editions of the book
-     * with best prices, daily minimums of the last 90 days for the verdict.
+     * with best prices, daily minimums of the last 90 days for the verdict. Cached for 30 minutes.
      */
+    @Cacheable(cacheNames = RedisConfig.EDITION, key = "#id")
     @Transactional(readOnly = true)
     public EditionDetailResponse getDetail(Long id) {
         Edition edition = editionRepository.findWithBookById(id)

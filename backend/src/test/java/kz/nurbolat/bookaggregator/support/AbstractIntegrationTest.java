@@ -1,13 +1,18 @@
 package kz.nurbolat.bookaggregator.support;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.utility.DockerImageName;
+
+import java.util.Objects;
 
 /**
  * Base class for integration tests. Containers are static and started once,
@@ -32,5 +37,14 @@ public abstract class AbstractIntegrationTest {
         POSTGRES.start();
         REDIS.start();
         RABBITMQ.start();
+    }
+
+    @Autowired
+    private CacheManager cacheManager;
+
+    /** Redis outlives test transactions, so cached pages must not leak between tests. */
+    @BeforeEach
+    void clearCaches() {
+        cacheManager.getCacheNames().forEach(name -> Objects.requireNonNull(cacheManager.getCache(name)).clear());
     }
 }

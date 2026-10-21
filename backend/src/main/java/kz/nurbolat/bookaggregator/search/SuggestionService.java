@@ -1,8 +1,10 @@
 package kz.nurbolat.bookaggregator.search;
 
 import kz.nurbolat.bookaggregator.common.text.TextNormalizer;
+import kz.nurbolat.bookaggregator.config.RedisConfig;
 import kz.nurbolat.bookaggregator.search.dto.Suggestion;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,8 +18,10 @@ public class SuggestionService {
     private final SearchRepository searchRepository;
 
     /**
-     * Up to eight "title — author" variants for the typed text.
+     * Up to eight "title — author" variants for the typed text. Cached by the normalized text.
      */
+    @Cacheable(cacheNames = RedisConfig.SUGGEST,
+            key = "T(kz.nurbolat.bookaggregator.common.text.TextNormalizer).normalize(#query)")
     public List<Suggestion> suggest(String query) {
         String normalized = TextNormalizer.normalize(query);
         if (normalized == null || normalized.length() < 2) {
