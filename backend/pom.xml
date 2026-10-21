@@ -22,6 +22,7 @@
         <springdoc.version>2.6.0</springdoc.version>
         <!-- 1.21.4+ speaks the Docker API version required by Docker Engine 29 -->
         <testcontainers.version>1.21.4</testcontainers.version>
+        <datasource-proxy.version>1.11.0</datasource-proxy.version>
     </properties>
 
     <dependencyManagement>
@@ -156,6 +157,13 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Counts SQL statements in tests (no N+1 on search pages) -->
+        <dependency>
+            <groupId>net.ttddyy</groupId>
+            <artifactId>datasource-proxy</artifactId>
+            <version>${datasource-proxy.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

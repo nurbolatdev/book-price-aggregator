@@ -89,6 +89,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY}
+      APP_DEV_SEED: ${APP_DEV_SEED:-false}
     ports:
       - "8080:8080"
     healthcheck:
