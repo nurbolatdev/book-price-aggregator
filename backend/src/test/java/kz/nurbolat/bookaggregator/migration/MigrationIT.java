@@ -30,11 +30,11 @@ class MigrationIT extends AbstractIntegrationTest {
     void shouldApplyAllMigrationsWhenDatabaseIsEmpty() throws SQLException {
         DataSource dataSource = createDatabase();
 
-        flyway(dataSource, MigrationVersion.LATEST).migrate();
+        var result = flyway(dataSource, MigrationVersion.LATEST).migrate();
 
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
-        assertThat(flyway(dataSource, MigrationVersion.LATEST).info().current().getVersion())
-                .isEqualTo(MigrationVersion.fromVersion("7"));
+        assertThat(result.success).isTrue();
+        assertThat(flyway(dataSource, MigrationVersion.LATEST).info().pending()).isEmpty();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM stores WHERE enabled", Integer.class)).isEqualTo(5);
         assertThat(jdbc.queryForObject("SELECT to_regclass('price_alerts') IS NULL", Boolean.class)).isTrue();
     }
