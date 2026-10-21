@@ -7,6 +7,9 @@ security:
 
 app:
   base-url: http://localhost:3000
+  scheduling:
+    # Scheduled jobs are triggered explicitly in tests
+    enabled: false
   google-books:
     # Tests never reach the real internet
     base-url: http://localhost:1/books/v1

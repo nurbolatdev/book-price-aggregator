@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse;
+import kz.nurbolat.bookaggregator.home.dto.DropItem;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem;
 import kz.nurbolat.bookaggregator.search.dto.Suggestion;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
@@ -33,6 +34,7 @@ public class RedisConfig implements CachingConfigurer {
     public static final String SEARCH = "search";
     public static final String SUGGEST = "suggest";
     public static final String EDITION = "edition";
+    public static final String DROPS = "drops";
 
     /** Defaults for caches without their own configuration. */
     @Bean
@@ -52,7 +54,9 @@ public class RedisConfig implements CachingConfigurer {
                 .withCacheConfiguration(SUGGEST, cache(defaults, objectMapper, "suggest:v1:", Duration.ofMinutes(10),
                         types.constructCollectionType(List.class, Suggestion.class)))
                 .withCacheConfiguration(EDITION, cache(defaults, objectMapper, "edition:v1:", Duration.ofMinutes(30),
-                        types.constructType(EditionDetailResponse.class)));
+                        types.constructType(EditionDetailResponse.class)))
+                .withCacheConfiguration(DROPS, cache(defaults, objectMapper, "home:v1:", Duration.ofMinutes(15),
+                        types.constructCollectionType(List.class, DropItem.class)));
     }
 
     /** A Redis outage degrades to uncached reads instead of failing requests. */
