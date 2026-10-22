@@ -13,5 +13,12 @@ public interface EditionRepository extends JpaRepository<Edition, Long> {
     @Query("SELECT e FROM Edition e JOIN FETCH e.book WHERE e.id = :id")
     Optional<Edition> findWithBookById(Long id);
 
+    @Query("""
+            SELECT e FROM Edition e JOIN FETCH e.book b
+            WHERE b.titleNorm = :titleNorm AND b.authorNorm = :authorNorm
+            ORDER BY e.id
+            """)
+    List<Edition> findByBookTitleNormAndAuthorNorm(String titleNorm, String authorNorm);
+
     List<Edition> findByBookId(Long bookId);
 }

@@ -1,6 +1,8 @@
 package kz.nurbolat.bookaggregator.offer;
 
 import kz.nurbolat.bookaggregator.parser.core.ParsedOffer;
+import kz.nurbolat.bookaggregator.parser.matching.EditionMatcher;
+import kz.nurbolat.bookaggregator.parser.matching.MatchResult;
 import kz.nurbolat.bookaggregator.store.Store;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import kz.nurbolat.bookaggregator.store.StoreService;
@@ -20,8 +22,8 @@ import java.util.Map;
 
 /**
  * The only place where store offers are written (docs/05-parsing-policy.md): upsert by store and
- * product id, a price_history row only when the price appears or changes, and a
- * {@link PriceChangedEvent} for matched offers, delivered after commit.
+ * product id, edition matching for offers not linked yet, a price_history row only when the price
+ * appears or changes, and a {@link PriceChangedEvent} for matched offers, delivered after commit.
  */
 @Slf4j
 @Service
@@ -34,6 +36,7 @@ public class OfferIngestionService {
     private final OfferRepository offerRepository;
     private final PriceHistoryRepository priceHistoryRepository;
     private final StoreService storeService;
+    private final EditionMatcher editionMatcher;
     private final ApplicationEventPublisher events;
     private final Clock clock;
 
@@ -51,6 +54,8 @@ public class OfferIngestionService {
 
         int upserted = 0;
         int priceChanged = 0;
+        int matched = 0;
+        int pendingReview = 0;
         for (ParsedOffer item : unique.values()) {
             if (item.price() == null || item.externalId() == null || item.url() == null) {
                 log.warn("Skipped incomplete offer from {} (run {}): {}", storeCode, runId, item);
@@ -65,6 +70,16 @@ public class OfferIngestionService {
             if (changed) {
                 offer.setLastChangedAt(now);
             }
+            if (offer.getEdition() == null && offer.getMatchStatus() != MatchStatus.REJECTED) {
+                MatchResult match = editionMatcher.match(item);
+                offer.setMatchStatus(match.status());
+                offer.setEdition(match.edition());
+                if (match.status() == MatchStatus.MATCHED) {
+                    matched++;
+                } else {
+                    pendingReview++;
+                }
+            }
             offerRepository.save(offer);
             upserted++;
 
@@ -78,7 +93,7 @@ public class OfferIngestionService {
             }
         }
         log.debug("Ingested {} offers from {} (run {}), {} price changes", upserted, storeCode, runId, priceChanged);
-        return new IngestResult(upserted, priceChanged, 0, 0);
+        return new IngestResult(upserted, priceChanged, matched, pendingReview);
     }
 
     /**
