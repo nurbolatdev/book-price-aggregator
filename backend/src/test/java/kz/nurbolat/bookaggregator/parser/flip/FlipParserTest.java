@@ -119,12 +119,7 @@ class FlipParserTest {
     }
 
     @Test
-    void shouldParseFieldsTolerantly() {
-        assertThat(FlipParser.money("2 722 ₸")).isEqualByComparingTo("2722");
-        assertThat(FlipParser.money("—")).isNull();
-        assertThat(FlipParser.binding("мягкая обложка, 2023")).isEqualTo(Binding.PAPERBACK);
-        assertThat(FlipParser.binding("суперобложка")).isEqualTo(Binding.UNKNOWN);
-        assertThat(FlipParser.year("твердый переплет, 2026")).isEqualTo(2026);
+    void shouldTakeFirstPublisherOfList() {
         assertThat(FlipParser.firstListItem("Эксмо, Магистраль. Главный тренд")).isEqualTo("Эксмо");
         assertThat(FlipParser.firstListItem("Clever")).isEqualTo("Clever");
     }

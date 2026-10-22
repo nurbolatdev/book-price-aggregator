@@ -90,6 +90,9 @@ services:
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY}
       APP_DEV_SEED: ${APP_DEV_SEED:-false}
+      PARSER_BROWSER_ENABLED: ${PARSER_BROWSER_ENABLED:-true}
+    # Chromium needs more shared memory than Docker's default 64 MB
+    shm_size: 512m
     ports:
       - "8080:8080"
     healthcheck:

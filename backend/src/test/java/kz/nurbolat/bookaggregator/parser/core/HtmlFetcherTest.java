@@ -120,6 +120,16 @@ class HtmlFetcherTest {
     }
 
     @Test
+    void shouldNotTakePageMentioningCaptchaInScriptsForChallenge() {
+        // Magento writes its login captcha settings into every page
+        String page = "<html><body><form action='/cart/add'><button>Купить</button></form>"
+                + "<script>{\"sectionNames\": [\"cart\", \"captcha\"]}</script><h1>Книга</h1></body></html>";
+
+        assertThat(HtmlFetcher.looksLikeCaptcha(page)).isFalse();
+        assertThat(HtmlFetcher.looksLikeCaptcha("<html><body><b id='s-key' data-site-key='f0'></b></body></html>")).isTrue();
+    }
+
+    @Test
     void shouldOpenCircuitBreakerWhenHalfOfRequestsFail() {
         stubFor(get(urlEqualTo("/broken")).willReturn(aResponse().withStatus(502)));
         stubFor(get(urlEqualTo("/fine")).willReturn(ok(PAGE)));
@@ -184,7 +194,7 @@ class HtmlFetcherTest {
 
     private HtmlFetcher fetcher(int minDelayMs) {
         ParserProperties properties = new ParserProperties(USER_AGENT, Duration.ofSeconds(2), Duration.ofHours(1),
-                Duration.ofHours(24), 200, 50, Duration.ofMillis(10), Duration.ofMinutes(30), Duration.ofSeconds(5));
+                Duration.ofHours(24), 200, 50, 5, Duration.ofMillis(10), Duration.ofMinutes(30), Duration.ofSeconds(5));
         StoreService storeService = mock(StoreService.class);
         for (StoreCode code : StoreCode.values()) {
             Store store = new Store();

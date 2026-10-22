@@ -23,6 +23,7 @@ class StoreControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$", hasSize(5)))
                 .andExpect(jsonPath("$[*].code").value(contains("KASPI", "FLIP", "MELOMAN", "WILDBERRIES", "OZON")))
                 .andExpect(jsonPath("$[0].name").value("Kaspi.kz"))
-                .andExpect(jsonPath("$[0].enabled").value(true));
+                // switched off: Kaspi does not answer the parser (V10), Wildberries challenges it (V11)
+                .andExpect(jsonPath("$[*].enabled").value(contains(false, true, true, false, true)));
     }
 }

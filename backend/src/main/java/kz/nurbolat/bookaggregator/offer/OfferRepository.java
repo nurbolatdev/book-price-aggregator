@@ -1,5 +1,7 @@
 package kz.nurbolat.bookaggregator.offer;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +13,18 @@ import java.util.Optional;
 public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     Optional<Offer> findByStoreIdAndExternalId(Long storeId, String externalId);
+
+    @Query("SELECT o FROM Offer o JOIN FETCH o.store LEFT JOIN FETCH o.edition WHERE o.id = :id")
+    Optional<Offer> findWithStoreById(Long id);
+
+    @Query(value = """
+            SELECT o FROM Offer o
+            JOIN FETCH o.store
+            WHERE o.matchStatus = :status
+            ORDER BY o.firstSeenAt ASC, o.id ASC
+            """,
+            countQuery = "SELECT COUNT(o) FROM Offer o WHERE o.matchStatus = :status")
+    Page<Offer> findByMatchStatusWithStore(MatchStatus status, Pageable pageable);
 
     @Query("""
             SELECT o FROM Offer o

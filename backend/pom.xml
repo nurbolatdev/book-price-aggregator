@@ -26,6 +26,10 @@
         <jsoup.version>1.23.2</jsoup.version>
         <resilience4j.version>2.2.0</resilience4j.version>
         <wiremock.version>3.13.2</wiremock.version>
+        <playwright.version>1.56.0</playwright.version>
+        <!-- Browser tests need Chromium; they run only with -Pbrowser -->
+        <failsafe.groups></failsafe.groups>
+        <failsafe.excludedGroups>browser</failsafe.excludedGroups>
     </properties>
 
     <dependencyManagement>
@@ -92,6 +96,12 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
+        </dependency>
+        <!-- Headless Chromium for stores whose pages are rendered by JavaScript -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>${playwright.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
@@ -213,6 +223,10 @@
                 <!-- Runs *IT integration tests during verify -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <groups>${failsafe.groups}</groups>
+                    <excludedGroups>${failsafe.excludedGroups}</excludedGroups>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -236,5 +250,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- ./mvnw verify -Pbrowser: integration tests that start Chromium (Playwright) -->
+        <profile>
+            <id>browser</id>
+            <properties>
+                <failsafe.groups>browser</failsafe.groups>
+                <failsafe.excludedGroups></failsafe.excludedGroups>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

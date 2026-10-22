@@ -15,6 +15,7 @@
 | [adr/](adr/) | Архитектурные решения |
 | [brand/](brand/README.md) | Логотип, иконки, цвета, правила использования |
 | [frontend/ROADMAP.md](frontend/ROADMAP.md) | План frontend-вех |
+| [backend/parsing-report-M15-M16.md](backend/parsing-report-M15-M16.md) | Итоги M15–M16: как работает парсинг, какие магазины работают и почему остальные нет, что проверено |
 
 ## Статус вех
 
@@ -29,8 +30,8 @@
 | [M12](backend/M12-cleanup-infra.md) | Чистка, баги, инфраструктура (RabbitMQ, Mailpit, Testcontainers) | `feature/m12-cleanup-infra` | ✅ |
 | [M13](backend/M13-data-model-v2.md) | Модель данных v2: издания, магазины, маячки | `feature/m13-data-model-v2` | ✅ |
 | [M14](backend/M14-catalog-search.md) | Каталог и быстрый поиск (pg_trgm, фильтры, кэш) | `feature/m14-catalog-search` | ✅ |
-| [M15](backend/M15-parser-framework.md) | Каркас парсеров + первый магазин (Flip.kz) | `feature/m15-parser-framework` | 🟡 в работе |
-| [M16](backend/M16-store-parsers.md) | Остальные магазины + сопоставление изданий | `feature/m16-store-parsers` | ⬜ |
+| [M15](backend/M15-parser-framework.md) | Каркас парсеров + первый магазин (Flip.kz) | `feature/m15-parser-framework` | ✅ |
+| [M16](backend/M16-store-parsers.md) | Остальные магазины + сопоставление изданий | `feature/m16-store-parsers` | ✅ |
 | [M17](backend/M17-rabbitmq.md) | RabbitMQ: очереди парсинга и событий цен | `feature/m17-rabbitmq` | ⬜ |
 | [M18](backend/M18-auth-v2.md) | Auth v2: подтверждение email, refresh, сброс пароля, лимиты | `feature/m18-auth-v2` | ⬜ |
 | [M19](backend/M19-beacons-notifications.md) | Маячки и email-уведомления | `feature/m19-beacons-notifications` | ⬜ |

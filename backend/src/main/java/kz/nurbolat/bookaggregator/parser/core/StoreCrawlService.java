@@ -8,6 +8,7 @@ import kz.nurbolat.bookaggregator.offer.IngestResult;
 import kz.nurbolat.bookaggregator.offer.OfferIngestionService;
 import kz.nurbolat.bookaggregator.parser.core.CrawlTargetRepository.EditionToFind;
 import kz.nurbolat.bookaggregator.parser.core.CrawlTargetRepository.KnownOffer;
+import kz.nurbolat.bookaggregator.parser.matching.TitleCleaner;
 import kz.nurbolat.bookaggregator.store.Store;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import kz.nurbolat.bookaggregator.store.StoreService;
@@ -23,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -30,7 +32,8 @@ import java.util.stream.Stream;
  * <ol>
  *   <li>refresh — reload product pages of known offers (beacon editions first, then the oldest);</li>
  *   <li>discovery — search the store for editions it has no offer for, then load the product
- *       pages of fitting results.</li>
+ *       pages of fitting results; a store whose robots.txt forbids search is browsed instead
+ *       (its first catalog pages).</li>
  * </ol>
  * A failing page only counts in {@code pages_failed}; a blocked or paused store stops the run.
  * Offers are stored in small batches so that transactions stay short.
@@ -116,33 +119,67 @@ public class StoreCrawlService {
         List<EditionToFind> editions = targets.findEditionsToDiscover(
                 store.getId(), editionIds, properties.maxDiscoveryPerRun());
         log.info("Run {}: looking for {} editions in {}", state.runId, editions.size(), store.getCode());
+        if (!parser.canSearch()) {
+            browse(parser, store, editions, state);
+            return;
+        }
         for (EditionToFind edition : editions) {
             boolean byIsbn = edition.isbn13() != null;
             String query = byIsbn ? edition.isbn13()
                     : String.join(" ", Stream.of(edition.title(), edition.author()).filter(Objects::nonNull).toList());
             Optional<List<ParsedOffer>> hits = Optional.ofNullable(state.page(() -> parser.search(query)));
             List<ParsedOffer> candidates = hits.orElse(List.of()).stream()
-                    .filter(hit -> byIsbn || sameTitle(hit, edition))
+                    .filter(hit -> byIsbn || edition.titleNorm().equals(titleNorm(hit)))
                     .limit(byIsbn ? CANDIDATES_BY_ISBN : CANDIDATES_BY_TITLE)
                     .toList();
+            loadNew(parser, store, candidates, state);
+        }
+    }
 
-            // Products already stored are refreshed by the first pass
-            Set<String> known = targets.findKnownExternalIds(store.getId(),
-                    candidates.stream().map(ParsedOffer::externalId).toList());
-            for (ParsedOffer candidate : candidates) {
-                if (known.contains(candidate.externalId()) || state.contains(candidate.externalId())) {
-                    continue;
-                }
-                Optional<ParsedOffer> detail = state.page(() -> parser.fetchOffer(candidate.url()));
-                if (detail != null) {
-                    detail.ifPresent(state::add);
-                }
+    /**
+     * For stores that cannot be searched: reads the first catalog pages and loads the products whose
+     * titles are those of the editions looked for. Finds only what those pages list.
+     */
+    private void browse(StoreParser parser, Store store, List<EditionToFind> editions, Run state) {
+        if (editions.isEmpty()) {
+            return;
+        }
+        Set<String> titles = editions.stream().map(EditionToFind::titleNorm).collect(Collectors.toSet());
+        List<ParsedOffer> candidates = new ArrayList<>();
+        for (int page = 1; page <= properties.maxBrowsePagesPerRun(); page++) {
+            int number = page;
+            List<ParsedOffer> offers = state.page(() -> parser.browse(number));
+            if (offers == null) {
+                continue;
+            }
+            if (offers.isEmpty()) {
+                break;
+            }
+            offers.stream().filter(offer -> titles.contains(titleNorm(offer))).forEach(candidates::add);
+        }
+        log.info("Run {}: {} catalog products of {} fit the editions looked for", state.runId, candidates.size(),
+                store.getCode());
+        loadNew(parser, store, candidates.stream().limit(properties.maxDiscoveryPerRun()).toList(), state);
+    }
+
+    // Products already stored are refreshed by the first pass
+    private void loadNew(StoreParser parser, Store store, List<ParsedOffer> candidates, Run state) {
+        Set<String> known = targets.findKnownExternalIds(store.getId(),
+                candidates.stream().map(ParsedOffer::externalId).toList());
+        for (ParsedOffer candidate : candidates) {
+            if (known.contains(candidate.externalId()) || state.contains(candidate.externalId())) {
+                continue;
+            }
+            Optional<ParsedOffer> detail = state.page(() -> parser.fetchOffer(candidate.url()));
+            if (detail != null) {
+                detail.ifPresent(state::add);
             }
         }
     }
 
-    private static boolean sameTitle(ParsedOffer hit, EditionToFind edition) {
-        return Objects.equals(TextNormalizer.normalize(hit.title()), edition.titleNorm());
+    // Store titles carry bindings and series ("(твердый переплет)"), the catalog's do not
+    private static String titleNorm(ParsedOffer offer) {
+        return TextNormalizer.normalize(TitleCleaner.clean(offer.title()).title());
     }
 
     /**

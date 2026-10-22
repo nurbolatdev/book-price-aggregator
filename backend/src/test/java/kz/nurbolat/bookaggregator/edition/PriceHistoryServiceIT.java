@@ -44,7 +44,7 @@ class PriceHistoryServiceIT extends AbstractIntegrationTest {
     @Test
     void shouldTakeLowestPriceAmongStoresForEachDay() {
         long editionId = editionWithHistory(jdbc, "Два магазина", true, daysAgo(6, 3000));
-        addOffer(jdbc, editionId, "KASPI", true, daysAgo(6, 3200), daysAgo(3, 2800));
+        addOffer(jdbc, editionId, "MELOMAN", true, daysAgo(6, 3200), daysAgo(3, 2800));
 
         PriceHistoryResponse history = priceHistoryService.getHistory(editionId, PricePeriod.ONE_MONTH);
 

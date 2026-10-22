@@ -76,6 +76,10 @@ app:
   google-books:
     api-key: ${GOOGLE_BOOKS_API_KEY:}
     timeout: 5s
+  parser:
+    browser:
+      # Headless Chromium for JavaScript-rendered stores; needs the browser installed (backend image)
+      enabled: ${PARSER_BROWSER_ENABLED:false}
 
 logging:
   pattern:

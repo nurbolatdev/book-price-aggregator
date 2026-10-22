@@ -1,15 +1,7 @@
 package kz.nurbolat.bookaggregator.parser.core;
 
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.ratelimiter.RateLimiter;
-import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import kz.nurbolat.bookaggregator.store.StoreService;
@@ -20,10 +12,8 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * The single entry point for HTTP requests to stores (docs/05-parsing-policy.md):
@@ -36,15 +26,16 @@ import java.util.function.Supplier;
 @Component
 public class HtmlFetcher {
 
-    private static final int MAX_BODY_BYTES = 5 * 1024 * 1024;
+    // Catalog pages of Meloman are over 5 MB
+    private static final int MAX_BODY_BYTES = 8 * 1024 * 1024;
+    // reCAPTCHA, hCaptcha, Yandex SmartCaptcha, Cloudflare Turnstile, Wildberries antibot
+    private static final String CAPTCHA_WIDGETS =
+            "[data-sitekey], [data-site-key], .g-recaptcha, .h-captcha, .smart-captcha, .cf-turnstile, iframe[src*=captcha]";
 
     private final ParserProperties properties;
     private final PageCache pageCache;
     private final RobotsTxtChecker robotsTxtChecker;
-    private final StoreService storeService;
-    private final CircuitBreakerRegistry circuitBreakers;
-    private final RateLimiterRegistry rateLimiters;
-    private final RetryRegistry retries;
+    private final StoreResilience resilience;
 
     public HtmlFetcher(ParserProperties properties, PageCache pageCache, RobotsTxtChecker robotsTxtChecker,
                        StoreService storeService,
@@ -53,10 +44,7 @@ public class HtmlFetcher {
         this.properties = properties;
         this.pageCache = pageCache;
         this.robotsTxtChecker = robotsTxtChecker;
-        this.storeService = storeService;
-        this.circuitBreakers = circuitBreakers;
-        this.rateLimiters = rateLimiters;
-        this.retries = retries;
+        this.resilience = new StoreResilience(properties, storeService, circuitBreakers, rateLimiters, retries);
     }
 
     /**
@@ -77,21 +65,7 @@ public class HtmlFetcher {
             throw new DisallowedByRobotsException(url);
         }
 
-        CircuitBreaker circuitBreaker = circuitBreaker(store);
-        Supplier<String> request = () -> download(store, url);
-        Supplier<String> guarded = Retry.decorateSupplier(retry(store),
-                CircuitBreaker.decorateSupplier(circuitBreaker,
-                        RateLimiter.decorateSupplier(rateLimiter(store), request)));
-        String html;
-        try {
-            html = guarded.get();
-        } catch (StoreBlockedException e) {
-            // Stop all further requests to this store for the open period
-            circuitBreaker.transitionToOpenState();
-            throw e;
-        } catch (CallNotPermittedException | RequestNotPermitted e) {
-            throw new StoreUnavailableException(store, e);
-        }
+        String html = resilience.call(store, () -> download(store, url));
         pageCache.put(url, html, properties.htmlCacheTtl());
         return Jsoup.parse(html, url);
     }
@@ -132,39 +106,17 @@ public class HtmlFetcher {
         return body;
     }
 
-    // Normal store pages never mention captchas; a challenge page is a form that does
+    /**
+     * A challenge page shows a captcha widget or a form with a captcha in it. Words alone do not count:
+     * Magento stores mention "captcha" in the login settings of every page.
+     */
     static boolean looksLikeCaptcha(String html) {
-        String lower = html.toLowerCase(Locale.ROOT);
-        return lower.contains("<form") && lower.contains("captcha");
-    }
-
-    private CircuitBreaker circuitBreaker(StoreCode store) {
-        return circuitBreakers.circuitBreaker("store-" + store, () -> CircuitBreakerConfig.custom()
-                .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
-                .slidingWindowSize(10)
-                .minimumNumberOfCalls(10)
-                .failureRateThreshold(50)
-                .waitDurationInOpenState(properties.circuitBreakerOpenDuration())
-                .recordExceptions(RetryableFetchException.class, StoreBlockedException.class)
-                .ignoreExceptions(PageNotFoundException.class)
-                .build());
-    }
-
-    private RateLimiter rateLimiter(StoreCode store) {
-        Duration minDelay = Duration.ofMillis(Math.max(1, storeService.getByCode(store).getMinDelayMs()));
-        return rateLimiters.rateLimiter("store-" + store, () -> RateLimiterConfig.custom()
-                .limitForPeriod(1)
-                .limitRefreshPeriod(minDelay)
-                .timeoutDuration(properties.rateLimitMaxWait())
-                .build());
-    }
-
-    private Retry retry(StoreCode store) {
-        return retries.retry("store-" + store, () -> RetryConfig.custom()
-                .maxAttempts(3)
-                .waitDuration(properties.retryWait())
-                .retryExceptions(RetryableFetchException.class)
-                .build());
+        if (!html.toLowerCase(Locale.ROOT).contains("captcha") && !html.contains("site-key") && !html.contains("sitekey")) {
+            return false;
+        }
+        Document page = Jsoup.parse(html);
+        return !page.select(CAPTCHA_WIDGETS).isEmpty()
+                || page.select("form").stream().anyMatch(form -> form.html().toLowerCase(Locale.ROOT).contains("captcha"));
     }
 
     private static long elapsedMs(long startedNanos) {
