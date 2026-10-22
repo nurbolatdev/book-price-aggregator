@@ -36,7 +36,7 @@ class MigrationIT extends AbstractIntegrationTest {
         assertThat(result.success).isTrue();
         assertThat(flyway(dataSource, MigrationVersion.LATEST).info().pending()).isEmpty();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM stores", Integer.class)).isEqualTo(5);
-        assertThat(jdbc.queryForList("SELECT code FROM stores WHERE NOT enabled", String.class)).containsExactly("KASPI");
+        assertThat(jdbc.queryForList("SELECT code FROM stores WHERE NOT enabled", String.class)).containsExactly("KASPI", "WILDBERRIES");
         assertThat(jdbc.queryForObject("SELECT to_regclass('price_alerts') IS NULL", Boolean.class)).isTrue();
     }
 
