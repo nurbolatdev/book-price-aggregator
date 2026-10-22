@@ -14,6 +14,10 @@ app:
     # Tests never reach the real internet
     base-url: http://localhost:1/books/v1
     api-key: ""
+  parser:
+    browser:
+      # Browser tests construct the fetcher themselves (./mvnw verify -Pbrowser)
+      enabled: false
 
 logging:
   level:

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Product rendered by script</title>
+</head>
+<body>
+<!-- Like a single-page store: the HTML has no product data until the script runs -->
+<div id="app"></div>
+<img src="/cover.png" alt="cover">
+<script>
+    setTimeout(function () {
+        document.getElementById('app').innerHTML =
+            '<h1 class="title">Пикник на обочине</h1><span class="price">3 450 ₸</span>';
+    }, 200);
+</script>
+</body>
+</html>
