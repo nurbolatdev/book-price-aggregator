@@ -62,18 +62,18 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
         editionToFind = edition("Собачье сердце", "Михаил Булгаков", NEW_ISBN);
         jdbc.update("""
                 INSERT INTO offers (edition_id, store_id, external_id, url, price, match_status)
-                SELECT ?, id, 'known-1', 'https://flip.test/known-1', 2000, 'MATCHED' FROM stores WHERE code = 'FLIP'
+                SELECT ?, id, 'known-1', 'https://www.flip.kz/catalog?prod=known-1', 2000, 'MATCHED' FROM stores WHERE code = 'FLIP'
                 """, knownEdition);
         jdbc.update("""
                 INSERT INTO offers (edition_id, store_id, external_id, url, price, match_status)
-                SELECT ?, id, 'known-2', 'https://flip.test/known-2', 2500, 'MATCHED' FROM stores WHERE code = 'FLIP'
+                SELECT ?, id, 'known-2', 'https://www.flip.kz/catalog?prod=known-2', 2500, 'MATCHED' FROM stores WHERE code = 'FLIP'
                 """, knownEdition);
     }
 
     @Test
     void shouldFinishPartiallyAndCountPagesWhenOnePageFails() {
-        parser.products.put("https://flip.test/known-1", offer("known-1", KNOWN_ISBN, "1900"));
-        parser.failing.add("https://flip.test/known-2");
+        parser.products.put("https://www.flip.kz/catalog?prod=known-1", offer("known-1", KNOWN_ISBN, "1900"));
+        parser.failing.add("https://www.flip.kz/catalog?prod=known-2");
 
         CrawlResult result = crawl(knownEdition);
 
@@ -95,7 +95,7 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
     @Test
     void shouldDiscoverOfferForEditionMissingInStore() {
         parser.searchResults.put(NEW_ISBN, List.of(offer("new-1", null, "1500")));
-        parser.products.put("https://flip.test/new-1", offer("new-1", NEW_ISBN, "1500"));
+        parser.products.put("https://www.flip.kz/catalog?prod=new-1", offer("new-1", NEW_ISBN, "1500"));
 
         CrawlResult result = crawl(editionToFind);
 
@@ -108,7 +108,7 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
 
     @Test
     void shouldMarkOfferOutOfStockWhenProductPageIsGone() {
-        parser.products.put("https://flip.test/known-1", offer("known-1", KNOWN_ISBN, "2000"));
+        parser.products.put("https://www.flip.kz/catalog?prod=known-1", offer("known-1", KNOWN_ISBN, "2000"));
         // known-2 has no page any more: fetchOffer returns empty
 
         CrawlResult result = crawl(knownEdition);
@@ -116,6 +116,19 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
         assertThat(result.status()).isEqualTo(RunStatus.SUCCESS);
         assertThat(jdbc.queryForObject("SELECT in_stock FROM offers WHERE external_id = 'known-2'", Boolean.class))
                 .isFalse();
+    }
+
+    @Test
+    void shouldNeverRefreshOffersOutsideStoreSite() {
+        jdbc.update("""
+                INSERT INTO offers (edition_id, store_id, external_id, url, price, match_status)
+                SELECT ?, id, 'demo-1', 'https://flip.demo.example/product/1', 1000, 'MATCHED' FROM stores WHERE code = 'FLIP'
+                """, knownEdition);
+
+        crawl(knownEdition);
+
+        assertThat(parser.fetched).doesNotContain("https://flip.demo.example/product/1")
+                .contains("https://www.flip.kz/catalog?prod=known-1");
     }
 
     @Test
@@ -146,7 +159,7 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
     }
 
     private static ParsedOffer offer(String externalId, String isbn, String price) {
-        return new ParsedOffer(externalId, "https://flip.test/" + externalId, "Книга", "Автор", isbn,
+        return new ParsedOffer(externalId, "https://www.flip.kz/catalog?prod=" + externalId, "Книга", "Автор", isbn,
                 new BigDecimal(price), null, true, null, null, null, null, Binding.UNKNOWN);
     }
 
@@ -159,6 +172,7 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
         final Map<String, List<ParsedOffer>> searchResults = new HashMap<>();
         final List<String> failing = new ArrayList<>();
         final List<String> searched = new ArrayList<>();
+        final List<String> fetched = new ArrayList<>();
         boolean blocked;
 
         @Override
@@ -174,6 +188,7 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
 
         @Override
         public Optional<ParsedOffer> fetchOffer(String url) {
+            fetched.add(url);
             if (blocked) {
                 throw new StoreBlockedException(StoreCode.FLIP, url, "HTTP 403");
             }

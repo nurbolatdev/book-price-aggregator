@@ -25,8 +25,9 @@ class CrawlTargetRepository {
     }
 
     /**
-     * Offers of the store (except rejected ones): editions with active beacons first, then the
-     * longest unchecked.
+     * Offers of the store (except rejected ones) whose URL is on the store's site: editions with
+     * active beacons first, then the longest unchecked. The URL check keeps foreign addresses
+     * (e.g. demo data) from ever being requested.
      *
      * @param editionIds restrict to these editions, {@code null} for all
      */
@@ -35,8 +36,10 @@ class CrawlTargetRepository {
         String sql = """
                 SELECT o.id, o.url
                 FROM offers o
+                JOIN stores s ON s.id = o.store_id
                 WHERE o.store_id = :storeId
                   AND o.match_status <> 'REJECTED'
+                  AND o.url LIKE s.base_url || '/%'
                 """ + editionFilter("o.edition_id", editionIds, params) + """
                 ORDER BY EXISTS (SELECT 1 FROM beacons b WHERE b.edition_id = o.edition_id AND b.status = 'ACTIVE') DESC,
                          o.last_seen_at ASC
