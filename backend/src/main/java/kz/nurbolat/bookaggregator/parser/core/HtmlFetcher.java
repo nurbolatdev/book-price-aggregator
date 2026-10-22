@@ -29,7 +29,8 @@ import java.util.function.Supplier;
  * The single entry point for HTTP requests to stores (docs/05-parsing-policy.md):
  * pages are reused from the cache for an hour; every real request passes a per-store rate limit
  * ({@code stores.min_delay_ms}), a circuit breaker and up to two retries on 5xx and network errors.
- * 403, 429 and captcha pages stop the store instead of being retried.
+ * Paths forbidden by robots.txt are never requested. 403, 429 and captcha pages stop the store
+ * instead of being retried.
  */
 @Slf4j
 @Component
@@ -39,16 +40,19 @@ public class HtmlFetcher {
 
     private final ParserProperties properties;
     private final PageCache pageCache;
+    private final RobotsTxtChecker robotsTxtChecker;
     private final StoreService storeService;
     private final CircuitBreakerRegistry circuitBreakers;
     private final RateLimiterRegistry rateLimiters;
     private final RetryRegistry retries;
 
-    public HtmlFetcher(ParserProperties properties, PageCache pageCache, StoreService storeService,
+    public HtmlFetcher(ParserProperties properties, PageCache pageCache, RobotsTxtChecker robotsTxtChecker,
+                       StoreService storeService,
                        CircuitBreakerRegistry circuitBreakers, RateLimiterRegistry rateLimiters,
                        RetryRegistry retries) {
         this.properties = properties;
         this.pageCache = pageCache;
+        this.robotsTxtChecker = robotsTxtChecker;
         this.storeService = storeService;
         this.circuitBreakers = circuitBreakers;
         this.rateLimiters = rateLimiters;
@@ -58,6 +62,7 @@ public class HtmlFetcher {
     /**
      * @throws StoreBlockedException      the store answered 403, 429 or a captcha
      * @throws StoreUnavailableException  the store is paused by its circuit breaker
+     * @throws DisallowedByRobotsException the path is forbidden by the store's robots.txt
      * @throws PageNotFoundException      404 / 410
      * @throws FetchException             any other failure after retries
      */
@@ -66,6 +71,10 @@ public class HtmlFetcher {
         if (cached.isPresent()) {
             log.debug("Page from cache: store={} url={}", store, url);
             return Jsoup.parse(cached.get(), url);
+        }
+        if (!robotsTxtChecker.isAllowed(url)) {
+            log.info("Skipped by robots.txt: store={} url={}", store, url);
+            throw new DisallowedByRobotsException(url);
         }
 
         CircuitBreaker circuitBreaker = circuitBreaker(store);
