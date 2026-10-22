@@ -9,7 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Adds books and editions to the catalog from metadata (Google Books or a store page), without prices.
@@ -62,18 +66,32 @@ public class CatalogService {
         return edition;
     }
 
+    /**
+     * Adds a new edition to a book already in the catalog, e.g. a printing with an ISBN not seen before.
+     */
+    @Transactional
+    public Edition addEdition(Book book, BookMetadata metadata) {
+        Edition edition = newEdition(metadata);
+        book.addEdition(edition);
+        return editionRepository.save(edition);
+    }
+
     @Transactional(readOnly = true)
     public Optional<Edition> findEditionByIsbn(String isbn13) {
         return editionRepository.findByIsbn13(isbn13);
     }
 
     /**
-     * Editions of books whose normalized title and author equal the given ones exactly.
+     * Editions with their books, in the order of the given ids; unknown ids are skipped.
      */
     @Transactional(readOnly = true)
-    public List<Edition> findEditionsByExactTitleAndAuthor(String title, String author) {
-        return editionRepository.findByBookTitleNormAndAuthorNorm(
-                TextNormalizer.normalize(title), TextNormalizer.normalize(author));
+    public List<Edition> findEditionsWithBook(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, Edition> byId = editionRepository.findAllWithBookByIdIn(ids).stream()
+                .collect(Collectors.toMap(Edition::getId, Function.identity()));
+        return ids.stream().map(byId::get).filter(Objects::nonNull).toList();
     }
 
     private static Book newBook(BookMetadata metadata) {

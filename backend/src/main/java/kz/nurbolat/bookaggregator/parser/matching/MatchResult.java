@@ -15,4 +15,8 @@ public record MatchResult(MatchStatus status, Edition edition) {
     static MatchResult pendingReview() {
         return new MatchResult(MatchStatus.PENDING_REVIEW, null);
     }
+
+    static MatchResult rejected() {
+        return new MatchResult(MatchStatus.REJECTED, null);
+    }
 }

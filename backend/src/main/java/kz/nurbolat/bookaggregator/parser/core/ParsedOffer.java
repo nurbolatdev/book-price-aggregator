@@ -10,6 +10,7 @@ import java.math.BigDecimal;
  * @param externalId product id in the store, unique per store
  * @param isbn13     normalized ISBN-13, {@code null} if the page has none
  * @param oldPrice   crossed-out price, {@code null} without a discount
+ * @param category   the store's category of the product, {@code null} if the page does not show it
  */
 public record ParsedOffer(
         String externalId,
@@ -24,6 +25,15 @@ public record ParsedOffer(
         String coverUrl,
         String publisher,
         Integer year,
-        Binding binding
+        Binding binding,
+        String category
 ) {
+
+    /** An offer from a page that shows no category. */
+    public ParsedOffer(String externalId, String url, String title, String author, String isbn13, BigDecimal price,
+                       BigDecimal oldPrice, boolean inStock, String deliveryText, String coverUrl, String publisher,
+                       Integer year, Binding binding) {
+        this(externalId, url, title, author, isbn13, price, oldPrice, inStock, deliveryText, coverUrl, publisher,
+                year, binding, null);
+    }
 }

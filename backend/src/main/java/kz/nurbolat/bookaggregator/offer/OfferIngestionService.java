@@ -76,7 +76,7 @@ public class OfferIngestionService {
                 offer.setEdition(match.edition());
                 if (match.status() == MatchStatus.MATCHED) {
                     matched++;
-                } else {
+                } else if (match.status() == MatchStatus.PENDING_REVIEW) {
                     pendingReview++;
                 }
             }
