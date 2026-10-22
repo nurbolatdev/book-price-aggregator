@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * "подарочное издание", series, illustrations, "Комплект из 2 книг", a leading "Книга", article numbers,
  * quotes) and keeps the binding and year it mentioned, since those describe the edition.
  */
-final class TitleCleaner {
+public final class TitleCleaner {
 
     private static final int FLAGS = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS;
 
@@ -49,13 +49,13 @@ final class TitleCleaner {
      * @param binding binding named in the title, {@code null} if none
      * @param year    publication year named in the title, {@code null} if none
      */
-    record CleanTitle(String title, Binding binding, Integer year) {
+    public record CleanTitle(String title, Binding binding, Integer year) {
     }
 
     /**
      * @return the cleaned title; the original (stripped) one if cleaning would leave nothing, {@code null} for {@code null}
      */
-    static CleanTitle clean(String raw) {
+    public static CleanTitle clean(String raw) {
         if (raw == null) {
             return new CleanTitle(null, null, null);
         }

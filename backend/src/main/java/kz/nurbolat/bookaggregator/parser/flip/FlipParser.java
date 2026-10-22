@@ -3,8 +3,6 @@ package kz.nurbolat.bookaggregator.parser.flip;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kz.nurbolat.bookaggregator.common.text.IsbnUtils;
-import kz.nurbolat.bookaggregator.edition.Binding;
 import kz.nurbolat.bookaggregator.parser.core.HtmlFetcher;
 import kz.nurbolat.bookaggregator.parser.core.PageNotFoundException;
 import kz.nurbolat.bookaggregator.parser.core.ParsedOffer;
@@ -23,12 +21,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static kz.nurbolat.bookaggregator.parser.core.PageValues.binding;
+import static kz.nurbolat.bookaggregator.parser.core.PageValues.firstIsbn;
+import static kz.nurbolat.bookaggregator.parser.core.PageValues.money;
+import static kz.nurbolat.bookaggregator.parser.core.PageValues.text;
+import static kz.nurbolat.bookaggregator.parser.core.PageValues.year;
 import static kz.nurbolat.bookaggregator.parser.flip.FlipSelectors.*;
 
 /**
@@ -50,7 +52,6 @@ public class FlipParser implements StoreParser {
 
     static final String BASE_URL = "https://www.flip.kz";
     private static final Pattern PRODUCT_ID = Pattern.compile("prod=(\\d+)");
-    private static final Pattern YEAR = Pattern.compile("\\b(1[5-9]\\d{2}|20\\d{2})\\b");
 
     private final HtmlFetcher fetcher;
     private final ObjectMapper objectMapper;
@@ -139,7 +140,7 @@ public class FlipParser implements StoreParser {
                 productUrl(id),
                 title,
                 authors(page),
-                isbn(specs.get(SPEC_ISBN)),
+                firstIsbn(specs.get(SPEC_ISBN)),
                 price,
                 money(text(page, PRODUCT_OLD_PRICE)),
                 inStock,
@@ -178,55 +179,10 @@ public class FlipParser implements StoreParser {
         return names.isEmpty() ? null : String.join(", ", names);
     }
 
-    // "978-5-17-056954-0, 978-5-271-27312-4": the first valid one
-    private static String isbn(String cell) {
-        if (cell == null) {
-            return null;
-        }
-        for (String candidate : cell.split("[,;]")) {
-            String isbn13 = IsbnUtils.normalize(candidate);
-            if (isbn13 != null) {
-                return isbn13;
-            }
-        }
-        return null;
-    }
-
     private static String image(JsonNode product) {
         JsonNode image = product.path("image");
         String url = image.isArray() ? image.path(0).asText(null) : image.asText(null);
         return url == null ? null : absolute(url);
-    }
-
-    static Binding binding(String text) {
-        if (text == null) {
-            return Binding.UNKNOWN;
-        }
-        String lower = text.toLowerCase(Locale.ROOT);
-        if (lower.contains("тверд") || lower.contains("твёрд")) {
-            return Binding.HARDCOVER;
-        }
-        if (lower.contains("мягк")) {
-            return Binding.PAPERBACK;
-        }
-        return Binding.UNKNOWN;
-    }
-
-    static Integer year(String text) {
-        if (text == null) {
-            return null;
-        }
-        Matcher matcher = YEAR.matcher(text);
-        return matcher.find() ? Integer.valueOf(matcher.group(1)) : null;
-    }
-
-    /** Tenge amounts like "2 021 ₸" (with narrow no-break spaces); {@code null} if there are no digits. */
-    static BigDecimal money(String text) {
-        if (text == null) {
-            return null;
-        }
-        String digits = text.replaceAll("\\D", "");
-        return digits.isEmpty() ? null : new BigDecimal(digits);
     }
 
     // "МИФ (Манн, Иванов и Фербер), Вечные истории" -> "МИФ (Манн, Иванов и Фербер)"
@@ -262,15 +218,5 @@ public class FlipParser implements StoreParser {
 
     private static String absolute(String src) {
         return src.startsWith("//") ? "https:" + src : src;
-    }
-
-    // Element text with no-break spaces turned into plain ones; null when missing or blank
-    private static String text(Element root, String selector) {
-        Element element = root.selectFirst(selector);
-        if (element == null) {
-            return null;
-        }
-        String text = element.text().replace(' ', ' ').replace(' ', ' ').replaceAll("\\s+", " ").strip();
-        return text.isEmpty() ? null : text;
     }
 }

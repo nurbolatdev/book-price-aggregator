@@ -114,7 +114,7 @@ class BrowserFetcherIT {
 
     private BrowserFetcher fetcher() {
         ParserProperties properties = new ParserProperties(USER_AGENT, Duration.ofSeconds(5), Duration.ofHours(1),
-                Duration.ofHours(24), 200, 50, Duration.ofMillis(10), Duration.ofMinutes(30), Duration.ofSeconds(5));
+                Duration.ofHours(24), 200, 50, 5, Duration.ofMillis(10), Duration.ofMinutes(30), Duration.ofSeconds(5));
         StoreService storeService = mock(StoreService.class);
         for (StoreCode code : StoreCode.values()) {
             Store store = new Store();

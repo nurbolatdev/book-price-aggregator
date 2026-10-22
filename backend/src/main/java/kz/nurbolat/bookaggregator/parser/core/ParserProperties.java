@@ -17,6 +17,7 @@ import java.time.Duration;
  * @param robotsTtl                  how long a store's robots.txt is reused
  * @param maxEditionsPerRun          known offers refreshed in one run
  * @param maxDiscoveryPerRun         editions looked up in one run
+ * @param maxBrowsePagesPerRun       catalog pages read in one run of a store that cannot be searched
  * @param retryWait                  pause before retrying a failed request
  * @param circuitBreakerOpenDuration pause after a store started failing or blocked us
  * @param rateLimitMaxWait           longest wait for a free request slot of a store
@@ -31,6 +32,7 @@ public record ParserProperties(
         @DefaultValue("24h") Duration robotsTtl,
         @DefaultValue("200") @Positive int maxEditionsPerRun,
         @DefaultValue("50") @Positive int maxDiscoveryPerRun,
+        @DefaultValue("5") @Positive int maxBrowsePagesPerRun,
         @DefaultValue("1s") Duration retryWait,
         @DefaultValue("30m") Duration circuitBreakerOpenDuration,
         @DefaultValue("5m") Duration rateLimitMaxWait

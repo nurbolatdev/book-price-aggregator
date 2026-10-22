@@ -107,6 +107,25 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldBrowseCatalogForEditionWhenStoreCannotBeSearched() {
+        parser.searchable = false;
+        ParsedOffer listed = titled(offer("new-2", null, "1700"), "Собачье сердце (мягкая обложка)");
+        parser.catalog.add(List.of(titled(offer("other", null, "900"), "Белая гвардия"), listed));
+        parser.catalog.add(List.of());
+        parser.products.put("https://www.flip.kz/catalog?prod=new-2", offer("new-2", NEW_ISBN, "1700"));
+
+        CrawlResult result = crawl(editionToFind);
+
+        assertThat(result.status()).isEqualTo(RunStatus.SUCCESS);
+        assertThat(parser.searched).isEmpty();
+        // the second page is empty: browsing stops there
+        assertThat(parser.browsed).containsExactly(1, 2);
+        assertThat(parser.fetched).containsExactly("https://www.flip.kz/catalog?prod=new-2");
+        assertThat(jdbc.queryForObject("SELECT edition_id FROM offers WHERE external_id = 'new-2'", Long.class))
+                .isEqualTo(editionToFind);
+    }
+
+    @Test
     void shouldMarkOfferOutOfStockWhenProductPageIsGone() {
         parser.products.put("https://www.flip.kz/catalog?prod=known-1", offer("known-1", KNOWN_ISBN, "2000"));
         // known-2 has no page any more: fetchOffer returns empty
@@ -163,6 +182,11 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
                 new BigDecimal(price), null, true, null, null, null, null, Binding.UNKNOWN);
     }
 
+    private static ParsedOffer titled(ParsedOffer offer, String title) {
+        return new ParsedOffer(offer.externalId(), offer.url(), title, null, offer.isbn13(), offer.price(),
+                offer.oldPrice(), offer.inStock(), null, null, null, null, Binding.UNKNOWN);
+    }
+
     /**
      * Store parser with canned pages; no network.
      */
@@ -173,7 +197,10 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
         final List<String> failing = new ArrayList<>();
         final List<String> searched = new ArrayList<>();
         final List<String> fetched = new ArrayList<>();
+        final List<List<ParsedOffer>> catalog = new ArrayList<>();
+        final List<Integer> browsed = new ArrayList<>();
         boolean blocked;
+        boolean searchable = true;
 
         @Override
         public StoreCode store() {
@@ -184,6 +211,17 @@ class StoreCrawlServiceIT extends AbstractIntegrationTest {
         public List<ParsedOffer> search(String query) {
             searched.add(query);
             return searchResults.getOrDefault(query, List.of());
+        }
+
+        @Override
+        public boolean canSearch() {
+            return searchable;
+        }
+
+        @Override
+        public List<ParsedOffer> browse(int page) {
+            browsed.add(page);
+            return page <= catalog.size() ? catalog.get(page - 1) : List.of();
         }
 
         @Override

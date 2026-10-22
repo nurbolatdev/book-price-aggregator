@@ -26,7 +26,11 @@ import java.util.Optional;
 @Component
 public class HtmlFetcher {
 
-    private static final int MAX_BODY_BYTES = 5 * 1024 * 1024;
+    // Catalog pages of Meloman are over 5 MB
+    private static final int MAX_BODY_BYTES = 8 * 1024 * 1024;
+    // reCAPTCHA, hCaptcha, Yandex SmartCaptcha, Cloudflare Turnstile, Wildberries antibot
+    private static final String CAPTCHA_WIDGETS =
+            "[data-sitekey], [data-site-key], .g-recaptcha, .h-captcha, .smart-captcha, .cf-turnstile, iframe[src*=captcha]";
 
     private final ParserProperties properties;
     private final PageCache pageCache;
@@ -102,10 +106,17 @@ public class HtmlFetcher {
         return body;
     }
 
-    // Normal store pages never mention captchas; a challenge page is a form that does
+    /**
+     * A challenge page shows a captcha widget or a form with a captcha in it. Words alone do not count:
+     * Magento stores mention "captcha" in the login settings of every page.
+     */
     static boolean looksLikeCaptcha(String html) {
-        String lower = html.toLowerCase(Locale.ROOT);
-        return lower.contains("<form") && lower.contains("captcha");
+        if (!html.toLowerCase(Locale.ROOT).contains("captcha") && !html.contains("site-key") && !html.contains("sitekey")) {
+            return false;
+        }
+        Document page = Jsoup.parse(html);
+        return !page.select(CAPTCHA_WIDGETS).isEmpty()
+                || page.select("form").stream().anyMatch(form -> form.html().toLowerCase(Locale.ROOT).contains("captcha"));
     }
 
     private static long elapsedMs(long startedNanos) {
