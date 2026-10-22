@@ -61,7 +61,7 @@ class GoogleBooksClientTest {
 
         assertThat(books).singleElement().isEqualTo(new BookMetadata(
                 "Мастер и Маргарита", "Михаил Булгаков", "Роман", "9780306406157", "АСТ",
-                2019, 480, "ru", "https://books.google.com/cover.jpg"));
+                2019, 480, "ru", "https://books.google.com/cover.jpg", null));
         assertThat(lastQuery.get()).contains("langRestrict=ru");
     }
 

@@ -89,7 +89,8 @@ public class GoogleBooksClient {
                     year(text(info, "publishedDate")),
                     info.path("pageCount").isInt() ? info.path("pageCount").asInt() : null,
                     language(text(info, "language")),
-                    cover(text(info.path("imageLinks"), "thumbnail"))
+                    cover(text(info.path("imageLinks"), "thumbnail")),
+                    null
             ));
         }
         return result;

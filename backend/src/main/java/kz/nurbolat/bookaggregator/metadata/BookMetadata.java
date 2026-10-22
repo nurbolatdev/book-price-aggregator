@@ -1,9 +1,13 @@
 package kz.nurbolat.bookaggregator.metadata;
 
+import kz.nurbolat.bookaggregator.edition.Binding;
+
 /**
- * Bibliographic data of one book edition from an external catalog. Never contains prices.
+ * Bibliographic data of one book edition from an external catalog or a store page.
+ * Never contains prices.
  *
- * @param isbn13 normalized 13-digit ISBN, or {@code null} if the source has no valid ISBN
+ * @param isbn13  normalized 13-digit ISBN, or {@code null} if the source has no valid ISBN
+ * @param binding {@code null} when unknown (Google Books does not report it)
  */
 public record BookMetadata(
         String title,
@@ -14,6 +18,7 @@ public record BookMetadata(
         Integer year,
         Integer pages,
         String language,
-        String coverUrl
+        String coverUrl,
+        Binding binding
 ) {
 }
