@@ -107,6 +107,14 @@ public class OfferIngestionService {
         return offerRepository.markOutOfStockNotSeenSince(store.getId(), clock.instant().minus(notSeenFor));
     }
 
+    /**
+     * Offers whose product pages disappeared from the store.
+     */
+    @Transactional
+    public int markOutOfStock(List<Long> offerIds) {
+        return offerIds.isEmpty() ? 0 : offerRepository.markOutOfStock(offerIds);
+    }
+
     private static Offer newOffer(Store store, String externalId, Instant now) {
         Offer offer = new Offer();
         offer.setStore(store);

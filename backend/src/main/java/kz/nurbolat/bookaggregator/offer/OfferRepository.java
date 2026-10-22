@@ -25,4 +25,8 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
     @Modifying
     @Query("UPDATE Offer o SET o.inStock = false WHERE o.store.id = :storeId AND o.inStock = true AND o.lastSeenAt < :seenBefore")
     int markOutOfStockNotSeenSince(Long storeId, Instant seenBefore);
+
+    @Modifying
+    @Query("UPDATE Offer o SET o.inStock = false WHERE o.id IN :ids")
+    int markOutOfStock(List<Long> ids);
 }
