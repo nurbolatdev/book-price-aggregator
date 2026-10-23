@@ -31,4 +31,11 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
             WHERE t.user.id = :userId AND t.revokedAt IS NULL AND t.expiresAt > :now
             ORDER BY t.createdAt, t.id""")
     List<RefreshToken> findActiveOfUser(Long userId, Instant now);
+
+    /** Deletes up to {@code limit} tokens that expired before the given moment; returns how many. */
+    @Modifying
+    @Query(value = """
+            DELETE FROM refresh_tokens WHERE id IN (
+                SELECT id FROM refresh_tokens WHERE expires_at < :before LIMIT :limit)""", nativeQuery = true)
+    int deleteExpiredBefore(Instant before, int limit);
 }
