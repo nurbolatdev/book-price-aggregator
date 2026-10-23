@@ -41,6 +41,22 @@ spring:
     port: 5672
     username: guest
     password: guest
+    # A stopped broker must not hold up the API: publishing fails fast and is logged
+    connection-timeout: 3s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        # Failed messages are not put back: after the retries they go to kr.dead-letter
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1s
+          multiplier: 5
+          max-interval: 15s
 
   mail:
     host: localhost
