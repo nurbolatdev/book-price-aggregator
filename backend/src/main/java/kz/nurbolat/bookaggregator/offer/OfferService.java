@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,5 +19,13 @@ public class OfferService {
     @Transactional(readOnly = true)
     public List<Offer> findMatchedOffers(Long editionId) {
         return offerRepository.findByEditionWithStore(editionId, MatchStatus.MATCHED);
+    }
+
+    /**
+     * The cheapest in-stock matched offer of an edition in an enabled store, store loaded.
+     */
+    @Transactional(readOnly = true)
+    public Optional<Offer> findBestOffer(Long editionId) {
+        return findMatchedOffers(editionId).stream().findFirst().filter(Offer::isInStock);
     }
 }
