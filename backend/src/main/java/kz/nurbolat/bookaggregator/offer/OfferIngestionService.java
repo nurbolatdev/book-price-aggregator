@@ -88,7 +88,7 @@ public class OfferIngestionService {
                 priceChanged++;
                 if (offer.getEdition() != null) {
                     events.publishEvent(new PriceChangedEvent(offer.getId(), offer.getEdition().getId(), storeCode,
-                            previousPrice, item.price(), now));
+                            previousPrice, item.price(), item.inStock(), now));
                 }
             }
         }

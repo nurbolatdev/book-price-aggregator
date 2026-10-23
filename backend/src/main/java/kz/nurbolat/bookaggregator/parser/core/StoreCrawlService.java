@@ -65,6 +65,10 @@ public class StoreCrawlService {
         this.properties = properties;
     }
 
+    public boolean hasParser(StoreCode storeCode) {
+        return parsers.containsKey(storeCode);
+    }
+
     /**
      * @param editionIds restrict the run to these editions; empty to use the run limits over the whole catalog
      */

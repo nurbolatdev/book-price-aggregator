@@ -1,5 +1,15 @@
 # Infrastructure (PostgreSQL, Redis, RabbitMQ) is provided by Testcontainers via @ServiceConnection.
 
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        # Listeners would crawl real stores; flow tests start them on purpose with a stubbed crawler
+        auto-startup: false
+        retry:
+          initial-interval: 200ms
+          max-interval: 1s
+
 security:
   jwt:
     secret: test-secret-key-that-is-long-enough-for-hs256

@@ -23,7 +23,7 @@
   "fieldErrors": [ { "field": "targetPrice", "message": "должно быть больше 0" } ]
 }
 ```
-Коды: `VALIDATION_FAILED`, `NOT_FOUND`, `UNAUTHORIZED`, `FORBIDDEN`, `EMAIL_NOT_VERIFIED`, `EMAIL_TAKEN`, `INVALID_CREDENTIALS`, `TOKEN_EXPIRED`, `TOKEN_INVALID`, `RATE_LIMITED`, `CONFLICT`, `INTERNAL_ERROR`.
+Коды: `VALIDATION_FAILED`, `NOT_FOUND`, `UNAUTHORIZED`, `FORBIDDEN`, `EMAIL_NOT_VERIFIED`, `EMAIL_TAKEN`, `INVALID_CREDENTIALS`, `TOKEN_EXPIRED`, `TOKEN_INVALID`, `RATE_LIMITED`, `CONFLICT`, `SERVICE_UNAVAILABLE` (503: очередь задач недоступна), `INTERNAL_ERROR`.
 
 ## 1. Публичные эндпоинты
 
@@ -144,7 +144,7 @@
 | GET | `/admin/stats?period=24h\|7d\|30d` | KPI: пользователи (всего, новые), активные, маячки, письма (sent/failed), поиски, cache hit %, книги/издания/предложения |
 | GET | `/admin/health` | статусы: db, redis, rabbitmq, mail, scheduler (+ метрики) |
 | GET | `/admin/parsers` | по магазину: enabled, статус последнего запуска, % успеха, предложений, ср. время, circuit breaker |
-| POST | `/admin/parsers/{storeCode}/run` | ручной запуск (кладёт задачу в очередь), 202 |
+| POST | `/admin/parsers/{storeCode}/run` | ручной запуск (кладёт задачу в очередь), 202 `{ "queued": true }`; тело `{editionIds}` необязательно; 404 — у магазина нет парсера, 409 — магазин выключен, 503 — очередь недоступна |
 | PATCH | `/admin/stores/{storeCode}` | `{enabled}` |
 | GET | `/admin/queues` | по очереди: ready, unacked, consumers, скорость |
 | POST | `/admin/queues/dead-letter/requeue` | вернуть сообщения из DLQ в работу |
