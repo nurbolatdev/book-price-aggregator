@@ -27,6 +27,7 @@
         <resilience4j.version>2.2.0</resilience4j.version>
         <wiremock.version>3.13.2</wiremock.version>
         <playwright.version>1.56.0</playwright.version>
+        <shedlock.version>5.16.0</shedlock.version>
         <!-- Browser tests need Chromium; they run only with -Pbrowser -->
         <failsafe.groups></failsafe.groups>
         <failsafe.excludedGroups>browser</failsafe.excludedGroups>
@@ -82,6 +83,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- Scheduled jobs run on one instance at a time (lock table in PostgreSQL) -->
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
 
         <!-- OpenAPI / Swagger UI -->
