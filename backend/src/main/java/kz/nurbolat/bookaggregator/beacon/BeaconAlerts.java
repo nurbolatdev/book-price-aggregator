@@ -1,5 +1,7 @@
 package kz.nurbolat.bookaggregator.beacon;
 
+import kz.nurbolat.bookaggregator.auth.AuthProperties;
+import kz.nurbolat.bookaggregator.auth.EmailTokenService;
 import kz.nurbolat.bookaggregator.book.Book;
 import kz.nurbolat.bookaggregator.common.text.Emails;
 import kz.nurbolat.bookaggregator.config.AppProperties;
@@ -36,6 +38,8 @@ class BeaconAlerts {
     private final NotificationService notificationService;
     private final EmailPublisher emailPublisher;
     private final AppProperties appProperties;
+    private final EmailTokenService emailTokenService;
+    private final AuthProperties authProperties;
 
     /**
      * @param was    the price the user saw last: the previous reported price or the baseline
@@ -51,11 +55,19 @@ class BeaconAlerts {
         }
         Notification notification = notificationService.queue(user, beacon, payload);
         if (user.getNotifyFrequency() == NotifyFrequency.INSTANT) {
-            emailPublisher.publish(EmailType.PRICE_DROP, user.getEmail(), PriceDropEmail.subject(payload),
-                    PriceDropEmail.model(payload, appProperties.baseUrl()), List.of(notification.getId()));
+            Map<String, Object> model = PriceDropEmail.model(payload, appProperties.baseUrl());
+            model.put("unsubscribeUrl", unsubscribeUrl(beacon));
+            emailPublisher.publish(EmailType.PRICE_DROP, user.getEmail(), PriceDropEmail.subject(payload), model,
+                    List.of(notification.getId()));
         }
         log.info("Beacon {} fired at {}, email {}", beacon.getId(), offers.get(0).getPrice(),
                 user.getNotifyFrequency() == NotifyFrequency.INSTANT ? "queued" : "kept for the daily digest");
+    }
+
+    /** Link that pauses the beacon without signing in; also sent as the {@code List-Unsubscribe} header. */
+    String unsubscribeUrl(Beacon beacon) {
+        return appProperties.baseUrl() + "/unsubscribe?token="
+                + emailTokenService.issueUnsubscribe(beacon, authProperties.unsubscribeTtl());
     }
 
     /**

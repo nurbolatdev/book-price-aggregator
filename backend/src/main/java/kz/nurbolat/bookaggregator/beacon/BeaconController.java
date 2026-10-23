@@ -3,7 +3,9 @@ package kz.nurbolat.bookaggregator.beacon;
 import jakarta.validation.Valid;
 import kz.nurbolat.bookaggregator.beacon.dto.BeaconResponse;
 import kz.nurbolat.bookaggregator.beacon.dto.CreateBeaconRequest;
+import kz.nurbolat.bookaggregator.beacon.dto.UnsubscribeResponse;
 import kz.nurbolat.bookaggregator.beacon.dto.UpdateBeaconRequest;
+import kz.nurbolat.bookaggregator.user.dto.TokenRequest;
 import kz.nurbolat.bookaggregator.scheduler.RefreshOnDemandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -50,5 +52,11 @@ public class BeaconController {
     ResponseEntity<Void> delete(@PathVariable Long id) {
         beaconService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Link from a beacon email: pauses the beacon without signing in. */
+    @PostMapping("/unsubscribe")
+    UnsubscribeResponse unsubscribe(@Valid @RequestBody TokenRequest request) {
+        return beaconService.unsubscribe(request.token());
     }
 }

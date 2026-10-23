@@ -1,6 +1,7 @@
 package kz.nurbolat.bookaggregator.auth;
 
 import jakarta.persistence.*;
+import kz.nurbolat.bookaggregator.beacon.Beacon;
 import kz.nurbolat.bookaggregator.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 /**
- * One-time token sent by email (confirm the address, reset the password). Only its SHA-256 hash is stored.
+ * Token sent by email: one-time (confirm the address, reset the password) or reusable until it expires
+ * (unsubscribe from a beacon). Only its SHA-256 hash is stored.
  */
 @Entity
 @Table(name = "email_tokens")
@@ -26,6 +28,11 @@ public class EmailToken {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    /** The beacon an {@code UNSUBSCRIBE} link pauses; empty for other purposes. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "beacon_id")
+    private Beacon beacon;
 
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
     private String tokenHash;

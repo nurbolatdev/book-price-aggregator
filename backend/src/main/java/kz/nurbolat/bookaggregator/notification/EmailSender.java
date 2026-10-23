@@ -25,6 +25,9 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class EmailSender {
 
+    /** Model key of the link that stops these emails; it becomes the {@code List-Unsubscribe} header. */
+    public static final String UNSUBSCRIBE_URL = "unsubscribeUrl";
+
     private final JavaMailSender mailSender;
     private final ITemplateEngine templateEngine;
     private final MailProperties mailProperties;
@@ -46,6 +49,10 @@ public class EmailSender {
             helper.setTo(message.to());
             helper.setSubject(message.subjectOrDefault());
             helper.setText(text, html);
+            if (message.model().get(UNSUBSCRIBE_URL) instanceof String unsubscribe) {
+                // Mail clients show their own "unsubscribe" button for it
+                mime.setHeader("List-Unsubscribe", "<" + unsubscribe + ">");
+            }
         } catch (MessagingException e) {
             throw new MailPreparationException("Could not build email " + message.messageId(), e);
         }

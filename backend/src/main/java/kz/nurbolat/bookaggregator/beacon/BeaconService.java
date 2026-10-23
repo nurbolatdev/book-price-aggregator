@@ -1,7 +1,9 @@
 package kz.nurbolat.bookaggregator.beacon;
 
+import kz.nurbolat.bookaggregator.auth.EmailTokenService;
 import kz.nurbolat.bookaggregator.beacon.dto.BeaconResponse;
 import kz.nurbolat.bookaggregator.beacon.dto.CreateBeaconRequest;
+import kz.nurbolat.bookaggregator.beacon.dto.UnsubscribeResponse;
 import kz.nurbolat.bookaggregator.beacon.dto.UpdateBeaconRequest;
 import kz.nurbolat.bookaggregator.common.error.AppException;
 import kz.nurbolat.bookaggregator.common.error.ErrorCode;
@@ -32,6 +34,7 @@ public class BeaconService {
     private final EditionRepository editionRepository;
     private final OfferService offerService;
     private final SecurityUtils securityUtils;
+    private final EmailTokenService emailTokenService;
 
     @Transactional(readOnly = true)
     public List<BeaconResponse> list(BeaconStatus status) {
@@ -92,6 +95,19 @@ public class BeaconService {
     public void delete(Long id) {
         Beacon beacon = beaconRepository.findByIdAndUserId(id, currentUserId()).orElseThrow(BeaconService::notFound);
         beaconRepository.delete(beacon);
+    }
+
+    /**
+     * Pauses the beacon of an unsubscribe link from an email, without signing in. Clicking again is harmless.
+     *
+     * @throws AppException {@code TOKEN_INVALID} or {@code TOKEN_EXPIRED}
+     */
+    @Transactional
+    public UnsubscribeResponse unsubscribe(String token) {
+        Beacon beacon = emailTokenService.unsubscribeBeacon(token);
+        beacon.setStatus(BeaconStatus.PAUSED);
+        return new UnsubscribeResponse(beacon.getId(), beacon.getEdition().getId(),
+                beacon.getEdition().getBook().getTitle(), beacon.getStatus());
     }
 
     // Irrelevant parameters are cleared, so that a beacon never shows a target it does not use

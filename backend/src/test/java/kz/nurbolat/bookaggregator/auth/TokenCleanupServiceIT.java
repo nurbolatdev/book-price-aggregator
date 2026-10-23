@@ -54,7 +54,7 @@ class TokenCleanupServiceIT extends AbstractIntegrationTest {
         jdbc.update("DELETE FROM refresh_tokens");
         jdbc.update("DELETE FROM email_tokens");
         // Batches of two: the cleanup has to loop to delete everything
-        properties = new AuthProperties(Duration.ofHours(24), Duration.ofHours(1), Duration.ofMinutes(1),
+        properties = new AuthProperties(Duration.ofHours(24), Duration.ofHours(1), Duration.ofMinutes(1), Duration.ofDays(90),
                 new AuthProperties.Cleanup(Duration.ofDays(30), Duration.ofDays(7), 2));
         service = new TokenCleanupService(refreshTokens, emailTokens, properties, transactionManager, Clock.systemUTC());
         user = userRepository.save(user());
