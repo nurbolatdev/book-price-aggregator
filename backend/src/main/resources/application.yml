@@ -76,7 +76,8 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
+      roles: ADMIN
 
 springdoc:
   swagger-ui:
@@ -90,6 +91,9 @@ app:
     refresh-ttl: ${JWT_REFRESH_TTL:30d}
   mail:
     from: ${MAIL_FROM:KitapRadar <no-reply@kitapradar.kz>}
+  admin:
+    email: ${APP_ADMIN_EMAIL:}
+    password: ${APP_ADMIN_PASSWORD:}
   google-books:
     api-key: ${GOOGLE_BOOKS_API_KEY:}
     timeout: 5s
