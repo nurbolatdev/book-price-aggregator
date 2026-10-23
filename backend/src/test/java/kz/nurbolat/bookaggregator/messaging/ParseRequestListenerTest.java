@@ -20,8 +20,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +33,7 @@ class ParseRequestListenerTest {
     private final StoreCrawlService crawlService = mock(StoreCrawlService.class);
     private final StoreService storeService = mock(StoreService.class);
     private final CircuitBreakerRegistry circuitBreakers = CircuitBreakerRegistry.ofDefaults();
-    private final ProcessedMessages processed = mock(ProcessedMessages.class);
+    private final ProcessedMessages processed = spy(new ProcessedMessages(null));
     private final ParseRequestListener listener =
             new ParseRequestListener(crawlService, storeService, circuitBreakers, processed);
 
@@ -42,7 +45,8 @@ class ParseRequestListenerTest {
         flip.setEnabled(true);
         when(storeService.getByCode(StoreCode.FLIP)).thenReturn(flip);
         when(crawlService.hasParser(StoreCode.FLIP)).thenReturn(true);
-        when(processed.claim(any())).thenReturn(true);
+        doReturn(true).when(processed).claim(any());
+        doNothing().when(processed).release(any());
         when(crawlService.crawl(any(), any(), any())).thenReturn(
                 new CrawlResult(1L, StoreCode.FLIP, RunStatus.SUCCESS, 1, 0, IngestResult.EMPTY, null));
     }
@@ -63,7 +67,7 @@ class ParseRequestListenerTest {
 
     @Test
     void shouldSkipMessageProcessedBefore() {
-        when(processed.claim(any())).thenReturn(false);
+        doReturn(false).when(processed).claim(any());
 
         listener.handle(message(List.of()));
 

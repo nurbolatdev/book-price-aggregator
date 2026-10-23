@@ -24,6 +24,24 @@ public class ProcessedMessages {
     private final StringRedisTemplate redis;
 
     /**
+     * Runs the work unless the message was processed before; a failure gives the message back and is rethrown.
+     *
+     * @return {@code false} if the message was skipped as a duplicate
+     */
+    public boolean runOnce(UUID messageId, Runnable work) {
+        if (!claim(messageId)) {
+            return false;
+        }
+        try {
+            work.run();
+            return true;
+        } catch (RuntimeException e) {
+            release(messageId);
+            throw e;
+        }
+    }
+
+    /**
      * @return {@code false} if the message was already processed or is being processed
      */
     public boolean claim(UUID messageId) {
