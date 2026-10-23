@@ -22,6 +22,7 @@ public enum ErrorCode {
     TOKEN_INVALID(HttpStatus.BAD_REQUEST, "Токен недействителен"),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "Слишком много запросов"),
     CONFLICT(HttpStatus.CONFLICT, "Конфликт данных"),
+    SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "Сервис временно недоступен"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сервера");
 
     private final HttpStatus status;

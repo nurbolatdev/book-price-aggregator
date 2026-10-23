@@ -2,10 +2,9 @@ package kz.nurbolat.bookaggregator.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import kz.nurbolat.bookaggregator.admin.dto.ParserRunQueuedResponse;
 import kz.nurbolat.bookaggregator.admin.dto.ParserRunRequest;
-import kz.nurbolat.bookaggregator.parser.core.CrawlResult;
-import kz.nurbolat.bookaggregator.parser.core.StoreCrawlService;
-import kz.nurbolat.bookaggregator.parser.core.TriggerType;
+import kz.nurbolat.bookaggregator.scheduler.ManualRunService;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,23 +15,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/admin/parsers")
 @RequiredArgsConstructor
 public class AdminParserController {
 
-    private final StoreCrawlService storeCrawlService;
+    private final ManualRunService manualRunService;
 
     /**
-     * Runs the store parser synchronously for now; it becomes a queued job returning 202 in M17.
+     * Queues a crawl of the store; the store's queue runs it, results appear in parser_runs.
      */
-    @Operation(summary = "Run a store parser now (synchronous until queues arrive)")
+    @Operation(summary = "Queue a crawl of a store")
     @PostMapping("/{storeCode}/run")
-    ResponseEntity<CrawlResult> run(@PathVariable StoreCode storeCode,
-                                    @Valid @RequestBody(required = false) ParserRunRequest request) {
-        Optional<List<Long>> editionIds = Optional.ofNullable(request).map(ParserRunRequest::editionIds);
-        return ResponseEntity.ok(storeCrawlService.crawl(storeCode, TriggerType.MANUAL, editionIds));
+    ResponseEntity<ParserRunQueuedResponse> run(@PathVariable StoreCode storeCode,
+                                                @Valid @RequestBody(required = false) ParserRunRequest request) {
+        List<Long> editionIds = request == null || request.editionIds() == null ? List.of() : request.editionIds();
+        manualRunService.queue(storeCode, editionIds);
+        return ResponseEntity.accepted().body(new ParserRunQueuedResponse(true));
     }
 }
