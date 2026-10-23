@@ -64,7 +64,7 @@ class BeaconAlerts {
                 user.getNotifyFrequency() == NotifyFrequency.INSTANT ? "queued" : "kept for the daily digest");
     }
 
-    /** Link that pauses the beacon without signing in; also sent as the {@code List-Unsubscribe} header. */
+    /** Link that pauses the beacon without signing in; for a single beacon email also the {@code List-Unsubscribe} header. */
     String unsubscribeUrl(Beacon beacon) {
         return appProperties.baseUrl() + "/unsubscribe?token="
                 + emailTokenService.issueUnsubscribe(beacon, authProperties.unsubscribeTtl());

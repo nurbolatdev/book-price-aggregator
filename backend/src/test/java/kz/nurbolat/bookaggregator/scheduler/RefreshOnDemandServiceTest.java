@@ -40,7 +40,7 @@ class RefreshOnDemandServiceTest {
     private final ValueOperations<String, String> values = mock(ValueOperations.class);
     private final RefreshOnDemandService service = new RefreshOnDemandService(staleEditions, storeService,
             crawlService, publisher, redis,
-            new SchedulerProperties("0 0 */6 * * *", "0 30 3 * * *", Duration.ofDays(7), Duration.ofDays(90),
+            new SchedulerProperties("0 0 */6 * * *", "0 30 3 * * *", "0 0 9 * * *", Duration.ofDays(7), Duration.ofDays(90),
                     Duration.ofHours(6), Duration.ofMinutes(30)),
             Clock.fixed(NOW, ZoneOffset.UTC));
 

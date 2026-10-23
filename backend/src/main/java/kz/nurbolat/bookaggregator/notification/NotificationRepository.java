@@ -6,8 +6,21 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    /** Users with notifications waiting for the daily digest. */
+    @Query("""
+            SELECT DISTINCT n.user.id FROM Notification n
+            WHERE n.status = 'QUEUED' AND n.user.notifyFrequency = 'DAILY' AND n.user.emailVerified = true""")
+    List<Long> findUsersWaitingForDigest();
+
+    @Query("""
+            SELECT n FROM Notification n JOIN FETCH n.user LEFT JOIN FETCH n.beacon
+            WHERE n.user.id = :userId AND n.status = 'QUEUED'
+            ORDER BY n.createdAt, n.id""")
+    List<Notification> findQueuedOfUser(Long userId);
 
     @Modifying
     @Query("UPDATE Notification n SET n.status = 'SENT', n.sentAt = :sentAt, n.error = NULL WHERE n.id IN :ids")
