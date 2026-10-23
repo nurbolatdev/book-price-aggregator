@@ -25,7 +25,9 @@
 
 - Поиск книг по названию или автору с агрегацией из нескольких источников
 - Сравнение цен от разных магазинов (см. «Магазины» ниже); метаданные книг — Google Books
-- Регистрация и авторизация через JWT
+- Регистрация с подтверждением email, вход (access JWT на 15 мин + refresh-токен на 30 дней с ротацией), сброс пароля по ссылке из письма
+- Письма уходят через очередь RabbitMQ; в разработке их видно в Mailpit: **http://localhost:8025**
+- Ограничение частоты запросов (429 и `Retry-After`)
 - Добавление книг в избранное
 - Подписка на снижение цены (price alerts)
 - Автоматическое обновление цен каждые 6 часов
@@ -83,6 +85,10 @@ JWT_SECRET=your_secret_key_minimum_32_characters
 JWT_ACCESS_TTL=15m
 JWT_REFRESH_TTL=30d
 
+# Первый администратор: создаётся при старте, если такого email ещё нет
+APP_ADMIN_EMAIL=admin@example.com
+APP_ADMIN_PASSWORD=your_admin_password
+
 GOOGLE_BOOKS_API_KEY=your_api_key
 ```
 
@@ -119,8 +125,15 @@ Frontend доступен на `http://localhost:3000`, запросы к `/api`
 
 | Метод | URL | Доступ | Описание |
 |-------|-----|--------|----------|
-| POST | `/api/v1/auth/register` | Публичный | Регистрация |
-| POST | `/api/v1/auth/login` | Публичный | Вход |
+| POST | `/api/v1/auth/register` | Публичный | Регистрация, письмо со ссылкой подтверждения |
+| POST | `/api/v1/auth/login` | Публичный | Вход: access + refresh токены |
+| POST | `/api/v1/auth/refresh` | Публичный | Новая пара токенов (старый refresh отзывается) |
+| POST | `/api/v1/auth/logout` | Публичный | Отзыв refresh-токена |
+| POST | `/api/v1/auth/verify-email` | Публичный | Подтверждение email по токену из письма |
+| POST | `/api/v1/auth/resend-verification` | Публичный | Повторное письмо подтверждения |
+| POST | `/api/v1/auth/forgot-password` | Публичный | Письмо со ссылкой сброса пароля |
+| POST | `/api/v1/auth/reset-password` | Публичный | Новый пароль по токену из письма |
+| GET, PATCH | `/api/v1/me` | JWT | Профиль и настройки уведомлений |
 | GET | `/api/v1/books/search?query=` | Публичный | Поиск книг |
 | GET | `/api/v1/books/{id}` | Публичный | Детали книги |
 | GET | `/api/v1/books/{id}/offers` | Публичный | Предложения по книге |

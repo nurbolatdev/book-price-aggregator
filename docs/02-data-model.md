@@ -197,8 +197,10 @@ CREATE INDEX idx_books_author_trgm ON books USING GIN (author_norm gin_trgm_ops)
 | V7__beacons.sql | M13 | `beacons`, перенос из `price_alerts`, drop `price_alerts` |
 | V8__search_trgm.sql | M14 | `pg_trgm`, GIN-индексы, `search_log` |
 | V9__parser_runs.sql | M15 | `parser_runs`, `system_events` |
-| V10__shedlock.sql | M17 | `shedlock` |
-| V11__auth_v2.sql | M18 | поля `users`, `email_tokens`, `refresh_tokens` |
-| V12__notifications.sql | M19 | `notifications` |
+| V10__disable_kaspi.sql | M16 | Kaspi выключен (не отвечает парсеру) |
+| V11__disable_wildberries.sql | M16 | Wildberries выключен (антибот-проверка) |
+| V12__shedlock.sql | M17 | `shedlock` |
+| V13__auth_v2.sql | M18 | поля `users`, `email_tokens`, `refresh_tokens` |
+| V14__notifications.sql | M19 | `notifications` |
 
 Номера могут сдвинуться, если понадобится промежуточная миграция — главное, по порядку и без правки старых.
