@@ -108,6 +108,8 @@ class MigrationIT extends AbstractIntegrationTest {
                 FROM beacons b JOIN editions e ON e.id = b.edition_id WHERE e.book_id = ?""", bookWithoutIsbn);
         assertThat(triggeredBeacon).containsEntry("status", "TRIGGERED");
         assertThat(triggeredBeacon.get("last_triggered_at")).isNotNull();
+
+        assertThat(jdbc.queryForObject("SELECT email_verified FROM users WHERE id = ?", Boolean.class, userId)).isTrue();
     }
 
     private static Flyway flyway(DataSource dataSource, MigrationVersion target) {
