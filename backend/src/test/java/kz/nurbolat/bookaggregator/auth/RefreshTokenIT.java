@@ -62,7 +62,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldRevokeAllSessionsWhenRevokedTokenIsUsedAgain() throws Exception {
+    void shouldEndOnlyThatSessionWhenRevokedTokenIsUsedAgain() throws Exception {
         String email = registered();
         String stolen = refreshTokenOf(signIn(email));
         String otherDevice = refreshTokenOf(signIn(email));
@@ -71,9 +71,37 @@ class RefreshTokenIT extends AbstractIntegrationTest {
         refresh(stolen)
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        Long userId = userRepository.findByEmail(email).orElseThrow().getId();
+        assertThat(jdbc.queryForObject("""
+                SELECT COUNT(*) FROM system_events
+                WHERE source = 'auth' AND level = 'WARN' AND details ->> 'userId' = ?""", Integer.class, userId.toString()))
+                .isEqualTo(1);
 
+        // The whole family of the copied token is revoked, the other device keeps its session
         refresh(rotated).andExpect(status().isUnauthorized());
-        refresh(otherDevice).andExpect(status().isUnauthorized());
+        refresh(otherDevice).andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldEndLeastRecentlyUsedSessionWhenSignInGoesOverTheLimit() throws Exception {
+        String email = registered();
+        String oldest = refreshTokenOf(signIn(email));
+        String second = refreshTokenOf(signIn(email));
+        for (int i = 3; i <= jwtProperties.maxSessions(); i++) {
+            signIn(email);
+        }
+        // Refreshing makes the second session the most recently used one
+        second = JsonPath.read(refresh(second).andReturn().getResponse().getContentAsString(), "$.refreshToken");
+
+        String newest = refreshTokenOf(signIn(email));
+
+        refresh(oldest).andExpect(status().isUnauthorized());
+        refresh(second).andExpect(status().isOk());
+        refresh(newest).andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("""
+                SELECT COUNT(*) FROM refresh_tokens t JOIN users u ON u.id = t.user_id
+                WHERE u.email = ? AND t.revoked_at IS NULL""", Integer.class, email))
+                .isEqualTo(jwtProperties.maxSessions());
     }
 
     @Test

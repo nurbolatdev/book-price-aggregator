@@ -1,5 +1,6 @@
 package kz.nurbolat.bookaggregator.auth;
 
+import kz.nurbolat.bookaggregator.admin.SystemEventService;
 import kz.nurbolat.bookaggregator.common.error.AppException;
 import kz.nurbolat.bookaggregator.common.error.ErrorCode;
 import kz.nurbolat.bookaggregator.security.JwtProperties;
@@ -12,10 +13,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
- * Refresh tokens with rotation: every refresh revokes the token it used and issues the next one. A revoked
- * token coming back means it was copied, so all tokens of that user are revoked and everyone signs in again.
+ * Refresh tokens with rotation. A sign-in starts a family; every refresh revokes the token it used and issues
+ * the next one of the same family. A revoked token coming back means it was copied, so its family is revoked:
+ * the thief and the owner of that session sign in again, the user's other devices stay signed in.
+ * A user keeps at most {@code app.jwt.max-sessions} families; a new sign-in over the limit ends the one
+ * refreshed least recently.
  */
 @Slf4j
 @Service
@@ -23,29 +31,26 @@ import java.time.Instant;
 public class RefreshTokenService {
 
     private static final int USER_AGENT_MAX = 255;
+    private static final String EVENT_SOURCE = "auth";
 
     private final RefreshTokenRepository repository;
     private final JwtProperties properties;
+    private final SystemEventService systemEventService;
     private final Clock clock;
 
     /**
+     * Starts a new session (family) of the user.
+     *
      * @return the new token itself; only its hash is stored
      */
     @Transactional
     public String issue(User user, String userAgent) {
-        String token = TokenHasher.newToken();
-        RefreshToken entity = new RefreshToken();
-        entity.setUser(user);
-        entity.setTokenHash(TokenHasher.hash(token));
-        entity.setExpiresAt(clock.instant().plus(properties.refreshTtl()));
-        entity.setUserAgent(userAgent == null || userAgent.length() <= USER_AGENT_MAX
-                ? userAgent : userAgent.substring(0, USER_AGENT_MAX));
-        repository.save(entity);
-        return token;
+        endSessionsOverLimit(user);
+        return save(user, UUID.randomUUID(), userAgent);
     }
 
     /**
-     * Revokes the token and issues the next one for the same user.
+     * Revokes the token and issues the next one of its family.
      *
      * @throws AppException {@code TOKEN_EXPIRED} for an expired token, {@code UNAUTHORIZED} for an unknown or revoked one
      */
@@ -57,15 +62,22 @@ public class RefreshTokenService {
         Instant now = clock.instant();
         User user = current.getUser();
         if (current.getRevokedAt() != null) {
-            int revoked = repository.revokeAllOfUser(user.getId(), now);
-            log.warn("Revoked refresh token used again: user={}, revoked {} active tokens", user.getId(), revoked);
+            int revoked = repository.revokeFamily(current.getFamilyId(), now);
+            log.warn("Revoked refresh token used again: user={}, family={}, revoked {} active tokens",
+                    user.getId(), current.getFamilyId(), revoked);
+            Map<String, Object> details = new HashMap<>();
+            details.put("userId", user.getId());
+            details.put("familyId", current.getFamilyId().toString());
+            details.put("userAgent", userAgent);
+            systemEventService.warn(EVENT_SOURCE, "Повторное использование отозванного refresh-токена: сессия завершена",
+                    details);
             throw invalid();
         }
         if (!current.getExpiresAt().isAfter(now)) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED, "Сессия истекла, войдите снова");
         }
         current.setRevokedAt(now);
-        return new Rotated(user, issue(user, userAgent));
+        return new Rotated(user, save(user, current.getFamilyId(), userAgent));
     }
 
     /** Signs one session out; an unknown or already revoked token is ignored. */
@@ -80,6 +92,32 @@ public class RefreshTokenService {
     @Transactional
     public void revokeAll(Long userId) {
         repository.revokeAllOfUser(userId, clock.instant());
+    }
+
+    // A family has at most one active token, so active tokens are the user's sessions
+    private void endSessionsOverLimit(User user) {
+        Instant now = clock.instant();
+        List<RefreshToken> active = repository.findActiveOfUser(user.getId(), now);
+        int over = active.size() - properties.maxSessions() + 1;
+        for (int i = 0; i < over; i++) {
+            active.get(i).setRevokedAt(now);
+        }
+        if (over > 0) {
+            log.info("Session limit of user {} reached: {} least recently used sessions ended", user.getId(), over);
+        }
+    }
+
+    private String save(User user, UUID familyId, String userAgent) {
+        String token = TokenHasher.newToken();
+        RefreshToken entity = new RefreshToken();
+        entity.setUser(user);
+        entity.setFamilyId(familyId);
+        entity.setTokenHash(TokenHasher.hash(token));
+        entity.setExpiresAt(clock.instant().plus(properties.refreshTtl()));
+        entity.setUserAgent(userAgent == null || userAgent.length() <= USER_AGENT_MAX
+                ? userAgent : userAgent.substring(0, USER_AGENT_MAX));
+        repository.save(entity);
+        return token;
     }
 
     private static AppException invalid() {

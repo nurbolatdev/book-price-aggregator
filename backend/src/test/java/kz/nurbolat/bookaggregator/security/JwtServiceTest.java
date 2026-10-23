@@ -20,7 +20,7 @@ class JwtServiceTest {
 
     private static final String SECRET = "test-secret-key-that-is-long-enough-for-hs256";
     private static final Instant NOW = Instant.parse("2026-10-20T09:00:00Z");
-    private static final JwtProperties PROPERTIES = new JwtProperties(SECRET, Duration.ofMinutes(15), Duration.ofDays(30));
+    private static final JwtProperties PROPERTIES = new JwtProperties(SECRET, Duration.ofMinutes(15), Duration.ofDays(30), 10);
 
     @Test
     void shouldCarryUserIdEmailAndRoleWhenTokenIsFresh() {
@@ -43,7 +43,7 @@ class JwtServiceTest {
 
     @Test
     void shouldRejectTokenWhenSignedWithAnotherKey() {
-        JwtService other = new JwtService(new JwtProperties(SECRET + "-other", Duration.ofMinutes(15), Duration.ofDays(30)),
+        JwtService other = new JwtService(new JwtProperties(SECRET + "-other", Duration.ofMinutes(15), Duration.ofDays(30), 10),
                 Clock.fixed(NOW, ZoneOffset.UTC));
 
         assertThatThrownBy(() -> service(NOW).parse(other.generateAccessToken(admin())))

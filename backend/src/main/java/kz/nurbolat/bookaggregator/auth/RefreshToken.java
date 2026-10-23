@@ -8,10 +8,11 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
- * Long-lived token that buys a new access token. Used once: refreshing revokes it and issues the next one.
- * Only its SHA-256 hash is stored.
+ * Long-lived token that buys a new access token. Used once: refreshing revokes it and issues the next one
+ * of the same family (one family = one sign-in on one device). Only its SHA-256 hash is stored.
  */
 @Entity
 @Table(name = "refresh_tokens")
@@ -27,6 +28,9 @@ public class RefreshToken {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "family_id", nullable = false, updatable = false)
+    private UUID familyId;
 
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
     private String tokenHash;

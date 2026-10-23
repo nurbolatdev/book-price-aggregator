@@ -89,6 +89,8 @@ app:
     secret: ${JWT_SECRET:my-super-secret-key-for-dev-only-32chars}
     access-ttl: ${JWT_ACCESS_TTL:15m}
     refresh-ttl: ${JWT_REFRESH_TTL:30d}
+    # Signed-in devices per user; over the limit the least recently used session ends
+    max-sessions: ${JWT_MAX_SESSIONS:10}
   mail:
     from: ${MAIL_FROM:KitapRadar <no-reply@kitapradar.kz>}
   cors:
