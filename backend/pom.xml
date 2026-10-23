@@ -29,6 +29,7 @@
         <playwright.version>1.56.0</playwright.version>
         <shedlock.version>5.16.0</shedlock.version>
         <bucket4j.version>8.14.0</bucket4j.version>
+        <greenmail.version>2.1.3</greenmail.version>
         <!-- Browser tests need Chromium; they run only with -Pbrowser -->
         <failsafe.groups></failsafe.groups>
         <failsafe.excludedGroups>browser</failsafe.excludedGroups>
@@ -222,6 +223,13 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- SMTP server inside the tests: emails are received and read, nothing leaves the machine -->
+        <dependency>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail-junit5</artifactId>
+            <version>${greenmail.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Stub HTTP server for fetcher tests (no real store requests) -->
