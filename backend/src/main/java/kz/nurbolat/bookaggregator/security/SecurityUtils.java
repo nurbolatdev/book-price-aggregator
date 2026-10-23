@@ -1,9 +1,10 @@
 package kz.nurbolat.bookaggregator.security;
 
+import kz.nurbolat.bookaggregator.common.error.AppException;
+import kz.nurbolat.bookaggregator.common.error.ErrorCode;
 import kz.nurbolat.bookaggregator.user.User;
 import kz.nurbolat.bookaggregator.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -17,20 +18,29 @@ public class SecurityUtils {
     private final UserRepository userRepository;
 
     /**
-     * Email of the authenticated user without touching the database; empty for anonymous requests.
+     * The signed-in user from the access token, without touching the database; empty for anonymous requests.
      */
-    public Optional<String> currentUserEmail() {
+    public Optional<AuthenticatedUser> currentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            return Optional.empty();
+        if (authentication != null && authentication.getPrincipal() instanceof AuthenticatedUser user) {
+            return Optional.of(user);
         }
-        return Optional.of(authentication.getName());
+        return Optional.empty();
     }
 
+    /**
+     * Email of the signed-in user without touching the database; empty for anonymous requests.
+     */
+    public Optional<String> currentUserEmail() {
+        return currentUser().map(AuthenticatedUser::email);
+    }
+
+    /**
+     * @throws AppException {@code UNAUTHORIZED} if nobody is signed in or the account was deleted meanwhile
+     */
     public User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database"));
+        return currentUser()
+                .flatMap(user -> userRepository.findById(user.id()))
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
     }
 }

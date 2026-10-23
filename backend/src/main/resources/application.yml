@@ -78,17 +78,16 @@ management:
     health:
       show-details: always
 
-security:
-  jwt:
-    secret: ${JWT_SECRET:my-super-secret-key-for-dev-only-32chars}
-    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
-
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:3000}
+  jwt:
+    secret: ${JWT_SECRET:my-super-secret-key-for-dev-only-32chars}
+    access-ttl: ${JWT_ACCESS_TTL:15m}
+    refresh-ttl: ${JWT_REFRESH_TTL:30d}
   google-books:
     api-key: ${GOOGLE_BOOKS_API_KEY:}
     timeout: 5s

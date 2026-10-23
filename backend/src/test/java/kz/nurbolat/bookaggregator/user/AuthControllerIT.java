@@ -29,8 +29,8 @@ class AuthControllerIT extends AbstractIntegrationTest {
 
         register(email, PASSWORD)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token", notNullValue()))
-                .andExpect(jsonPath("$.email").value(email));
+                .andExpect(jsonPath("$.accessToken", notNullValue()))
+                .andExpect(jsonPath("$.user.email").value(email));
     }
 
     @Test
@@ -40,7 +40,7 @@ class AuthControllerIT extends AbstractIntegrationTest {
 
         login(email, PASSWORD)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token", notNullValue()));
+                .andExpect(jsonPath("$.accessToken", notNullValue()));
     }
 
     @Test

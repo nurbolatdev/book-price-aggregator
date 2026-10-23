@@ -1,56 +1,71 @@
 package kz.nurbolat.bookaggregator.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
+import kz.nurbolat.bookaggregator.user.User;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
 
+/**
+ * Access tokens: signed JWT with the user id ({@code sub}), {@code email} and {@code role}.
+ */
 @Service
 public class JwtService {
 
-    @Value("${security.jwt.secret}")
-    private String secret;
+    private static final String EMAIL_CLAIM = "email";
+    private static final String ROLE_CLAIM = "role";
 
-    @Value("${security.jwt.expiration-ms}")
-    private long expirationMs;
+    private final JwtProperties properties;
+    private final Clock clock;
+    private final SecretKey key;
 
-    public String generateToken(UserDetails userDetails) {
+    public JwtService(JwtProperties properties, Clock clock) {
+        this.properties = properties;
+        this.clock = clock;
+        this.key = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String generateAccessToken(User user) {
+        Instant now = clock.instant();
         return Jwts.builder()
-                .subject(userDetails.getUsername())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getKey())
+                .subject(user.getId().toString())
+                .claim(EMAIL_CLAIM, user.getEmail())
+                .claim(ROLE_CLAIM, user.getRole().name())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(properties.accessTtl())))
+                .signWith(key)
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return extractClaims(token).getSubject();
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-    }
-
-    private boolean isTokenExpired(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
-    }
-
-    private Claims extractClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getKey())
+    /**
+     * @throws ExpiredJwtException the token was valid but has expired
+     * @throws JwtException        the token is malformed or its signature is wrong
+     */
+    public AuthenticatedUser parse(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .clock(() -> Date.from(clock.instant()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+        try {
+            return new AuthenticatedUser(Long.valueOf(claims.getSubject()), claims.get(EMAIL_CLAIM, String.class),
+                    User.Role.valueOf(claims.get(ROLE_CLAIM, String.class)));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Signed by us but without the claims of this version (tokens issued before M18)
+            throw new JwtException("Token without user claims", e);
+        }
     }
 
-    private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    public long accessTtlSeconds() {
+        return properties.accessTtl().toSeconds();
     }
 }

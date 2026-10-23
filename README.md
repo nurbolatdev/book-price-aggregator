@@ -80,7 +80,8 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 
 JWT_SECRET=your_secret_key_minimum_32_characters
-JWT_EXPIRATION_MS=3600000
+JWT_ACCESS_TTL=15m
+JWT_REFRESH_TTL=30d
 
 GOOGLE_BOOKS_API_KEY=your_api_key
 ```

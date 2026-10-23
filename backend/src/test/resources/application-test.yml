@@ -10,13 +10,10 @@ spring:
           initial-interval: 200ms
           max-interval: 1s
 
-security:
-  jwt:
-    secret: test-secret-key-that-is-long-enough-for-hs256
-    expiration-ms: 3600000
-
 app:
   base-url: http://localhost:3000
+  jwt:
+    secret: test-secret-key-that-is-long-enough-for-hs256
   scheduling:
     # Scheduled jobs are triggered explicitly in tests
     enabled: false

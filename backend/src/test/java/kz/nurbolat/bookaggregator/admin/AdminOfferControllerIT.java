@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.web.servlet.MockMvc;
@@ -50,8 +49,6 @@ class AdminOfferControllerIT extends AbstractIntegrationTest {
     @Autowired
     private JwtService jwtService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Autowired
     private ApplicationEvents events;
@@ -164,6 +161,6 @@ class AdminOfferControllerIT extends AbstractIntegrationTest {
         User user = user();
         user.setRole(role);
         userRepository.save(user);
-        return "Bearer " + jwtService.generateToken(userDetailsService.loadUserByUsername(user.getEmail()));
+        return "Bearer " + jwtService.generateAccessToken(user);
     }
 }
