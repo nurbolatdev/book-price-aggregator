@@ -3,6 +3,7 @@ package kz.nurbolat.bookaggregator.config;
 import kz.nurbolat.bookaggregator.security.JsonAccessDeniedHandler;
 import kz.nurbolat.bookaggregator.security.JsonAuthenticationEntryPoint;
 import kz.nurbolat.bookaggregator.security.JwtAuthFilter;
+import kz.nurbolat.bookaggregator.security.ratelimit.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final UserDetailsService userDetailsService;
     private final JsonAuthenticationEntryPoint authenticationEntryPoint;
     private final JsonAccessDeniedHandler accessDeniedHandler;
@@ -56,6 +58,8 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // After the JWT filter: limits of signed-in users are counted per user
+                .addFilterAfter(rateLimitFilter, JwtAuthFilter.class)
                 .build();
     }
 

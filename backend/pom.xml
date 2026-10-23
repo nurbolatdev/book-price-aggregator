@@ -28,6 +28,7 @@
         <wiremock.version>3.13.2</wiremock.version>
         <playwright.version>1.56.0</playwright.version>
         <shedlock.version>5.16.0</shedlock.version>
+        <bucket4j.version>8.14.0</bucket4j.version>
         <!-- Browser tests need Chromium; they run only with -Pbrowser -->
         <failsafe.groups></failsafe.groups>
         <failsafe.excludedGroups>browser</failsafe.excludedGroups>
@@ -152,6 +153,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Request rate limits, buckets kept in Redis so that every instance shares them -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-lettuce</artifactId>
+            <version>${bucket4j.version}</version>
         </dependency>
 
         <!-- JWT -->

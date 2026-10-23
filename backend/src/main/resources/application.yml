@@ -91,6 +91,13 @@ app:
     refresh-ttl: ${JWT_REFRESH_TTL:30d}
   mail:
     from: ${MAIL_FROM:KitapRadar <no-reply@kitapradar.kz>}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    login: { requests: 5, period: 1m }
+    register: { requests: 3, period: 1m }
+    forgot-password: { requests: 3, period: 1m }
+    search: { requests: 60, period: 1m }
+    api: { requests: 120, period: 1m }
   admin:
     email: ${APP_ADMIN_EMAIL:}
     password: ${APP_ADMIN_PASSWORD:}
