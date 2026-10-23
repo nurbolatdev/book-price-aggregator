@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
+import kz.nurbolat.bookaggregator.scheduler.RefreshOnDemandService;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem;
 import kz.nurbolat.bookaggregator.search.dto.SearchRequest;
 import kz.nurbolat.bookaggregator.search.dto.Suggestion;
@@ -24,10 +25,16 @@ public class SearchController {
 
     private final SearchService searchService;
     private final SuggestionService suggestionService;
+    private final RefreshOnDemandService refreshOnDemandService;
 
+    /** The first page also refreshes stale prices of its editions in the background. */
     @GetMapping
     ResponseEntity<PageResponse<SearchItem>> search(@Valid @ParameterObject SearchRequest request) {
-        return ResponseEntity.ok(searchService.search(request));
+        PageResponse<SearchItem> page = searchService.search(request);
+        if (request.page() == 0) {
+            refreshOnDemandService.requestIfStale(page.content().stream().map(SearchItem::editionId).toList());
+        }
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/suggest")
