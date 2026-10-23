@@ -87,6 +87,7 @@ services:
       MAIL_PORT: ${MAIL_PORT:-1025}
       MAIL_FROM: ${MAIL_FROM:-KitapRadar <no-reply@kitapradar.kz>}
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
       JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-30d}

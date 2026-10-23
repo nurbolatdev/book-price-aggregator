@@ -91,6 +91,9 @@ app:
     refresh-ttl: ${JWT_REFRESH_TTL:30d}
   mail:
     from: ${MAIL_FROM:KitapRadar <no-reply@kitapradar.kz>}
+  cors:
+    # Comma-separated; Vite dev server by default
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173}
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     login: { requests: 5, period: 1m }
