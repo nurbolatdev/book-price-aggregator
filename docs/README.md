@@ -34,8 +34,8 @@
 | [M15](backend/M15-parser-framework.md) | Каркас парсеров + первый магазин (Flip.kz) | `feature/m15-parser-framework` | ✅ |
 | [M16](backend/M16-store-parsers.md) | Остальные магазины + сопоставление изданий | `feature/m16-store-parsers` | ✅ |
 | [M17](backend/M17-rabbitmq.md) | RabbitMQ: очереди парсинга и событий цен | `feature/m17-rabbitmq` | ✅ |
-| [M18](backend/M18-auth-v2.md) | Auth v2: подтверждение email, refresh, сброс пароля, лимиты | `feature/m18-auth-v2` | 🟡 в работе |
-| [M19](backend/M19-beacons-notifications.md) | Маячки и email-уведомления | `feature/m19-beacons-notifications` | ⬜ |
+| [M18](backend/M18-auth-v2.md) | Auth v2: подтверждение email, refresh, сброс пароля, лимиты | `feature/m18-auth-v2` | ✅ |
+| [M19](backend/M19-beacons-notifications.md) | Маячки и email-уведомления | `feature/m19-beacons-notifications` | 🟡 в работе |
 | [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ⬜ |
 | [M21](backend/M21-quality-release.md) | Качество, CI, README, релиз backend | `feature/m21-quality-release` | ⬜ |
 
