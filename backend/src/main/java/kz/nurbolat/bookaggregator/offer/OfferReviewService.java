@@ -52,7 +52,7 @@ public class OfferReviewService {
         offer.setEdition(edition);
         offer.setMatchStatus(MatchStatus.MATCHED);
         events.publishEvent(new PriceChangedEvent(offer.getId(), edition.getId(), offer.getStore().getCode(),
-                null, offer.getPrice(), clock.instant()));
+                null, offer.getPrice(), offer.isInStock(), clock.instant()));
         log.info("Offer {} of {} matched to edition {} manually", offerId, offer.getStore().getCode(), editionId);
         return ReviewOfferResponse.from(offer);
     }
