@@ -61,6 +61,11 @@ spring:
   mail:
     host: localhost
     port: 1025
+    properties:
+      # JavaMail waits forever by default; a hung mail server must not hold the email listener
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
 
 server:
   port: 8080

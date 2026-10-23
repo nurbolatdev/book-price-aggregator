@@ -7,8 +7,10 @@ import kz.nurbolat.bookaggregator.common.text.Emails;
 import kz.nurbolat.bookaggregator.config.AppProperties;
 import kz.nurbolat.bookaggregator.edition.Edition;
 import kz.nurbolat.bookaggregator.notification.EmailPublisher;
+import kz.nurbolat.bookaggregator.notification.EmailSender;
 import kz.nurbolat.bookaggregator.notification.EmailType;
 import kz.nurbolat.bookaggregator.notification.Notification;
+import kz.nurbolat.bookaggregator.notification.NotificationDelivery;
 import kz.nurbolat.bookaggregator.notification.NotificationService;
 import kz.nurbolat.bookaggregator.notification.PriceDropEmail;
 import kz.nurbolat.bookaggregator.offer.Offer;
@@ -48,20 +50,35 @@ class BeaconAlerts {
     void fired(Beacon beacon, BigDecimal was, List<Offer> offers) {
         User user = beacon.getUser();
         Map<String, Object> payload = payload(beacon, was, offers);
+        NotificationDelivery delivery = user.getNotifyFrequency() == NotifyFrequency.DAILY
+                ? NotificationDelivery.DIGEST : NotificationDelivery.INSTANT;
         if (!user.isEmailVerified()) {
-            notificationService.fail(user, beacon, payload, EMAIL_NOT_VERIFIED);
+            notificationService.fail(user, beacon, payload, delivery, EMAIL_NOT_VERIFIED);
             log.info("Beacon {} fired, email not sent: {} is not confirmed", beacon.getId(), Emails.mask(user.getEmail()));
             return;
         }
-        Notification notification = notificationService.queue(user, beacon, payload);
-        if (user.getNotifyFrequency() == NotifyFrequency.INSTANT) {
-            Map<String, Object> model = PriceDropEmail.model(payload, appProperties.baseUrl());
-            model.put("unsubscribeUrl", unsubscribeUrl(beacon));
-            emailPublisher.publish(EmailType.PRICE_DROP, user.getEmail(), PriceDropEmail.subject(payload), model,
+        Notification notification = notificationService.queue(user, beacon, payload, delivery);
+        if (delivery == NotificationDelivery.INSTANT) {
+            Email email = instantEmail(notification);
+            emailPublisher.publish(EmailType.PRICE_DROP, user.getEmail(), email.subject(), email.model(),
                     List.of(notification.getId()));
         }
         log.info("Beacon {} fired at {}, email {}", beacon.getId(), offers.get(0).getPrice(),
-                user.getNotifyFrequency() == NotifyFrequency.INSTANT ? "queued" : "kept for the daily digest");
+                delivery == NotificationDelivery.INSTANT ? "queued" : "kept for the daily digest");
+    }
+
+    /**
+     * Subject and model of the price-drop email of a notification, built from its payload; the relay rebuilds
+     * the email the same way. A new unsubscribe link is issued each time.
+     */
+    Email instantEmail(Notification notification) {
+        Map<String, Object> payload = notification.getPayload();
+        Map<String, Object> model = PriceDropEmail.model(payload, appProperties.baseUrl());
+        model.put(EmailSender.UNSUBSCRIBE_URL, unsubscribeUrl(notification.getBeacon()));
+        return new Email(PriceDropEmail.subject(payload), model);
+    }
+
+    record Email(String subject, Map<String, Object> model) {
     }
 
     /** Link that pauses the beacon without signing in; for a single beacon email also the {@code List-Unsubscribe} header. */

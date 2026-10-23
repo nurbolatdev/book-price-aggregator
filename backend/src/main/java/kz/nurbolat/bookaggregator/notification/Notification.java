@@ -42,6 +42,14 @@ public class Notification {
     @Column(nullable = false, length = 20)
     private NotificationStatus status = NotificationStatus.QUEUED;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private NotificationDelivery delivery = NotificationDelivery.INSTANT;
+
+    /** When RabbitMQ confirmed the email message; {@code null} — never reached the broker. */
+    @Column(name = "published_at")
+    private Instant publishedAt;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false)
     private Map<String, Object> payload;

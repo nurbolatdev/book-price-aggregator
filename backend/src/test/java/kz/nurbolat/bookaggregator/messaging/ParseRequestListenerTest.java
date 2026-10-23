@@ -45,8 +45,8 @@ class ParseRequestListenerTest {
         flip.setEnabled(true);
         when(storeService.getByCode(StoreCode.FLIP)).thenReturn(flip);
         when(crawlService.hasParser(StoreCode.FLIP)).thenReturn(true);
-        doReturn(true).when(processed).claim(any(), any());
-        doNothing().when(processed).release(any(), any());
+        doReturn(false).when(processed).isProcessed(any(), any());
+        doNothing().when(processed).markProcessed(any(), any());
         when(crawlService.crawl(any(), any(), any())).thenReturn(
                 new CrawlResult(1L, StoreCode.FLIP, RunStatus.SUCCESS, 1, 0, IngestResult.EMPTY, null));
     }
@@ -67,7 +67,7 @@ class ParseRequestListenerTest {
 
     @Test
     void shouldSkipMessageProcessedBefore() {
-        doReturn(false).when(processed).claim(any(), any());
+        doReturn(true).when(processed).isProcessed(any(), any());
 
         listener.handle(message(List.of()));
 
@@ -87,12 +87,12 @@ class ParseRequestListenerTest {
     }
 
     @Test
-    void shouldReleaseMessageAndRethrowWhenCrawlFails() {
+    void shouldNotRecordMessageAndRethrowWhenCrawlFails() {
         when(crawlService.crawl(any(), any(), any())).thenThrow(new IllegalStateException("database is down"));
         ParseRequestMessage message = message(List.of());
 
         assertThatThrownBy(() -> listener.handle(message)).isInstanceOf(IllegalStateException.class);
-        verify(processed).release(ProcessedMessages.PARSE, message.messageId());
+        verify(processed, never()).markProcessed(ProcessedMessages.PARSE, message.messageId());
     }
 
     private static ParseRequestMessage message(List<Long> editionIds) {

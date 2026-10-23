@@ -15,6 +15,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.List;
+
 import static kz.nurbolat.bookaggregator.support.PriceFixtures.addOffer;
 import static kz.nurbolat.bookaggregator.support.PriceFixtures.daysAgo;
 import static kz.nurbolat.bookaggregator.support.PriceFixtures.editionWithHistory;
@@ -78,6 +80,27 @@ class BeaconServiceIT extends AbstractIntegrationTest {
         create(token, body)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("CONFLICT"));
+    }
+
+    @Test
+    void shouldCreateOneBeaconWhenSameEditionIsWatchedTwiceAtOnce() throws Exception {
+        String body = "{\"editionId\": %d, \"conditionType\": \"ANY_DROP\"}".formatted(edition);
+        java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            java.util.concurrent.Callable<Integer> request = () -> {
+                start.await();
+                return create(token, body).andReturn().getResponse().getStatus();
+            };
+            var first = pool.submit(request);
+            var second = pool.submit(request);
+            start.countDown();
+            assertThat(List.of(first.get(), second.get())).containsExactlyInAnyOrder(201, 409);
+        } finally {
+            pool.shutdownNow();
+        }
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM beacons WHERE edition_id = ?", Integer.class, edition))
+                .isEqualTo(1);
     }
 
     @Test

@@ -12,7 +12,10 @@ import java.util.List;
 
 /**
  * Consumer of {@code kr.notify.email}. An SMTP failure is retried and finally dead-lettered (rules of M17);
- * a redelivered message that was already sent is skipped. The notifications the email delivers are marked
+ * a redelivered message that was already sent is skipped, and so is a beacon email whose notifications are
+ * already {@code SENT} (a copy published again). Order: check the database → send → mark {@code SENT} → record
+ * the message in Redis → acknowledge. If the mail server took the email but the application stopped before
+ * {@code SENT} was saved, the email is sent again: a duplicate is possible, a loss is not. The notifications the email delivers are marked
  * {@code SENT}, or {@code FAILED} with the error after each failed attempt (a later successful retry marks them sent).
  */
 @Slf4j
@@ -38,6 +41,11 @@ class EmailListener {
 
     private void send(EmailMessage message) {
         List<Long> notifications = message.notificationIds() == null ? List.of() : message.notificationIds();
+        // The database decides: a republished copy of an email already handed to the mail server is not sent again
+        if (notificationService.allSent(notifications)) {
+            log.info("Email message {} skipped: notifications {} already sent", message.messageId(), notifications);
+            return;
+        }
         try {
             emailSender.send(message);
         } catch (RuntimeException e) {

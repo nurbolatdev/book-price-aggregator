@@ -21,10 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Daily digest for users who chose {@code DAILY}: everything queued for them goes out as one email; a beacon that
- * fired several times appears once, with its latest price. Notifications of beacons deleted or paused meanwhile
- * are not sent. Each user is handled in their own transaction; the email leaves after its commit, and the
- * listener marks the notifications sent.
+ * Daily digest: the digest notifications of a user that were not yet handed to the broker go out as one email;
+ * a beacon that fired several times appears once, with its latest price. Notifications of beacons deleted or
+ * paused meanwhile are not sent. Which notifications are digest ones was fixed when they were created, so a
+ * later change of the user's setting does not drop or duplicate them. Each user is handled in their own
+ * transaction; the email leaves after its commit and marks the notifications published once the broker confirms
+ * it, so a digest already in the queue or in the dead-letter queue is not put together again. A digest that did not
+ * reach the broker is retried by the next run; a missed run is caught up the same way.
  */
 @Slf4j
 @Service
@@ -66,7 +69,7 @@ public class DigestService {
     }
 
     private boolean sendTo(Long userId) {
-        List<Notification> queued = notifications.findQueuedOfUser(userId);
+        List<Notification> queued = notifications.findDigestOfUser(userId);
         if (queued.isEmpty()) {
             return false;
         }

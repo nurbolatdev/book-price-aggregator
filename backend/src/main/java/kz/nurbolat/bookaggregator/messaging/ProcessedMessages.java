@@ -10,10 +10,12 @@ import java.time.Duration;
 import java.util.UUID;
 
 /**
- * Makes listeners idempotent: a message id is claimed in Redis ({@code processed:v1:{consumer}:{messageId}}, 24 h)
- * before processing, so a redelivered copy is skipped. The claim is per consumer: one message routed to several
- * queues (e.g. {@code price.changed} to the beacon check and to the cache) is processed by each of them. A failed attempt gives the claim back, so that
- * retries and the dead-letter queue still see the message.
+ * Makes listeners idempotent: after a message was processed, its id is recorded in Redis
+ * ({@code processed:v1:{consumer}:{messageId}}, 24 h), so a redelivered copy is skipped. The record is made only
+ * after the work succeeded: a crash in the middle leaves no record, and the redelivered message is processed again
+ * (at least once). The work itself must therefore tolerate a repeat — the database is the source of truth.
+ * Records are per consumer: one message routed to several queues (e.g. {@code price.changed} to the beacon check
+ * and to the cache) is processed by each of them.
  */
 @Slf4j
 @Component
@@ -31,43 +33,35 @@ public class ProcessedMessages {
     private final StringRedisTemplate redis;
 
     /**
-     * Runs the work unless the message was processed before; a failure gives the message back and is rethrown.
+     * Runs the work unless the message was processed before; a failure is rethrown and leaves no record.
      *
      * @param consumer name of the listener, e.g. {@link #BEACONS}
      * @return {@code false} if the message was skipped as a duplicate
      */
     public boolean runOnce(String consumer, UUID messageId, Runnable work) {
-        if (!claim(consumer, messageId)) {
+        if (isProcessed(consumer, messageId)) {
             return false;
         }
-        try {
-            work.run();
-            return true;
-        } catch (RuntimeException e) {
-            release(consumer, messageId);
-            throw e;
-        }
+        work.run();
+        markProcessed(consumer, messageId);
+        return true;
     }
 
-    /**
-     * @return {@code false} if the message was already processed or is being processed
-     */
-    public boolean claim(String consumer, UUID messageId) {
+    public boolean isProcessed(String consumer, UUID messageId) {
         try {
-            return Boolean.TRUE.equals(redis.opsForValue().setIfAbsent(key(consumer, messageId), "1", KEEP));
+            return Boolean.TRUE.equals(redis.hasKey(key(consumer, messageId)));
         } catch (DataAccessException e) {
-            // Without Redis a duplicate may run twice; losing the message would be worse
+            // Without Redis a duplicate may run again; losing the message would be worse
             log.warn("No duplicate check for message {}: {}", messageId, e.getMessage());
-            return true;
+            return false;
         }
     }
 
-    /** Called when processing failed, so that the next attempt runs. */
-    public void release(String consumer, UUID messageId) {
+    public void markProcessed(String consumer, UUID messageId) {
         try {
-            redis.delete(key(consumer, messageId));
+            redis.opsForValue().set(key(consumer, messageId), "1", KEEP);
         } catch (DataAccessException e) {
-            log.warn("Could not release message {}: {}", messageId, e.getMessage());
+            log.warn("Could not record message {} as processed: {}", messageId, e.getMessage());
         }
     }
 
