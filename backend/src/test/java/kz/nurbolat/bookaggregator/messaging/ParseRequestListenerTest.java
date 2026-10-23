@@ -45,8 +45,8 @@ class ParseRequestListenerTest {
         flip.setEnabled(true);
         when(storeService.getByCode(StoreCode.FLIP)).thenReturn(flip);
         when(crawlService.hasParser(StoreCode.FLIP)).thenReturn(true);
-        doReturn(true).when(processed).claim(any());
-        doNothing().when(processed).release(any());
+        doReturn(true).when(processed).claim(any(), any());
+        doNothing().when(processed).release(any(), any());
         when(crawlService.crawl(any(), any(), any())).thenReturn(
                 new CrawlResult(1L, StoreCode.FLIP, RunStatus.SUCCESS, 1, 0, IngestResult.EMPTY, null));
     }
@@ -67,7 +67,7 @@ class ParseRequestListenerTest {
 
     @Test
     void shouldSkipMessageProcessedBefore() {
-        doReturn(false).when(processed).claim(any());
+        doReturn(false).when(processed).claim(any(), any());
 
         listener.handle(message(List.of()));
 
@@ -92,7 +92,7 @@ class ParseRequestListenerTest {
         ParseRequestMessage message = message(List.of());
 
         assertThatThrownBy(() -> listener.handle(message)).isInstanceOf(IllegalStateException.class);
-        verify(processed).release(message.messageId());
+        verify(processed).release(ProcessedMessages.PARSE, message.messageId());
     }
 
     private static ParseRequestMessage message(List<Long> editionIds) {

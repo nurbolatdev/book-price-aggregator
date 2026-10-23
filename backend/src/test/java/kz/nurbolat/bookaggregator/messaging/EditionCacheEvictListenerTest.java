@@ -24,7 +24,7 @@ class EditionCacheEvictListenerTest {
 
     @Test
     void shouldEvictCardOfEditionWhosePriceChanged() {
-        doReturn(true).when(processed).claim(any());
+        doReturn(true).when(processed).claim(any(), any());
 
         listener.onPriceChanged(message());
 
@@ -33,7 +33,7 @@ class EditionCacheEvictListenerTest {
 
     @Test
     void shouldSkipDuplicateMessage() {
-        doReturn(false).when(processed).claim(any());
+        doReturn(false).when(processed).claim(any(), any());
 
         listener.onPriceChanged(message());
 

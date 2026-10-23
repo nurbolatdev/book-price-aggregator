@@ -28,7 +28,7 @@ class EmailListener {
     void onEmail(EmailMessage message) {
         MDC.put("traceId", message.messageId().toString());
         try {
-            if (!processedMessages.runOnce(message.messageId(), () -> send(message))) {
+            if (!processedMessages.runOnce(ProcessedMessages.EMAIL, message.messageId(), () -> send(message))) {
                 log.info("Email message {} already sent, skipped", message.messageId());
             }
         } finally {

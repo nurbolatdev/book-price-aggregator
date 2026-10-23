@@ -58,7 +58,7 @@ public class BeaconChecker {
     void onPriceChanged(PriceChangedMessage message) {
         MDC.put("traceId", message.messageId().toString());
         try {
-            if (!processedMessages.runOnce(message.messageId(), () -> check(message.editionId()))) {
+            if (!processedMessages.runOnce(ProcessedMessages.BEACONS, message.messageId(), () -> check(message.editionId()))) {
                 log.info("Price change {} already checked, skipped", message.messageId());
             }
         } finally {

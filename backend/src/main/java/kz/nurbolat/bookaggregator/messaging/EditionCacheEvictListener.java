@@ -21,7 +21,7 @@ class EditionCacheEvictListener {
 
     @RabbitListener(id = "price-changed-cache", queues = RabbitTopology.PRICE_CHANGED_CACHE_QUEUE, concurrency = "1")
     void onPriceChanged(PriceChangedMessage message) {
-        processedMessages.runOnce(message.messageId(), () -> {
+        processedMessages.runOnce(ProcessedMessages.EDITION_CACHE, message.messageId(), () -> {
             editionCacheService.evict(message.editionId());
             log.debug("Edition {} card evicted after price change of offer {}", message.editionId(), message.offerId());
         });

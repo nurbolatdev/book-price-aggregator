@@ -44,7 +44,7 @@ class IdempotencyIT extends AbstractListenerIT {
         waitUntilQueueIsEmpty();
 
         verify(crawlService, times(1)).crawl(any(), any(), any());
-        assertThat(redis.hasKey("processed:v1:" + message.messageId())).isTrue();
+        assertThat(redis.hasKey("processed:v1:parse:" + message.messageId())).isTrue();
     }
 
     private void waitUntilQueueIsEmpty() throws InterruptedException {
