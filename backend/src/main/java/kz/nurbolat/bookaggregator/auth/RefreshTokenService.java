@@ -6,6 +6,7 @@ import kz.nurbolat.bookaggregator.common.error.ErrorCode;
 import kz.nurbolat.bookaggregator.security.JwtProperties;
 import kz.nurbolat.bookaggregator.security.TokenHasher;
 import kz.nurbolat.bookaggregator.user.User;
+import kz.nurbolat.bookaggregator.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class RefreshTokenService {
     private static final String EVENT_SOURCE = "auth";
 
     private final RefreshTokenRepository repository;
+    private final UserRepository userRepository;
     private final JwtProperties properties;
     private final SystemEventService systemEventService;
     private final Clock clock;
@@ -68,7 +70,7 @@ public class RefreshTokenService {
             Map<String, Object> details = new HashMap<>();
             details.put("userId", user.getId());
             details.put("familyId", current.getFamilyId().toString());
-            details.put("userAgent", userAgent);
+            details.put("userAgent", truncate(userAgent));
             systemEventService.warn(EVENT_SOURCE, "Повторное использование отозванного refresh-токена: сессия завершена",
                     details);
             throw invalid();
@@ -94,8 +96,10 @@ public class RefreshTokenService {
         repository.revokeAllOfUser(userId, clock.instant());
     }
 
-    // A family has at most one active token, so active tokens are the user's sessions
+    // A family has at most one active token, so active tokens are the user's sessions. The user's row is locked
+    // first: two sign-ins at once would otherwise both see room for one more session and go over the limit
     private void endSessionsOverLimit(User user) {
+        userRepository.lockById(user.getId());
         Instant now = clock.instant();
         List<RefreshToken> active = repository.findActiveOfUser(user.getId(), now);
         int over = active.size() - properties.maxSessions() + 1;
@@ -114,10 +118,13 @@ public class RefreshTokenService {
         entity.setFamilyId(familyId);
         entity.setTokenHash(TokenHasher.hash(token));
         entity.setExpiresAt(clock.instant().plus(properties.refreshTtl()));
-        entity.setUserAgent(userAgent == null || userAgent.length() <= USER_AGENT_MAX
-                ? userAgent : userAgent.substring(0, USER_AGENT_MAX));
+        entity.setUserAgent(truncate(userAgent));
         repository.save(entity);
         return token;
+    }
+
+    private static String truncate(String userAgent) {
+        return userAgent == null || userAgent.length() <= USER_AGENT_MAX ? userAgent : userAgent.substring(0, USER_AGENT_MAX);
     }
 
     private static AppException invalid() {

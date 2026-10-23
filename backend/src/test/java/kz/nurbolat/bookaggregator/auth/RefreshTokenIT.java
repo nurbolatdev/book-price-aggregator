@@ -19,7 +19,14 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,6 +49,9 @@ class RefreshTokenIT extends AbstractIntegrationTest {
 
     @Autowired
     private JwtProperties jwtProperties;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     @Test
     void shouldIssueNewPairAndRevokeOldTokenWhenRefreshing() throws Exception {
@@ -68,14 +78,20 @@ class RefreshTokenIT extends AbstractIntegrationTest {
         String otherDevice = refreshTokenOf(signIn(email));
         String rotated = JsonPath.read(refresh(stolen).andReturn().getResponse().getContentAsString(), "$.refreshToken");
 
-        refresh(stolen)
+        mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.USER_AGENT, "X".repeat(1000))
+                        .content("{\"refreshToken\": \"" + stolen + "\"}"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
         Long userId = userRepository.findByEmail(email).orElseThrow().getId();
-        assertThat(jdbc.queryForObject("""
-                SELECT COUNT(*) FROM system_events
-                WHERE source = 'auth' AND level = 'WARN' AND details ->> 'userId' = ?""", Integer.class, userId.toString()))
-                .isEqualTo(1);
+        Map<String, Object> event = jdbc.queryForMap("""
+                SELECT details ->> 'familyId' AS family, details ->> 'userAgent' AS agent, details::text AS raw
+                FROM system_events WHERE source = 'auth' AND level = 'WARN' AND details ->> 'userId' = ?""",
+                userId.toString());
+        assertThat(event.get("family")).isNotNull();
+        assertThat((String) event.get("agent")).hasSize(255);
+        // No token or hash in the journal
+        assertThat((String) event.get("raw")).doesNotContain(stolen, TokenHasher.hash(stolen));
 
         // The whole family of the copied token is revoked, the other device keeps its session
         refresh(rotated).andExpect(status().isUnauthorized());
@@ -102,6 +118,41 @@ class RefreshTokenIT extends AbstractIntegrationTest {
                 SELECT COUNT(*) FROM refresh_tokens t JOIN users u ON u.id = t.user_id
                 WHERE u.email = ? AND t.revoked_at IS NULL""", Integer.class, email))
                 .isEqualTo(jwtProperties.maxSessions());
+    }
+
+    @Test
+    void shouldKeepSessionLimitWhenTwoSignInsComeAtOnce() throws Exception {
+        for (int round = 0; round < 5; round++) {
+            User user = userRepository.findByEmail(registered()).orElseThrow();
+            for (int i = 1; i < jwtProperties.maxSessions(); i++) {
+                refreshTokenService.issue(user, "device-" + i);
+            }
+            CountDownLatch start = new CountDownLatch(1);
+            ExecutorService pool = Executors.newFixedThreadPool(2);
+            try {
+                List<Future<String>> signIns = List.of(
+                        pool.submit(() -> {
+                            start.await();
+                            return refreshTokenService.issue(user, "phone");
+                        }),
+                        pool.submit(() -> {
+                            start.await();
+                            return refreshTokenService.issue(user, "laptop");
+                        }));
+                start.countDown();
+                for (Future<String> signIn : signIns) {
+                    signIn.get(10, TimeUnit.SECONDS);
+                }
+            } finally {
+                pool.shutdownNow();
+            }
+
+            assertThat(jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM refresh_tokens WHERE user_id = ? AND revoked_at IS NULL", Integer.class,
+                    user.getId()))
+                    .as("active sessions in round " + round)
+                    .isEqualTo(jwtProperties.maxSessions());
+        }
     }
 
     @Test

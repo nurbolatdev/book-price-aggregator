@@ -12,8 +12,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static kz.nurbolat.bookaggregator.support.TestData.user;
@@ -41,6 +44,7 @@ class TokenCleanupServiceIT extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private AuthProperties properties;
     private TokenCleanupService service;
     private User user;
 
@@ -50,7 +54,7 @@ class TokenCleanupServiceIT extends AbstractIntegrationTest {
         jdbc.update("DELETE FROM refresh_tokens");
         jdbc.update("DELETE FROM email_tokens");
         // Batches of two: the cleanup has to loop to delete everything
-        AuthProperties properties = new AuthProperties(Duration.ofHours(24), Duration.ofHours(1), Duration.ofMinutes(1),
+        properties = new AuthProperties(Duration.ofHours(24), Duration.ofHours(1), Duration.ofMinutes(1),
                 new AuthProperties.Cleanup(Duration.ofDays(30), Duration.ofDays(7), 2));
         service = new TokenCleanupService(refreshTokens, emailTokens, properties, transactionManager, Clock.systemUTC());
         user = userRepository.save(user());
@@ -87,6 +91,23 @@ class TokenCleanupServiceIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldDeleteTokensOnlyOnceRetentionHasFullyPassed() {
+        Instant now = Instant.parse("2026-10-23T03:30:00Z");
+        TokenCleanupService atNow = new TokenCleanupService(refreshTokens, emailTokens, properties, transactionManager,
+                Clock.fixed(now, ZoneOffset.UTC));
+        String refreshKept = refreshTokenExpiringAt(now.minus(Duration.ofDays(30)).plusSeconds(1));
+        refreshTokenExpiringAt(now.minus(Duration.ofDays(30)).minusSeconds(1));
+        String emailKept = emailTokenExpiringAt(now.minus(Duration.ofDays(7)).plusSeconds(1));
+        emailTokenExpiringAt(now.minus(Duration.ofDays(7)).minusSeconds(1));
+
+        TokenCleanupService.Result result = atNow.cleanUp();
+
+        assertThat(result).isEqualTo(new TokenCleanupService.Result(1, 1));
+        assertThat(jdbc.queryForList("SELECT token_hash FROM refresh_tokens", String.class)).containsExactly(refreshKept);
+        assertThat(jdbc.queryForList("SELECT token_hash FROM email_tokens", String.class)).containsExactly(emailKept);
+    }
+
+    @Test
     void shouldStillDetectReuseOfRevokedTokenAfterCleanup() throws Exception {
         String stolen = TokenHasher.newToken();
         String sibling = TokenHasher.newToken();
@@ -118,6 +139,20 @@ class TokenCleanupServiceIT extends AbstractIntegrationTest {
                 INSERT INTO refresh_tokens (user_id, family_id, token_hash, expires_at, revoked_at)
                 VALUES (?, ?, ?, NOW() - CAST(? AS INTERVAL), CASE WHEN ? THEN NOW() - INTERVAL '40 days' END)""",
                 user.getId(), family, hash, expiredAgo, revoked);
+    }
+
+    private String refreshTokenExpiringAt(Instant expiresAt) {
+        String hash = TokenHasher.hash(UUID.randomUUID().toString());
+        jdbc.update("INSERT INTO refresh_tokens (user_id, family_id, token_hash, expires_at) VALUES (?, ?, ?, ?)",
+                user.getId(), UUID.randomUUID(), hash, Timestamp.from(expiresAt));
+        return hash;
+    }
+
+    private String emailTokenExpiringAt(Instant expiresAt) {
+        String hash = TokenHasher.hash(UUID.randomUUID().toString());
+        jdbc.update("INSERT INTO email_tokens (user_id, token_hash, purpose, expires_at) VALUES (?, ?, 'VERIFY_EMAIL', ?)",
+                user.getId(), hash, Timestamp.from(expiresAt));
+        return hash;
     }
 
     private String emailToken(String name, String expiredAgo, boolean used) {
