@@ -14,7 +14,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,8 +39,6 @@ class AdminParserControllerIT extends AbstractIntegrationTest {
     @Autowired
     private JwtService jwtService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Autowired
     private RabbitAdmin rabbitAdmin;
@@ -105,6 +102,6 @@ class AdminParserControllerIT extends AbstractIntegrationTest {
         User user = user();
         user.setRole(role);
         userRepository.save(user);
-        return "Bearer " + jwtService.generateToken(userDetailsService.loadUserByUsername(user.getEmail()));
+        return "Bearer " + jwtService.generateAccessToken(user);
     }
 }

@@ -68,7 +68,13 @@ class RabbitTopologyIT extends AbstractIntegrationTest {
         rabbitTemplate.convertAndSend("kr.events", NOTIFY_EMAIL_KEY, "poison");
 
         rabbitTemplate.execute(channel -> {
+            // Publishing is asynchronous: wait until the broker has put the message into the queue
             var delivery = channel.basicGet(NOTIFY_EMAIL_QUEUE, false);
+            for (int attempt = 0; delivery == null && attempt < 50; attempt++) {
+                Thread.sleep(100);
+                delivery = channel.basicGet(NOTIFY_EMAIL_QUEUE, false);
+            }
+            assertThat(delivery).as("message in " + NOTIFY_EMAIL_QUEUE).isNotNull();
             channel.basicReject(delivery.getEnvelope().getDeliveryTag(), false);
             return null;
         });

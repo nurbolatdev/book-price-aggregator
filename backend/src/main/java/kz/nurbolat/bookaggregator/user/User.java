@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "users")
@@ -30,8 +32,24 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    /** Beacon emails go only to confirmed addresses; signing in does not need it. */
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "notify_frequency", nullable = false)
+    private NotifyFrequency notifyFrequency = NotifyFrequency.INSTANT;
+
+    @Column(name = "weekly_digest", nullable = false)
+    private boolean weeklyDigest = true;
+
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     public enum Role {
         USER, ADMIN

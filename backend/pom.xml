@@ -28,6 +28,8 @@
         <wiremock.version>3.13.2</wiremock.version>
         <playwright.version>1.56.0</playwright.version>
         <shedlock.version>5.16.0</shedlock.version>
+        <bucket4j.version>8.14.0</bucket4j.version>
+        <greenmail.version>2.1.3</greenmail.version>
         <!-- Browser tests need Chromium; they run only with -Pbrowser -->
         <failsafe.groups></failsafe.groups>
         <failsafe.excludedGroups>browser</failsafe.excludedGroups>
@@ -83,6 +85,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- Emails: SMTP (Mailpit in development) and Thymeleaf templates -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
         <!-- Scheduled jobs run on one instance at a time (lock table in PostgreSQL) -->
@@ -144,6 +156,18 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- Request rate limits, buckets kept in Redis so that every instance shares them -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-lettuce</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+
         <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -199,6 +223,13 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- SMTP server inside the tests: emails are received and read, nothing leaves the machine -->
+        <dependency>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail-junit5</artifactId>
+            <version>${greenmail.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Stub HTTP server for fetcher tests (no real store requests) -->

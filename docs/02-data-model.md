@@ -166,7 +166,7 @@ erDiagram
 `id, user_id FK, token_hash VARCHAR(64) UNIQUE, purpose VARCHAR(20) ('VERIFY_EMAIL' | 'RESET_PASSWORD' | 'UNSUBSCRIBE'), expires_at, used_at`. В БД хранится **SHA-256 хеш** токена, сам токен — только в письме.
 
 ### refresh_tokens (новая)
-`id, user_id FK, token_hash UNIQUE, expires_at, revoked_at, created_at, user_agent`. Ротация: при обновлении старый помечается revoked.
+`id, user_id FK, family_id UUID, token_hash UNIQUE, expires_at, revoked_at, created_at, user_agent`. Ротация: при обновлении старый помечается revoked, новый получает тот же `family_id` (одно семейство = один вход на одном устройстве). Повтор отозванного токена отзывает его семейство. Записи удаляются ночной очисткой через 30 дней после `expires_at`, `email_tokens` — через 7 дней.
 
 ### parser_runs (новая)
 Каждый проход парсера. Используется админкой и для расчёта «% успешных страниц». Индекс `(store_id, started_at DESC)`.
@@ -197,8 +197,12 @@ CREATE INDEX idx_books_author_trgm ON books USING GIN (author_norm gin_trgm_ops)
 | V7__beacons.sql | M13 | `beacons`, перенос из `price_alerts`, drop `price_alerts` |
 | V8__search_trgm.sql | M14 | `pg_trgm`, GIN-индексы, `search_log` |
 | V9__parser_runs.sql | M15 | `parser_runs`, `system_events` |
-| V10__shedlock.sql | M17 | `shedlock` |
-| V11__auth_v2.sql | M18 | поля `users`, `email_tokens`, `refresh_tokens` |
-| V12__notifications.sql | M19 | `notifications` |
+| V10__disable_kaspi.sql | M16 | Kaspi выключен (не отвечает парсеру) |
+| V11__disable_wildberries.sql | M16 | Wildberries выключен (антибот-проверка) |
+| V12__shedlock.sql | M17 | `shedlock` |
+| V13__auth_v2.sql | M18 | поля `users`, `email_tokens`, `refresh_tokens` |
+| V14__refresh_token_families.sql | M18 | `refresh_tokens.family_id` |
+| V15__auth_token_expiry_indexes.sql | M18 | индексы `expires_at` для очистки токенов |
+| V16__notifications.sql | M19 | `notifications` |
 
 Номера могут сдвинуться, если понадобится промежуточная миграция — главное, по порядку и без правки старых.

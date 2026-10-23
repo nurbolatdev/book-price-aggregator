@@ -9,7 +9,6 @@ import kz.nurbolat.bookaggregator.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +35,6 @@ class BookControllerIT extends AbstractIntegrationTest {
     @Autowired
     private JwtService jwtService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Test
     void shouldReturnBookWithEditionsWhenBookExists() throws Exception {
@@ -71,7 +68,7 @@ class BookControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldReturn404WhenRemovedEndpointsAreCalledByAuthenticatedUser() throws Exception {
         User user = userRepository.save(user());
-        String token = "Bearer " + jwtService.generateToken(userDetailsService.loadUserByUsername(user.getEmail()));
+        String token = "Bearer " + jwtService.generateAccessToken(user);
 
         mockMvc.perform(get("/api/v1/books/1/offers").header(HttpHeaders.AUTHORIZATION, token))
                 .andExpect(status().isNotFound());

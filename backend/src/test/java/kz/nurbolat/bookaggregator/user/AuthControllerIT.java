@@ -24,29 +24,31 @@ class AuthControllerIT extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
-    void shouldReturnTokenWhenRegisteringNewEmail() throws Exception {
-        String email = uniqueEmail();
-
-        register(email, PASSWORD)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token", notNullValue()))
-                .andExpect(jsonPath("$.email").value(email));
+    void shouldCreateUnverifiedAccountWhenRegisteringNewEmail() throws Exception {
+        register(uniqueEmail(), PASSWORD)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.userId", notNullValue()))
+                .andExpect(jsonPath("$.emailVerificationRequired").value(true));
     }
 
     @Test
     void shouldReturnTokenWhenCredentialsAreValid() throws Exception {
         String email = uniqueEmail();
-        register(email, PASSWORD).andExpect(status().isOk());
+        register(email, PASSWORD).andExpect(status().isCreated());
 
         login(email, PASSWORD)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token", notNullValue()));
+                .andExpect(jsonPath("$.accessToken", notNullValue()))
+                .andExpect(jsonPath("$.refreshToken", notNullValue()))
+                .andExpect(jsonPath("$.expiresIn").value(900))
+                .andExpect(jsonPath("$.user.email").value(email))
+                .andExpect(jsonPath("$.user.emailVerified").value(false));
     }
 
     @Test
     void shouldReturn401InErrorFormatWhenPasswordIsWrong() throws Exception {
         String email = uniqueEmail();
-        register(email, PASSWORD).andExpect(status().isOk());
+        register(email, PASSWORD).andExpect(status().isCreated());
 
         login(email, "wrong-password")
                 .andExpect(status().isUnauthorized())
@@ -61,7 +63,7 @@ class AuthControllerIT extends AbstractIntegrationTest {
     @Test
     void shouldReturn409WhenEmailIsAlreadyRegistered() throws Exception {
         String email = uniqueEmail();
-        register(email, PASSWORD).andExpect(status().isOk());
+        register(email, PASSWORD).andExpect(status().isCreated());
 
         register(email, PASSWORD)
                 .andExpect(status().isConflict())

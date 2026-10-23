@@ -99,14 +99,18 @@
 |---|---|---|---|
 | POST | `/auth/register` | `{name, email, password}` | 201 `{userId, emailVerificationRequired: true}` + письмо |
 | POST | `/auth/login` | `{email, password}` | 200 `{accessToken, refreshToken, expiresIn, user}` |
-| POST | `/auth/refresh` | `{refreshToken}` | 200 новая пара (старый refresh отзывается) |
+| POST | `/auth/refresh` | `{refreshToken}` | 200 новая пара (старый refresh отзывается); повтор отозванного → 401 и завершение этой сессии |
 | POST | `/auth/logout` | `{refreshToken}` | 204 |
 | POST | `/auth/verify-email` | `{token}` | 204 |
 | POST | `/auth/resend-verification` | `{email}` | 204 (всегда, даже если email нет — не раскрываем) |
 | POST | `/auth/forgot-password` | `{email}` | 204 (всегда) |
 | POST | `/auth/reset-password` | `{token, newPassword}` | 204, все refresh-токены отзываются |
 
-Лимиты (Bucket4j): `login` — 5 в минуту на IP+email, `register`/`forgot-password` — 3 в минуту на IP.
+Лимиты (Bucket4j): `login` — 5 в минуту на IP+email, `register`/`forgot-password` — 3 в минуту на IP, `GET /search` — 60 в минуту на IP, остальное API — 120 в минуту на пользователя (без входа — на IP). Превышение → 429 `RATE_LIMITED` и заголовок `Retry-After` (секунды).
+
+Сессий (устройств) на пользователя — не больше 10: вход сверх лимита завершает ту, что дольше всех не обновлялась.
+`user` в ответе входа и `GET /me`: `{id, email, name, role, emailVerified, notifyFrequency, weeklyDigest}`; `expiresIn` — секунды жизни access-токена (900).
+Ошибки токенов: истёкший access-токен на любом защищённом пути → 401 `TOKEN_EXPIRED` (обновить пару через `/auth/refresh`); неизвестный или отозванный refresh → 401 `UNAUTHORIZED`, истёкший → 401 `TOKEN_EXPIRED`; ссылка из письма неизвестная, использованная или другого назначения → 400 `TOKEN_INVALID`, истёкшая → 401 `TOKEN_EXPIRED`.
 
 ## 3. Пользователь (роль USER)
 | Метод | Путь | Описание |
@@ -160,7 +164,7 @@
 ## 6. Служебные
 | Путь | Доступ |
 |---|---|
-| `/actuator/health` | публично (только UP/DOWN) |
+| `/actuator/health` | публично (только UP/DOWN; подробности — ADMIN) |
 | `/actuator/health/**`, `/actuator/metrics`, `/actuator/prometheus` | ADMIN |
 | `/swagger-ui.html`, `/v3/api-docs` | публично в dev, отключаемо в prod |
 

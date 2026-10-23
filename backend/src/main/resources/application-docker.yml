@@ -22,8 +22,14 @@ spring:
   jpa:
     show-sql: false
 
+server:
+  # The frontend's nginx passes the client address in X-Forwarded-For; rate limits count per client, not per proxy
+  forward-headers-strategy: native
+
 app:
   base-url: ${APP_BASE_URL}
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost}
 
 logging:
   level:

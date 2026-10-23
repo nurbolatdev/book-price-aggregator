@@ -20,6 +20,7 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        errorResponseWriter.write(request, response, ErrorCode.UNAUTHORIZED);
+        boolean expired = request.getAttribute(JwtAuthFilter.TOKEN_EXPIRED_ATTRIBUTE) != null;
+        errorResponseWriter.write(request, response, expired ? ErrorCode.TOKEN_EXPIRED : ErrorCode.UNAUTHORIZED);
     }
 }

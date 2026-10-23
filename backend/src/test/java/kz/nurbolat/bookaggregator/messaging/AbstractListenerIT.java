@@ -1,5 +1,6 @@
 package kz.nurbolat.bookaggregator.messaging;
 
+import kz.nurbolat.bookaggregator.notification.EmailSender;
 import kz.nurbolat.bookaggregator.parser.core.StoreCrawlService;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,8 @@ import org.springframework.test.context.TestPropertySource;
 
 /**
  * Listener tests: queue consumers are started (they are off in other tests) and the crawler is a mock,
- * so no store is ever requested. The context is closed after each class: its consumers would otherwise keep
+ * so no store is ever requested. Emails left in the queue by other tests are "sent" by a mock, so that they
+ * do not fail on the missing SMTP server and end up in the dead-letter queue these tests read. The context is closed after each class: its consumers would otherwise keep
  * taking messages from queues that other tests read.
  */
 @TestPropertySource(properties = "spring.rabbitmq.listener.simple.auto-startup=true")
@@ -21,6 +23,9 @@ abstract class AbstractListenerIT extends AbstractIntegrationTest {
 
     @MockBean
     protected StoreCrawlService crawlService;
+
+    @MockBean
+    private EmailSender emailSender;
 
     @Autowired
     protected RabbitTemplate rabbitTemplate;

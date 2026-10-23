@@ -108,6 +108,33 @@ class MigrationIT extends AbstractIntegrationTest {
                 FROM beacons b JOIN editions e ON e.id = b.edition_id WHERE e.book_id = ?""", bookWithoutIsbn);
         assertThat(triggeredBeacon).containsEntry("status", "TRIGGERED");
         assertThat(triggeredBeacon.get("last_triggered_at")).isNotNull();
+
+        assertThat(jdbc.queryForObject("SELECT email_verified FROM users WHERE id = ?", Boolean.class, userId)).isTrue();
+    }
+
+    @Test
+    void shouldPutAllRefreshTokensOfUserIntoOneFamilyWhenUpgradingFromV13() throws SQLException {
+        DataSource dataSource = createDatabase();
+        flyway(dataSource, MigrationVersion.fromVersion("13")).migrate();
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        long reader = insertId(jdbc, "INSERT INTO users (email, password) VALUES ('reader@example.com', 'x') RETURNING id");
+        long other = insertId(jdbc, "INSERT INTO users (email, password) VALUES ('other@example.com', 'x') RETURNING id");
+        // A rotated chain of the reader (A revoked, B active) and a token of another user
+        jdbc.update("""
+                INSERT INTO refresh_tokens (user_id, token_hash, expires_at, revoked_at)
+                VALUES (?, 'hash-a', NOW() + INTERVAL '29 days', NOW()),
+                       (?, 'hash-b', NOW() + INTERVAL '30 days', NULL),
+                       (?, 'hash-c', NOW() + INTERVAL '30 days', NULL)""", reader, reader, other);
+
+        flyway(dataSource, MigrationVersion.LATEST).migrate();
+
+        Map<String, Object> families = jdbc.queryForMap("""
+                SELECT (SELECT family_id FROM refresh_tokens WHERE token_hash = 'hash-a')::text AS a,
+                       (SELECT family_id FROM refresh_tokens WHERE token_hash = 'hash-b')::text AS b,
+                       (SELECT family_id FROM refresh_tokens WHERE token_hash = 'hash-c')::text AS c""");
+        // Reusing A then revokes B as well, as before families existed
+        assertThat(families.get("a")).isNotNull().isEqualTo(families.get("b"));
+        assertThat(families.get("c")).isNotNull().isNotEqualTo(families.get("a"));
     }
 
     private static Flyway flyway(DataSource dataSource, MigrationVersion target) {

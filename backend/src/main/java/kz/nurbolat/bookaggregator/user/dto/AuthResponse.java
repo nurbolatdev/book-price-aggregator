@@ -1,13 +1,7 @@
 package kz.nurbolat.bookaggregator.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
-public class AuthResponse {
-
-    private String token;
-    private String email;
-    private String name;
+/**
+ * @param expiresIn seconds the access token lives
+ */
+public record AuthResponse(String accessToken, String refreshToken, long expiresIn, UserResponse user) {
 }
