@@ -13,6 +13,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -78,7 +79,7 @@ class EmailSenderTest {
     private MimeMessage sendMessage(EmailType type, Map<String, Object> model) throws Exception {
         when(mailSender.createMimeMessage()).thenReturn(new MimeMessage(Session.getInstance(new Properties())));
 
-        sender.send(new EmailMessage(UUID.randomUUID(), type, "reader@example.com", "ru", model));
+        sender.send(new EmailMessage(UUID.randomUUID(), type, "reader@example.com", "ru", null, model, List.of()));
 
         ArgumentCaptor<MimeMessage> captor = ArgumentCaptor.forClass(MimeMessage.class);
         verify(mailSender).send(captor.capture());

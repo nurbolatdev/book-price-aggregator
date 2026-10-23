@@ -44,7 +44,7 @@ public class EmailSender {
             MimeMessageHelper helper = new MimeMessageHelper(mime, true, StandardCharsets.UTF_8.name());
             helper.setFrom(mailProperties.from());
             helper.setTo(message.to());
-            helper.setSubject(message.type().getSubject());
+            helper.setSubject(message.subjectOrDefault());
             helper.setText(text, html);
         } catch (MessagingException e) {
             throw new MailPreparationException("Could not build email " + message.messageId(), e);

@@ -2,10 +2,13 @@ package kz.nurbolat.bookaggregator.beacon;
 
 import kz.nurbolat.bookaggregator.book.Book;
 import kz.nurbolat.bookaggregator.common.text.Emails;
+import kz.nurbolat.bookaggregator.config.AppProperties;
 import kz.nurbolat.bookaggregator.edition.Edition;
 import kz.nurbolat.bookaggregator.notification.EmailPublisher;
 import kz.nurbolat.bookaggregator.notification.EmailType;
+import kz.nurbolat.bookaggregator.notification.Notification;
 import kz.nurbolat.bookaggregator.notification.NotificationService;
+import kz.nurbolat.bookaggregator.notification.PriceDropEmail;
 import kz.nurbolat.bookaggregator.offer.Offer;
 import kz.nurbolat.bookaggregator.user.NotifyFrequency;
 import kz.nurbolat.bookaggregator.user.User;
@@ -32,6 +35,7 @@ class BeaconAlerts {
 
     private final NotificationService notificationService;
     private final EmailPublisher emailPublisher;
+    private final AppProperties appProperties;
 
     /**
      * @param was    the price the user saw last: the previous reported price or the baseline
@@ -45,9 +49,10 @@ class BeaconAlerts {
             log.info("Beacon {} fired, email not sent: {} is not confirmed", beacon.getId(), Emails.mask(user.getEmail()));
             return;
         }
-        notificationService.queue(user, beacon, payload);
+        Notification notification = notificationService.queue(user, beacon, payload);
         if (user.getNotifyFrequency() == NotifyFrequency.INSTANT) {
-            emailPublisher.publish(EmailType.PRICE_DROP, user.getEmail(), payload);
+            emailPublisher.publish(EmailType.PRICE_DROP, user.getEmail(), PriceDropEmail.subject(payload),
+                    PriceDropEmail.model(payload, appProperties.baseUrl()), List.of(notification.getId()));
         }
         log.info("Beacon {} fired at {}, email {}", beacon.getId(), offers.get(0).getPrice(),
                 user.getNotifyFrequency() == NotifyFrequency.INSTANT ? "queued" : "kept for the daily digest");

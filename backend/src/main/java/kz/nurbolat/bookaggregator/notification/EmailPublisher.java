@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,7 +27,15 @@ public class EmailPublisher {
     private final MessageSender messageSender;
 
     public void publish(EmailType type, String to, Map<String, Object> model) {
-        EmailMessage message = new EmailMessage(UUID.randomUUID(), type, to, LOCALE, model);
+        publish(type, to, null, model, List.of());
+    }
+
+    /**
+     * @param subject         {@code null} for the fixed subject of the type
+     * @param notificationIds notifications this email delivers; the listener marks them sent or failed
+     */
+    public void publish(EmailType type, String to, String subject, Map<String, Object> model, List<Long> notificationIds) {
+        EmailMessage message = new EmailMessage(UUID.randomUUID(), type, to, LOCALE, subject, model, notificationIds);
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override

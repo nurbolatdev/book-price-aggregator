@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -16,6 +18,7 @@ import java.util.Map;
 public class NotificationService {
 
     private final NotificationRepository repository;
+    private final Clock clock;
 
     /** Records an email waiting to be sent, now or in the daily digest. */
     @Transactional
@@ -34,5 +37,20 @@ public class NotificationService {
         notification.setStatus(NotificationStatus.FAILED);
         notification.setError(error);
         return notification;
+    }
+
+    @Transactional
+    public void markSent(Collection<Long> ids) {
+        if (!ids.isEmpty()) {
+            repository.markSent(ids, clock.instant());
+        }
+    }
+
+    /** A notification already sent stays sent. */
+    @Transactional
+    public void markFailed(Collection<Long> ids, String error) {
+        if (!ids.isEmpty()) {
+            repository.markFailed(ids, error == null ? "unknown error" : error);
+        }
     }
 }

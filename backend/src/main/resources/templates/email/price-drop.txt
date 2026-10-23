@@ -1,0 +1,20 @@
+Маячок сработал — цена упала
+
+«[(${title})]»[# th:if="${author}"], [(${author})][/]
+[# th:if="${oldPriceText}"]Было [(${oldPriceText})] → стало [(${newPriceText})], дешевле на [(${savingText})] (−[(${savingPercent})]%)[/][# th:unless="${oldPriceText}"]Цена: [(${newPriceText})][/]
+Магазин: [(${storeName})]
+
+Открыть в магазине: [(${offerUrl})]
+Сравнить все цены: [(${editionUrl})]
+[# th:if="${!#lists.isEmpty(otherOffers)}"]
+В других магазинах:
+[# th:each="offer : ${otherOffers}"]- [(${offer.storeName})]: [(${offer.priceText})][# th:unless="${offer.inStock}"] (нет в наличии)[/]
+[/][/][# th:if="${collectedAtText}"]
+Цены собраны [(${collectedAtText})] (время Алматы). Цена в магазине могла измениться.[/]
+
+[# th:if="${unsubscribeUrl}"]Отключить этот маячок: [(${unsubscribeUrl})]
+[/]Настройки уведомлений: [(${settingsUrl})]
+Мои маячки: [(${beaconsUrl})]
+
+—
+KitapRadar · [(${baseUrl})]
