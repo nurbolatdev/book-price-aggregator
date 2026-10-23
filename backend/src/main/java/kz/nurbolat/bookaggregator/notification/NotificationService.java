@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,7 +54,7 @@ public class NotificationService {
     @Transactional
     public void markFailed(Collection<Long> ids, String error) {
         if (!ids.isEmpty()) {
-            repository.markFailed(ids, error == null ? "unknown error" : error);
+            repository.markFailed(ids, error == null ? "unknown error" : error, NotificationErrors.FINAL);
         }
     }
 
@@ -68,9 +69,25 @@ public class NotificationService {
         }
     }
 
-    /** Whether the email for these notifications was already handed to the mail server. */
-    @Transactional(readOnly = true)
-    public boolean allSent(Collection<Long> ids) {
-        return !ids.isEmpty() && repository.countNotSent(ids) == 0;
+    /**
+     * Sends the email of these notifications unless they are all done: already {@code SENT} or closed for good.
+     * The rows stay locked from the check until {@code SENT} is committed, so two copies of one email processed
+     * at once send it once: the second waits and then finds the notifications sent. An exception rolls back and
+     * is rethrown; the caller records the failure.
+     *
+     * @return {@code false} if nothing was left to send
+     */
+    @Transactional
+    public boolean deliver(Collection<Long> ids, Runnable send) {
+        List<Long> open = repository.lockForSending(ids).stream()
+                .filter(n -> n.getStatus() != NotificationStatus.SENT && !NotificationErrors.isFinal(n))
+                .map(Notification::getId)
+                .toList();
+        if (open.isEmpty()) {
+            return false;
+        }
+        send.run();
+        repository.markSent(open, clock.instant());
+        return true;
     }
 }

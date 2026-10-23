@@ -5,6 +5,7 @@ import kz.nurbolat.bookaggregator.config.AppProperties;
 import kz.nurbolat.bookaggregator.notification.EmailPublisher;
 import kz.nurbolat.bookaggregator.notification.EmailType;
 import kz.nurbolat.bookaggregator.notification.Notification;
+import kz.nurbolat.bookaggregator.notification.NotificationErrors;
 import kz.nurbolat.bookaggregator.notification.NotificationRepository;
 import kz.nurbolat.bookaggregator.notification.NotificationService;
 import kz.nurbolat.bookaggregator.notification.PriceDropEmail;
@@ -32,8 +33,6 @@ import java.util.Map;
 @Slf4j
 @Service
 public class DigestService {
-
-    static final String BEACON_INACTIVE = "BEACON_INACTIVE";
 
     private final NotificationRepository notifications;
     private final NotificationService notificationService;
@@ -88,7 +87,7 @@ public class DigestService {
             latest.put(beacon.getId(), notification);
             delivered.add(notification.getId());
         }
-        notificationService.markFailed(inactive, BEACON_INACTIVE);
+        notificationService.markFailed(inactive, NotificationErrors.BEACON_INACTIVE);
         if (latest.isEmpty()) {
             return false;
         }

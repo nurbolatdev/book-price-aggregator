@@ -3,6 +3,7 @@ package kz.nurbolat.bookaggregator.beacon;
 import kz.nurbolat.bookaggregator.notification.EmailPublisher;
 import kz.nurbolat.bookaggregator.notification.EmailType;
 import kz.nurbolat.bookaggregator.notification.Notification;
+import kz.nurbolat.bookaggregator.notification.NotificationErrors;
 import kz.nurbolat.bookaggregator.notification.NotificationRepository;
 import kz.nurbolat.bookaggregator.notification.NotificationStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,9 @@ import java.util.List;
  *     <li>Only rows older than {@link #MIN_AGE}: the first publication gives up after
  *     {@link EmailPublisher#CONFIRM_TIMEOUT}, so it is over by then and both never publish the same row at once.</li>
  *     <li>Rows are locked with {@code SKIP LOCKED}; together with ShedLock no two relays take the same row.</li>
- *     <li>After {@link #GIVE_UP} unpublished rows become {@code FAILED} ({@code NOT_PUBLISHED}); a row that never
- *     reached the broker has no copy anywhere that could still be sent later.</li>
+ *     <li>After {@link #GIVE_UP} unpublished rows become {@code FAILED} ({@code NOT_PUBLISHED}), a final reason:
+ *     if a copy did reach the broker after all (its confirmation was lost) and turns up later, the listener
+ *     acknowledges it without sending.</li>
  * </ul>
  * If the broker took a message but its confirmation was lost, the email is published twice; the listener sends
  * it once, because it checks that the notification is not {@code SENT} yet.
@@ -36,7 +38,6 @@ public class BeaconEmailRelay {
 
     static final Duration MIN_AGE = Duration.ofMinutes(1);
     static final Duration GIVE_UP = Duration.ofHours(24);
-    static final String NOT_PUBLISHED = "NOT_PUBLISHED";
     private static final int BATCH = 100;
 
     private final NotificationRepository notifications;
@@ -57,7 +58,7 @@ public class BeaconEmailRelay {
     public Result run() {
         Instant now = clock.instant();
         Integer republished = transaction.execute(status -> republish(now));
-        Integer abandoned = transaction.execute(status -> notifications.failUnpublishedInstant(now.minus(GIVE_UP), NOT_PUBLISHED));
+        Integer abandoned = transaction.execute(status -> notifications.failUnpublishedInstant(now.minus(GIVE_UP), NotificationErrors.NOT_PUBLISHED));
         Result result = new Result(republished == null ? 0 : republished, abandoned == null ? 0 : abandoned);
         if (result.republished() > 0 || result.abandoned() > 0) {
             log.warn("Beacon email relay: {} emails published again, {} given up", result.republished(), result.abandoned());
@@ -72,7 +73,7 @@ public class BeaconEmailRelay {
             Beacon beacon = notification.getBeacon();
             if (beacon == null || beacon.getStatus() == BeaconStatus.PAUSED) {
                 notification.setStatus(NotificationStatus.FAILED);
-                notification.setError(DigestService.BEACON_INACTIVE);
+                notification.setError(NotificationErrors.BEACON_INACTIVE);
                 continue;
             }
             BeaconAlerts.Email email = alerts.instantEmail(notification);

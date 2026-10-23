@@ -72,7 +72,7 @@
 - [x] Отписка из письма работает без входа.
 - [x] DAILY-пользователь получает одну сводку.
 - [ ] `./mvnw -q verify` зелёный.
-  Unit-тесты зелёные (165). Интеграционные — на локальных PostgreSQL 16, Redis, RabbitMQ вместо Testcontainers (в среде нет Docker): 156 из 159, не запускаются три теста `MigrationIT`.
+  Unit-тесты зелёные (165). Интеграционные — на локальных PostgreSQL 16, Redis, RabbitMQ вместо Testcontainers (в среде нет Docker): 159 из 162, не запускаются три теста `MigrationIT`.
 
 Проверено вживую (jar + Mailpit, событие `price.changed` опубликовано через RabbitMQ API после изменения цены SQL-запросом): письмо «Цена упала» с заголовком `List-Unsubscribe`; та же цена — письма нет; ниже — второе письмо «3 150 → 2 990»; отписка по ссылке без входа ставит паузу, дальнейшие снижения писем не дают; DAILY-пользователь получил одну сводку (расписание на время проверки — раз в минуту).
 
@@ -83,6 +83,7 @@
 - [x] `BeaconEmailRelay` раз в минуту (ShedLock, `FOR UPDATE SKIP LOCKED`) публикует повторно только `QUEUED` + `INSTANT` + неопубликованные старше 1 мин; через 24 ч — `FAILED` / `NOT_PUBLISHED`. Сообщения в очереди и в DLQ не трогает — их повторы остаются за RabbitMQ.
 - [x] Способ доставки (`INSTANT` / `DIGEST`) фиксируется при создании уведомления; сводка берёт только неопубликованные `DIGEST`.
 - [x] Тайм-ауты SMTP: подключение 5 с, чтение и запись 10 с (по умолчанию JavaMail ждёт бесконечно).
+- [x] Две копии одного письма, обработанные одновременно, отправляют его один раз: строки уведомления блокируются (`FOR UPDATE`) от проверки до записи `SENT`. Окончательные причины отказа (`NotificationErrors.FINAL`) закрывают уведомление — поздняя копия не отправляется; ошибка SMTP остаётся временной. Тесты — `NotificationSendingIT`.
 - [x] Правило писем зафиксировано: письмо — только о **новом минимуме** относительно последней сообщённой цены (3 000 → 3 800 → 3 000 — письма нет; → 2 950 — есть).
 - [x] Тесты сценариев отказа — `BeaconEmailDeliveryIT` (9), одновременное создание маячка — `BeaconServiceIT`. Тест одновременной проверки без блокировки строк падает (2 уведомления вместо 1).
 
@@ -99,7 +100,7 @@
 8. `test: beacon and notification integration tests`
 9. `docs: update milestone status`
 
-Сверх плана: `docs: mark M18 as done`, `fix: keep message idempotency per consumer`, `fix: reliable delivery of beacon emails`.
+Сверх плана: `docs: mark M18 as done`, `fix: keep message idempotency per consumer`, `fix: reliable delivery of beacon emails`, `fix: serialize sending of one notification email`.
 
 ## Не входит
 Telegram (v2), веб-push (v2).

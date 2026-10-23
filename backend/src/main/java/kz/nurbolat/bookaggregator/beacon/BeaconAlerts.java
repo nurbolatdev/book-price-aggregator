@@ -11,6 +11,7 @@ import kz.nurbolat.bookaggregator.notification.EmailSender;
 import kz.nurbolat.bookaggregator.notification.EmailType;
 import kz.nurbolat.bookaggregator.notification.Notification;
 import kz.nurbolat.bookaggregator.notification.NotificationDelivery;
+import kz.nurbolat.bookaggregator.notification.NotificationErrors;
 import kz.nurbolat.bookaggregator.notification.NotificationService;
 import kz.nurbolat.bookaggregator.notification.PriceDropEmail;
 import kz.nurbolat.bookaggregator.offer.Offer;
@@ -35,8 +36,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 class BeaconAlerts {
 
-    static final String EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
-
     private final NotificationService notificationService;
     private final EmailPublisher emailPublisher;
     private final AppProperties appProperties;
@@ -53,7 +52,7 @@ class BeaconAlerts {
         NotificationDelivery delivery = user.getNotifyFrequency() == NotifyFrequency.DAILY
                 ? NotificationDelivery.DIGEST : NotificationDelivery.INSTANT;
         if (!user.isEmailVerified()) {
-            notificationService.fail(user, beacon, payload, delivery, EMAIL_NOT_VERIFIED);
+            notificationService.fail(user, beacon, payload, delivery, NotificationErrors.EMAIL_NOT_VERIFIED);
             log.info("Beacon {} fired, email not sent: {} is not confirmed", beacon.getId(), Emails.mask(user.getEmail()));
             return;
         }

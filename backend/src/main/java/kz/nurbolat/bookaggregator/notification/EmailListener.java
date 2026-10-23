@@ -12,10 +12,12 @@ import java.util.List;
 
 /**
  * Consumer of {@code kr.notify.email}. An SMTP failure is retried and finally dead-lettered (rules of M17);
- * a redelivered message that was already sent is skipped, and so is a beacon email whose notifications are
- * already {@code SENT} (a copy published again). Order: check the database → send → mark {@code SENT} → record
- * the message in Redis → acknowledge. If the mail server took the email but the application stopped before
- * {@code SENT} was saved, the email is sent again: a duplicate is possible, a loss is not. The notifications the email delivers are marked
+ * a redelivered message that was already sent is skipped. For beacon emails the database decides
+ * ({@link NotificationService#deliver}): notifications locked → already {@code SENT} or closed for good
+ * ({@link NotificationErrors#FINAL}) → acknowledged without sending; otherwise send → {@code SENT} → unlock →
+ * record the message in Redis → acknowledge. Two copies of one email (republished after a lost confirmation)
+ * therefore send once even when processed at the same moment. If the mail server took the email but the
+ * application stopped before {@code SENT} was saved, the email is sent again: a duplicate is possible, a loss is not. The notifications the email delivers are marked
  * {@code SENT}, or {@code FAILED} with the error after each failed attempt (a later successful retry marks them sent).
  */
 @Slf4j
@@ -41,17 +43,18 @@ class EmailListener {
 
     private void send(EmailMessage message) {
         List<Long> notifications = message.notificationIds() == null ? List.of() : message.notificationIds();
-        // The database decides: a republished copy of an email already handed to the mail server is not sent again
-        if (notificationService.allSent(notifications)) {
-            log.info("Email message {} skipped: notifications {} already sent", message.messageId(), notifications);
+        if (notifications.isEmpty()) {
+            emailSender.send(message);
             return;
         }
         try {
-            emailSender.send(message);
+            if (!notificationService.deliver(notifications, () -> emailSender.send(message))) {
+                log.info("Email message {} skipped: notifications {} already sent or closed",
+                        message.messageId(), notifications);
+            }
         } catch (RuntimeException e) {
             notificationService.markFailed(notifications, e.getMessage());
             throw e;
         }
-        notificationService.markSent(notifications);
     }
 }

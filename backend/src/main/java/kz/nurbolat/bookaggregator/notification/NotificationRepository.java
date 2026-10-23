@@ -1,6 +1,8 @@
 package kz.nurbolat.bookaggregator.notification;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
@@ -46,14 +48,23 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             WHERE n.status = 'QUEUED' AND n.delivery = 'INSTANT' AND n.publishedAt IS NULL AND n.createdAt < :before""")
     int failUnpublishedInstant(Instant before, String error);
 
-    @Query("SELECT COUNT(n) FROM Notification n WHERE n.id IN :ids AND n.status <> 'SENT'")
-    long countNotSent(Collection<Long> ids);
+    /**
+     * Locks the notifications of an email, in id order (no deadlock between emails sharing rows), waiting for
+     * whoever holds them: a copy of the same email, the relay or the digest.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT n FROM Notification n WHERE n.id IN :ids ORDER BY n.id")
+    List<Notification> lockForSending(Collection<Long> ids);
 
     @Modifying
     @Query("UPDATE Notification n SET n.status = 'SENT', n.sentAt = :sentAt, n.error = NULL WHERE n.id IN :ids")
     int markSent(Collection<Long> ids, Instant sentAt);
 
+    /** Sent notifications and final failures keep their state. */
     @Modifying
-    @Query("UPDATE Notification n SET n.status = 'FAILED', n.error = :error WHERE n.id IN :ids AND n.status <> 'SENT'")
-    int markFailed(Collection<Long> ids, String error);
+    @Query("""
+            UPDATE Notification n SET n.status = 'FAILED', n.error = :error
+            WHERE n.id IN :ids AND n.status <> 'SENT'
+              AND NOT (n.status = 'FAILED' AND COALESCE(n.error, '') IN :finalErrors)""")
+    int markFailed(Collection<Long> ids, String error, Collection<String> finalErrors);
 }
