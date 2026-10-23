@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<body>
+<!-- Shared parts of every email; inline styles, since mail clients drop <style> -->
+<th:block th:fragment="header">
+    <tr>
+        <td style="padding:24px 32px 8px 32px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;">
+            <a th:href="${baseUrl}" href="#" style="text-decoration:none;">
+                <span style="color:#0E1A2B;">Kitap</span><span style="color:#C2410C;">Radar</span>
+            </a>
+        </td>
+    </tr>
+</th:block>
+
+<th:block th:fragment="button(link, label)">
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+        <tr>
+            <td style="border-radius:8px;background:#C2410C;">
+                <a th:href="${link}" href="#" th:text="${label}"
+                   style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:8px;">Кнопка</a>
+            </td>
+        </tr>
+    </table>
+</th:block>
+
+<th:block th:fragment="footer">
+    <tr>
+        <td style="padding:16px 32px 24px 32px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#6B7280;border-top:1px solid #E5E7EB;">
+            KitapRadar сравнивает цены на книги в магазинах Казахстана.<br>
+            Письмо отправлено автоматически, отвечать на него не нужно.
+        </td>
+    </tr>
+</th:block>
+</body>
+</html>

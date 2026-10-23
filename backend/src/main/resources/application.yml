@@ -88,6 +88,8 @@ app:
     secret: ${JWT_SECRET:my-super-secret-key-for-dev-only-32chars}
     access-ttl: ${JWT_ACCESS_TTL:15m}
     refresh-ttl: ${JWT_REFRESH_TTL:30d}
+  mail:
+    from: ${MAIL_FROM:KitapRadar <no-reply@kitapradar.kz>}
   google-books:
     api-key: ${GOOGLE_BOOKS_API_KEY:}
     timeout: 5s

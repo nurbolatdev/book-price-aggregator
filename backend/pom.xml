@@ -85,6 +85,16 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
+        <!-- Emails: SMTP (Mailpit in development) and Thymeleaf templates -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
         <!-- Scheduled jobs run on one instance at a time (lock table in PostgreSQL) -->
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
