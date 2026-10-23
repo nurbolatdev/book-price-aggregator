@@ -15,6 +15,7 @@
 | [adr/](adr/) | Архитектурные решения |
 | [brand/](brand/README.md) | Логотип, иконки, цвета, правила использования |
 | [frontend/ROADMAP.md](frontend/ROADMAP.md) | План frontend-вех |
+| [backend/M18-report.md](backend/M18-report.md) | Итоги M18: что сделано сверх плана и иначе, чем в задании, принятые решения, результаты ревью |
 | [backend/parsing-report-M15-M16.md](backend/parsing-report-M15-M16.md) | Итоги M15–M16: как работает парсинг, какие магазины работают и почему остальные нет, что проверено |
 
 ## Статус вех
