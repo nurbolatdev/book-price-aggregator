@@ -156,14 +156,14 @@ erDiagram
 - Проверки (CHECK): `BELOW_PRICE` требует `target_price`, `DISCOUNT_PERCENT` требует `target_percent` 1–90.
 - `baseline_price` — лучшая цена в момент создания (для `ANY_DROP` и `DISCOUNT_PERCENT`).
 - `last_notified_price` — защита от повторных писем на ту же цену.
-- Индекс `(edition_id) WHERE status = 'ACTIVE'`.
+- Индекс `(edition_id) WHERE status IN ('ACTIVE', 'TRIGGERED')` (с V16: сработавший маячок продолжает следить за новыми снижениями).
 - Миграция данных: `price_alerts` → `beacons` (BELOW_PRICE, издание = единственное издание книги), затем `DROP TABLE price_alerts`.
 
 ### notifications (новая)
-История писем: что, кому, статус, ошибка. `payload JSONB` — данные письма (цены, магазин). Индекс `(user_id, created_at DESC)`, `(status)`.
+История писем: что, кому, статус, ошибка. `payload JSONB` — данные письма (издание, цены, магазин, другие предложения); из него собирается ежедневная сводка. `beacon_id` → `ON DELETE SET NULL` (история остаётся). Статусы: `QUEUED` (ждёт отправки или сводки), `SENT` (`sent_at`: почтовый сервер **принял** письмо — не «доставлено во входящие»), `FAILED` (`error`: текст SMTP-ошибки — временная причина, следующая попытка отправит письмо; `EMAIL_NOT_VERIFIED`, `BEACON_INACTIVE`, `NOT_PUBLISHED` — окончательные, письмо уже не уйдёт). С V18: `delivery` (`INSTANT` | `DIGEST`) — способ доставки, фиксируется при создании; `published_at` — когда RabbitMQ подтвердил сообщение письма (пусто — до брокера не дошло, такие письма публикует повторно `BeaconEmailRelay`). Таблица работает как упрощённый transactional outbox. Индекс `(user_id, created_at DESC)`, `(status)`.
 
 ### email_tokens (новая)
-`id, user_id FK, token_hash VARCHAR(64) UNIQUE, purpose VARCHAR(20) ('VERIFY_EMAIL' | 'RESET_PASSWORD' | 'UNSUBSCRIBE'), expires_at, used_at`. В БД хранится **SHA-256 хеш** токена, сам токен — только в письме.
+`id, user_id FK, beacon_id FK NULL, token_hash VARCHAR(64) UNIQUE, purpose VARCHAR(20) ('VERIFY_EMAIL' | 'RESET_PASSWORD' | 'UNSUBSCRIBE'), expires_at, used_at`. `beacon_id` обязателен для `UNSUBSCRIBE` (какой маячок ставить на паузу); такая ссылка многоразовая до истечения срока (90 дней). В БД хранится **SHA-256 хеш** токена, сам токен — только в письме.
 
 ### refresh_tokens (новая)
 `id, user_id FK, family_id UUID, token_hash UNIQUE, expires_at, revoked_at, created_at, user_agent`. Ротация: при обновлении старый помечается revoked, новый получает тот же `family_id` (одно семейство = один вход на одном устройстве). Повтор отозванного токена отзывает его семейство. Записи удаляются ночной очисткой через 30 дней после `expires_at`, `email_tokens` — через 7 дней.
@@ -203,6 +203,8 @@ CREATE INDEX idx_books_author_trgm ON books USING GIN (author_norm gin_trgm_ops)
 | V13__auth_v2.sql | M18 | поля `users`, `email_tokens`, `refresh_tokens` |
 | V14__refresh_token_families.sql | M18 | `refresh_tokens.family_id` |
 | V15__auth_token_expiry_indexes.sql | M18 | индексы `expires_at` для очистки токенов |
-| V16__notifications.sql | M19 | `notifications` |
+| V16__notifications.sql | M19 | `notifications`, индекс маячков ACTIVE + TRIGGERED |
+| V17__unsubscribe_tokens.sql | M19 | `email_tokens.beacon_id` для ссылок отписки |
+| V18__notification_delivery.sql | M19 | `notifications.delivery`, `notifications.published_at` (надёжная доставка писем) |
 
 Номера могут сдвинуться, если понадобится промежуточная миграция — главное, по порядку и без правки старых.

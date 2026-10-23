@@ -53,6 +53,8 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        // The token from the email is the credential
+                        .requestMatchers(HttpMethod.POST, "/api/v1/beacons/unsubscribe").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/search/**", "/api/v1/books/**", "/api/v1/editions/**",
                                 "/api/v1/home/**", "/api/v1/stores").permitAll()

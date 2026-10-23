@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -24,7 +25,8 @@ class EditionCacheEvictListenerTest {
 
     @Test
     void shouldEvictCardOfEditionWhosePriceChanged() {
-        doReturn(true).when(processed).claim(any());
+        doReturn(false).when(processed).isProcessed(any(), any());
+        doNothing().when(processed).markProcessed(any(), any());
 
         listener.onPriceChanged(message());
 
@@ -33,7 +35,7 @@ class EditionCacheEvictListenerTest {
 
     @Test
     void shouldSkipDuplicateMessage() {
-        doReturn(false).when(processed).claim(any());
+        doReturn(true).when(processed).isProcessed(any(), any());
 
         listener.onPriceChanged(message());
 

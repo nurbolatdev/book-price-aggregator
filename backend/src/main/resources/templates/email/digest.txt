@@ -1,0 +1,16 @@
+[# th:if="${name} != null"]Здравствуйте, [(${name})]![/][# th:unless="${name} != null"]Здравствуйте![/]
+
+Сводка цен за сутки — ваши маячки сработали:
+[# th:each="item : ${items}"]
+«[(${item.title})]»[# th:if="${item.author}"], [(${item.author})][/]
+[# th:if="${item.oldPriceText}"]Было [(${item.oldPriceText})] → стало [(${item.newPriceText})] (−[(${item.savingPercent})]%)[/][# th:unless="${item.oldPriceText}"]Цена: [(${item.newPriceText})][/], [(${item.storeName})]
+Открыть в магазине: [(${item.offerUrl})]
+Сравнить все цены: [(${item.editionUrl})]
+Отключить маячок: [(${item.unsubscribeUrl})]
+[/]
+Сводка приходит раз в день, потому что в настройках выбрано «раз в день».
+Настройки уведомлений: [(${settingsUrl})]
+Мои маячки: [(${beaconsUrl})]
+
+—
+KitapRadar · [(${baseUrl})]

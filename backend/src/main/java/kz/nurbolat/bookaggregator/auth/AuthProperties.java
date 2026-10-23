@@ -15,6 +15,7 @@ import java.time.Duration;
  * @param verifyEmailTtl   life of the link that confirms an address
  * @param resetPasswordTtl life of the link that sets a new password
  * @param resendInterval   least time between two confirmation emails to one user
+ * @param unsubscribeTtl   life of the link in beacon emails that pauses the beacon
  * @param cleanup          when expired tokens are deleted
  */
 @Validated
@@ -23,6 +24,7 @@ public record AuthProperties(
         @DefaultValue("24h") @NotNull Duration verifyEmailTtl,
         @DefaultValue("1h") @NotNull Duration resetPasswordTtl,
         @DefaultValue("1m") @NotNull Duration resendInterval,
+        @DefaultValue("90d") @NotNull Duration unsubscribeTtl,
         @Valid @DefaultValue Cleanup cleanup
 ) {
 

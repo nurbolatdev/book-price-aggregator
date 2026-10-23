@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'Цена упала: ' + ${title}">Цена упала</title>
+</head>
+<body style="margin:0;padding:0;background:#F4F6F8;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6F8;padding:24px 12px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                   style="max-width:560px;background:#FFFFFF;border-radius:12px;">
+                <th:block th:replace="~{email/layout :: header}"></th:block>
+                <tr>
+                    <td style="padding:8px 32px 16px 32px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:#0E1A2B;">
+                        <p style="margin:0 0 16px 0;font-size:13px;font-weight:bold;letter-spacing:0.5px;color:#C2410C;text-transform:uppercase;">Маячок сработал — цена упала</p>
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td th:if="${coverUrl}" width="96" valign="top" style="padding-right:16px;">
+                                    <img th:src="${coverUrl}" src="#" width="96" alt="Обложка"
+                                         style="display:block;width:96px;height:auto;border-radius:6px;border:1px solid #E5E7EB;">
+                                </td>
+                                <td valign="top">
+                                    <h1 style="margin:0 0 4px 0;font-size:20px;line-height:26px;" th:text="${title}">Название</h1>
+                                    <p th:if="${author}" style="margin:0 0 12px 0;font-size:14px;color:#6B7280;" th:text="${author}">Автор</p>
+                                    <p style="margin:0;">
+                                        <span th:if="${oldPriceText}" style="font-size:16px;color:#6B7280;text-decoration:line-through;" th:text="${oldPriceText}">3 610 ₸</span>
+                                        <span th:if="${oldPriceText}" style="color:#6B7280;">&nbsp;→&nbsp;</span>
+                                        <span style="font-size:24px;font-weight:bold;color:#0E1A2B;" th:text="${newPriceText}">3 150 ₸</span>
+                                    </p>
+                                    <p th:if="${savingText}" style="margin:4px 0 0 0;font-size:14px;font-weight:bold;color:#15803D;"
+                                       th:text="'Дешевле на ' + ${savingText} + ' (−' + ${savingPercent} + '%)'">Дешевле на 460 ₸ (−12%)</p>
+                                    <p style="margin:4px 0 0 0;font-size:14px;color:#0E1A2B;" th:text="'в магазине ' + ${storeName}">в магазине Flip.kz</p>
+                                </td>
+                            </tr>
+                        </table>
+                        <th:block th:replace="~{email/layout :: button(${offerUrl}, 'Открыть в ' + ${storeName})}"></th:block>
+                        <p style="margin:0 0 16px 0;font-size:14px;">
+                            <a th:href="${editionUrl}" href="#" style="color:#C2410C;">Сравнить все цены</a>
+                        </p>
+                        <th:block th:if="${!#lists.isEmpty(otherOffers)}">
+                            <p style="margin:0 0 8px 0;font-size:14px;font-weight:bold;">В других магазинах</p>
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="font-size:14px;">
+                                <tr th:each="offer : ${otherOffers}">
+                                    <td style="padding:4px 0;border-top:1px solid #E5E7EB;" th:text="${offer.storeName}">Meloman</td>
+                                    <td align="right" style="padding:4px 0;border-top:1px solid #E5E7EB;"
+                                        th:text="${offer.inStock} ? ${offer.priceText} : ${offer.priceText} + ' · нет в наличии'">3 380 ₸</td>
+                                </tr>
+                            </table>
+                        </th:block>
+                        <p th:if="${collectedAtText}" style="margin:16px 0 0 0;font-size:12px;color:#6B7280;"
+                           th:text="'Цены собраны ' + ${collectedAtText} + ' (время Алматы). Цена в магазине могла измениться.'">Цены собраны</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:0 32px 16px 32px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#6B7280;">
+                        <a th:if="${unsubscribeUrl}" th:href="${unsubscribeUrl}" href="#" style="color:#6B7280;">Отключить этот маячок</a>
+                        <span th:if="${unsubscribeUrl}">&nbsp;·&nbsp;</span>
+                        <a th:href="${settingsUrl}" href="#" style="color:#6B7280;">Настройки уведомлений</a>
+                        &nbsp;·&nbsp;
+                        <a th:href="${beaconsUrl}" href="#" style="color:#6B7280;">Мои маячки</a>
+                    </td>
+                </tr>
+                <th:block th:replace="~{email/layout :: footer}"></th:block>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

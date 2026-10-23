@@ -65,7 +65,7 @@ class ParseRequestListener {
     void handle(ParseRequestMessage message) {
         MDC.put("traceId", message.messageId().toString());
         try {
-            if (!processedMessages.runOnce(message.messageId(), () -> crawl(message))) {
+            if (!processedMessages.runOnce(ProcessedMessages.PARSE, message.messageId(), () -> crawl(message))) {
                 log.info("Parse request {} already processed, skipped", message.messageId());
             }
         } finally {
