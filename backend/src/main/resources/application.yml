@@ -120,6 +120,10 @@ app:
   admin:
     email: ${APP_ADMIN_EMAIL:}
     password: ${APP_ADMIN_PASSWORD:}
+  rabbit-admin:
+    url: ${RABBITMQ_MANAGEMENT_URL:http://localhost:15672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
   google-books:
     api-key: ${GOOGLE_BOOKS_API_KEY:}
     timeout: 5s
