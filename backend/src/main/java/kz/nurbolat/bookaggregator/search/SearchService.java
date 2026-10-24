@@ -3,6 +3,7 @@ package kz.nurbolat.bookaggregator.search;
 import kz.nurbolat.bookaggregator.common.text.Hashing;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
 import kz.nurbolat.bookaggregator.config.RedisConfig;
+import kz.nurbolat.bookaggregator.metrics.KrMetrics;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem.BestPrice;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem.OfferChip;
@@ -36,9 +37,12 @@ public class SearchService {
     private final SearchLogWriter searchLogWriter;
     private final SecurityUtils securityUtils;
     private final Cache searchCache;
+    private final KrMetrics metrics;
 
     public SearchService(SearchRepository searchRepository, CatalogSeeder catalogSeeder,
-                         SearchLogWriter searchLogWriter, SecurityUtils securityUtils, CacheManager cacheManager) {
+                         SearchLogWriter searchLogWriter, SecurityUtils securityUtils, CacheManager cacheManager,
+                         KrMetrics metrics) {
+        this.metrics = metrics;
         this.searchRepository = searchRepository;
         this.catalogSeeder = catalogSeeder;
         this.searchLogWriter = searchLogWriter;
@@ -83,10 +87,17 @@ public class SearchService {
     private PageResponse<SearchItem> cachedPage(SearchQuery query) {
         String key = cacheKey(query);
         try {
-            return searchCache.get(key, () -> findPage(query));
+            boolean[] loaded = {false};
+            PageResponse<SearchItem> page = searchCache.get(key, () -> {
+                loaded[0] = true;
+                return findPage(query);
+            });
+            metrics.searchRequest(!loaded[0]);
+            return page;
         } catch (DataAccessException e) {
             // Redis is unavailable: answer from the database
             log.warn("Search cache unavailable: {}", e.getMessage());
+            metrics.searchRequest(false);
             return findPage(query);
         }
     }

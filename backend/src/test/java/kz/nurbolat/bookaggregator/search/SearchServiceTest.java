@@ -1,6 +1,8 @@
 package kz.nurbolat.bookaggregator.search;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import kz.nurbolat.bookaggregator.config.RedisConfig;
+import kz.nurbolat.bookaggregator.metrics.KrMetrics;
 import kz.nurbolat.bookaggregator.edition.Binding;
 import kz.nurbolat.bookaggregator.search.dto.SearchRequest;
 import kz.nurbolat.bookaggregator.security.SecurityUtils;
@@ -38,7 +40,8 @@ class SearchServiceTest {
     @BeforeEach
     void setUp() {
         when(securityUtils.currentUserEmail()).thenReturn(Optional.empty());
-        service = new SearchService(repository, seeder, logWriter, securityUtils, cacheManager);
+        service = new SearchService(repository, seeder, logWriter, securityUtils, cacheManager,
+                new KrMetrics(new SimpleMeterRegistry()));
     }
 
     @Test

@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import kz.nurbolat.bookaggregator.common.text.Emails;
 import kz.nurbolat.bookaggregator.config.AppProperties;
+import kz.nurbolat.bookaggregator.metrics.KrMetrics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailPreparationException;
@@ -32,6 +33,7 @@ public class EmailSender {
     private final ITemplateEngine templateEngine;
     private final MailProperties mailProperties;
     private final AppProperties appProperties;
+    private final KrMetrics metrics;
 
     public void send(EmailMessage message) {
         Context context = new Context(Locale.forLanguageTag(message.locale()));
@@ -56,7 +58,13 @@ public class EmailSender {
         } catch (MessagingException e) {
             throw new MailPreparationException("Could not build email " + message.messageId(), e);
         }
-        mailSender.send(mime);
+        try {
+            mailSender.send(mime);
+        } catch (RuntimeException e) {
+            metrics.mail(message.type().name(), "failed");
+            throw e;
+        }
+        metrics.mail(message.type().name(), "sent");
         log.info("Email {} sent to {}, messageId={}", message.type(), Emails.mask(message.to()), message.messageId());
     }
 }

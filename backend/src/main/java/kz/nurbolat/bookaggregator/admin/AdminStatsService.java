@@ -7,6 +7,7 @@ import kz.nurbolat.bookaggregator.admin.dto.AdminStatsResponse;
 import kz.nurbolat.bookaggregator.common.error.AppException;
 import kz.nurbolat.bookaggregator.common.error.ErrorCode;
 import kz.nurbolat.bookaggregator.config.RedisConfig;
+import kz.nurbolat.bookaggregator.metrics.KrMetrics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminStatsService {
 
-    static final String SEARCH_REQUESTS = "kr.search.requests";
+    static final String SEARCH_REQUESTS = KrMetrics.SEARCH_REQUESTS;
     private static final int MAX_ACTIVITY_DAYS = 90;
 
     private final JdbcTemplate jdbc;

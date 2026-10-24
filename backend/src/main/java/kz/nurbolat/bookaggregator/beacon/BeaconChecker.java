@@ -3,6 +3,7 @@ package kz.nurbolat.bookaggregator.beacon;
 import kz.nurbolat.bookaggregator.messaging.ProcessedMessages;
 import kz.nurbolat.bookaggregator.messaging.RabbitTopology;
 import kz.nurbolat.bookaggregator.messaging.message.PriceChangedMessage;
+import kz.nurbolat.bookaggregator.metrics.KrMetrics;
 import kz.nurbolat.bookaggregator.offer.Offer;
 import kz.nurbolat.bookaggregator.offer.OfferService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +44,12 @@ public class BeaconChecker {
     private final ProcessedMessages processedMessages;
     private final TransactionTemplate transaction;
     private final Clock clock;
+    private final KrMetrics metrics;
 
     public BeaconChecker(BeaconRepository beaconRepository, OfferService offerService, BeaconAlerts alerts,
-                         ProcessedMessages processedMessages, PlatformTransactionManager transactionManager, Clock clock) {
+                         ProcessedMessages processedMessages, PlatformTransactionManager transactionManager, Clock clock,
+                         KrMetrics metrics) {
+        this.metrics = metrics;
         this.beaconRepository = beaconRepository;
         this.offerService = offerService;
         this.alerts = alerts;
@@ -113,6 +117,7 @@ public class BeaconChecker {
             alerts.fired(beacon, was, offers);
             fired++;
         }
+        metrics.beaconTriggered(fired);
         return new Batch(beacons.size(), beacons.isEmpty() ? null : beacons.get(beacons.size() - 1).getId(), fired);
     }
 
