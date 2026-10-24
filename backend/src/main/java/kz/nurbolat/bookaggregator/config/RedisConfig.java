@@ -3,6 +3,7 @@ package kz.nurbolat.bookaggregator.config;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import kz.nurbolat.bookaggregator.admin.dto.AdminStatsResponse;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse;
 import kz.nurbolat.bookaggregator.home.dto.DropItem;
@@ -35,6 +36,7 @@ public class RedisConfig implements CachingConfigurer {
     public static final String SUGGEST = "suggest";
     public static final String EDITION = "edition";
     public static final String DROPS = "drops";
+    public static final String ADMIN_STATS = "admin-stats";
 
     /** Defaults for caches without their own configuration. */
     @Bean
@@ -56,7 +58,9 @@ public class RedisConfig implements CachingConfigurer {
                 .withCacheConfiguration(EDITION, cache(defaults, objectMapper, "edition:v1:", Duration.ofMinutes(30),
                         types.constructType(EditionDetailResponse.class)))
                 .withCacheConfiguration(DROPS, cache(defaults, objectMapper, "home:v1:", Duration.ofMinutes(15),
-                        types.constructCollectionType(List.class, DropItem.class)));
+                        types.constructCollectionType(List.class, DropItem.class)))
+                .withCacheConfiguration(ADMIN_STATS, cache(defaults, objectMapper, "admin:v1:stats:", Duration.ofMinutes(1),
+                        types.constructType(AdminStatsResponse.class)));
     }
 
     /** A Redis outage degrades to uncached reads instead of failing requests. */
