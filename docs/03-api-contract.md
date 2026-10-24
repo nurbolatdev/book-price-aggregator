@@ -146,7 +146,7 @@
 | Метод | Путь | Описание |
 |---|---|---|
 | GET | `/admin/stats?period=24h\|7d\|30d` | KPI: пользователи (всего, новые), активные, маячки, письма (sent/failed), поиски, cache hit %, книги/издания/предложения |
-| GET | `/admin/health` | статусы: db, redis, rabbitmq, mail, scheduler (+ метрики) |
+| GET | `/admin/health` | статусы компонентов под именами Spring Boot Actuator (`db`, `redis`, `rabbit`, `mail`, `diskSpace`, `ping`, `scheduler`; набор зависит от окружения) и метрики: `httpP95Millis` — максимум p95 по эндпоинтам приложения (без `/actuator/**`), пул БД, память Redis |
 | GET | `/admin/parsers` | по магазину: enabled, статус последнего запуска, % успеха, предложений, ср. время, circuit breaker |
 | POST | `/admin/parsers/{storeCode}/run` | ручной запуск (кладёт задачу в очередь), 202 `{ "queued": true }`; тело `{editionIds}` необязательно; 404 — у магазина нет парсера, 409 — магазин выключен, 503 — очередь недоступна |
 | PATCH | `/admin/stores/{storeCode}` | `{enabled}` |

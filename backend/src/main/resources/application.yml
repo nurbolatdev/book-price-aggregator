@@ -75,6 +75,12 @@ server:
     min-response-size: 1KB
 
 management:
+  health:
+    mail:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles[http.server.requests]: 0.95
   endpoints:
     web:
       exposure:
@@ -83,6 +89,9 @@ management:
     health:
       show-details: when-authorized
       roles: ADMIN
+      # Liveness is for the container healthcheck: a stale schedule or a mail outage must not stop the stack
+      probes:
+        enabled: true
 
 springdoc:
   swagger-ui:

@@ -60,7 +60,7 @@ public class SecurityConfig {
                                 "/api/v1/home/**", "/api/v1/stores").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         // Public health shows only UP/DOWN; details, groups and metrics are for admins
-                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/liveness").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
