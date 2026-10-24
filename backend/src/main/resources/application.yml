@@ -75,14 +75,23 @@ server:
     min-response-size: 1KB
 
 management:
+  health:
+    mail:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles[http.server.requests]: 0.95
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       show-details: when-authorized
       roles: ADMIN
+      # Liveness is for the container healthcheck: a stale schedule or a mail outage must not stop the stack
+      probes:
+        enabled: true
 
 springdoc:
   swagger-ui:
@@ -111,6 +120,10 @@ app:
   admin:
     email: ${APP_ADMIN_EMAIL:}
     password: ${APP_ADMIN_PASSWORD:}
+  rabbit-admin:
+    url: ${RABBITMQ_MANAGEMENT_URL:http://localhost:15672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
   google-books:
     api-key: ${GOOGLE_BOOKS_API_KEY:}
     timeout: 5s

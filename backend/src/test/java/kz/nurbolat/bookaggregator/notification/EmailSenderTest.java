@@ -3,7 +3,9 @@ package kz.nurbolat.bookaggregator.notification;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import kz.nurbolat.bookaggregator.config.AppProperties;
+import kz.nurbolat.bookaggregator.metrics.KrMetrics;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -30,7 +32,7 @@ class EmailSenderTest {
     private final JavaMailSender mailSender = mock(JavaMailSender.class);
     private final EmailSender sender = new EmailSender(mailSender, templateEngine(),
             new MailProperties("KitapRadar <no-reply@kitapradar.kz>"),
-            new AppProperties(BASE_URL, null, null));
+            new AppProperties(BASE_URL, null, null), new KrMetrics(new SimpleMeterRegistry()));
 
     @Test
     void shouldRenderVerifyEmailWithAbsoluteLinksInHtmlAndText() throws Exception {

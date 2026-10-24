@@ -2,12 +2,14 @@ package kz.nurbolat.bookaggregator.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import kz.nurbolat.bookaggregator.admin.dto.AdminParserResponse;
 import kz.nurbolat.bookaggregator.admin.dto.ParserRunQueuedResponse;
 import kz.nurbolat.bookaggregator.admin.dto.ParserRunRequest;
 import kz.nurbolat.bookaggregator.scheduler.ManualRunService;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +24,13 @@ import java.util.List;
 public class AdminParserController {
 
     private final ManualRunService manualRunService;
+    private final AdminParserService parserService;
+
+    @Operation(summary = "Status of every store parser: last run, success rate, circuit breaker")
+    @GetMapping
+    List<AdminParserResponse> parsers() {
+        return parserService.parsers();
+    }
 
     /**
      * Queues a crawl of the store; the store's queue runs it, results appear in parser_runs.

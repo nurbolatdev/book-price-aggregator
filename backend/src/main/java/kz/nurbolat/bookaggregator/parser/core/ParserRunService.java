@@ -2,6 +2,7 @@ package kz.nurbolat.bookaggregator.parser.core;
 
 import kz.nurbolat.bookaggregator.admin.SystemEventService;
 import kz.nurbolat.bookaggregator.common.error.NotFoundException;
+import kz.nurbolat.bookaggregator.metrics.KrMetrics;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import kz.nurbolat.bookaggregator.store.StoreService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,6 +29,7 @@ public class ParserRunService {
     private final ParserRunRepository repository;
     private final StoreService storeService;
     private final SystemEventService systemEventService;
+    private final KrMetrics metrics;
     private final Clock clock;
 
     @Transactional
@@ -56,6 +59,9 @@ public class ParserRunService {
         log.info("Parser run {} finished: store={} status={} pagesOk={} pagesFailed={} upserted={} priceChanged={}",
                 runId, store, run.getStatus(), stats.pagesOk(), stats.pagesFailed(), stats.offersUpserted(),
                 stats.pricesChanged());
+        metrics.parserRun(store.name(), run.getStatus().name(), Duration.between(run.getStartedAt(), run.getFinishedAt()));
+        metrics.parserOffersUpserted(store.name(), stats.offersUpserted());
+        metrics.parserPricesChanged(store.name(), stats.pricesChanged());
         report(run, store);
         return run;
     }

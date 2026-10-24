@@ -1,6 +1,7 @@
 package kz.nurbolat.bookaggregator.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kz.nurbolat.bookaggregator.admin.SystemEventService;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Binding;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static kz.nurbolat.bookaggregator.messaging.RabbitTopology.*;
 
@@ -63,10 +65,25 @@ public class RabbitTopologyConfig {
         return new Jackson2JsonMessageConverter(objectMapper);
     }
 
-    /** After the last retry a message is rejected without requeue, so its queue dead-letters it. */
+    /**
+     * After the last retry a message is rejected without requeue, so its queue dead-letters it. The failure is
+     * written to the admin journal first; a failed write never stops the rejection.
+     */
     @Bean
-    MessageRecoverer messageRecoverer() {
-        return new RejectAndDontRequeueRecoverer();
+    MessageRecoverer messageRecoverer(SystemEventService events) {
+        RejectAndDontRequeueRecoverer reject = new RejectAndDontRequeueRecoverer();
+        return (message, cause) -> {
+            try {
+                String queue = message.getMessageProperties().getConsumerQueue();
+                String source = NOTIFY_EMAIL_QUEUE.equals(queue) ? "mail" : "queue";
+                String reason = cause.getCause() != null ? cause.getCause().getMessage() : cause.getMessage();
+                events.error(source, "Сообщение из " + queue + " отправлено в dead-letter",
+                        Map.of("queue", String.valueOf(queue), "error", String.valueOf(reason)));
+            } catch (RuntimeException e) {
+                log.warn("Could not write the dead-letter event: {}", e.getMessage());
+            }
+            reject.recover(message, cause);
+        };
     }
 
     /** Logs messages the broker did not accept or could not route (publisher confirms and returns). */
