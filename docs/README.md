@@ -39,7 +39,7 @@
 | [M17](backend/M17-rabbitmq.md) | RabbitMQ: очереди парсинга и событий цен | `feature/m17-rabbitmq` | ✅ |
 | [M18](backend/M18-auth-v2.md) | Auth v2: подтверждение email, refresh, сброс пароля, лимиты | `feature/m18-auth-v2` | ✅ |
 | [M19](backend/M19-beacons-notifications.md) | Маячки и email-уведомления | `feature/m19-beacons-notifications` | ✅ |
-| [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ⬜ |
+| [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ✅ |
 | [M21](backend/M21-quality-release.md) | Качество, CI, README, релиз backend | `feature/m21-quality-release` | ⬜ |
 
 Фаза 3 — frontend: F1–F6, см. [frontend/ROADMAP.md](frontend/ROADMAP.md).
