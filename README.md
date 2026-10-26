@@ -94,6 +94,7 @@ backend/src/main/java/kz/nurbolat/bookaggregator/
 - Java 21, Spring Boot 3.3, Spring Security + JWT (access + refresh с ротацией)
 - PostgreSQL 16 (pg_trgm) + Flyway, Redis 7 (кэш, лимиты запросов), RabbitMQ 3.13
 - Jsoup и Playwright (Chromium) для парсеров, Resilience4j
+- Frontend: React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, Zustand, Vitest + Testing Library
 - Тесты: JUnit 5, Mockito, Testcontainers, WireMock; покрытие — JaCoCo
 - Нагрузка — k6; сборка и запуск — Docker Compose; CI — GitHub Actions
 
@@ -154,11 +155,12 @@ curl -X POST localhost:8080/api/v1/admin/parsers/FLIP/run -H "Authorization: Bea
 ```bash
 docker compose up -d postgres redis rabbitmq mailpit
 (cd backend && ./mvnw spring-boot:run)                  # терминал 1: backend с хоста
-(cd frontend && npm install && npm run dev)             # терминал 2: frontend
+(cd frontend && npm ci && npm run dev)                  # терминал 2: frontend, http://localhost:5173 (/api проксируется на 8080)
 ```
 
 Две последние команды запускаются в разных терминалах и друг от друга не зависят.
 
+- Frontend (`cd frontend`): `npm run lint`, `npm test`, `npm run build`, `npm run gen:api` (перегенерировать `src/api/schema.d.ts` после изменения `docs/api/openapi.json`).
 - Тесты: `cd backend && ./mvnw verify` (нужен Docker для Testcontainers). Отчёт покрытия — `backend/target/site/jacoco/index.html`; порог для сервисов — 70% строк.
 - Нагрузочный тест k6 и результаты — [docs/performance.md](docs/performance.md).
 - Контракт OpenAPI экспортирован в [docs/api/openapi.json](docs/api/openapi.json); после изменения аннотаций обновить: `cd backend && ./mvnw -B verify -Dit.test=OpenApiSpecIT -Dopenapi.update=true`.
