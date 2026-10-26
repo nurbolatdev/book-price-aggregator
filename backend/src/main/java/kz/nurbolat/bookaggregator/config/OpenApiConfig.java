@@ -1,10 +1,19 @@
 package kz.nurbolat.bookaggregator.config;
 
+import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import kz.nurbolat.bookaggregator.common.error.ErrorResponse;
+import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,5 +62,51 @@ public class OpenApiConfig {
                 .group("admin")
                 .pathsToMatch("/api/v1/admin/**")
                 .build();
+    }
+
+    /**
+     * Explicit {@code @ApiResponse} annotations make springdoc drop the implicit 200 and attach the return type to
+     * every declared code. This moves the success body to a 200 where no 2xx is declared and points every 4xx/5xx
+     * at {@link ErrorResponse}.
+     */
+    @Bean
+    GlobalOpenApiCustomizer responseSchemas() {
+        return openApi -> {
+            Components components = openApi.getComponents();
+            ModelConverters.getInstance().readAll(ErrorResponse.class).forEach(components::addSchemas);
+            Schema<?> errorRef = new Schema<>().$ref("#/components/schemas/ErrorResponse");
+            if (openApi.getPaths() == null) {
+                return;
+            }
+            openApi.getPaths().values().forEach(item -> item.readOperations().forEach(op -> fixResponses(op, errorRef)));
+        };
+    }
+
+    private static void fixResponses(Operation operation, Schema<?> errorRef) {
+        ApiResponses responses = operation.getResponses();
+        if (responses == null) {
+            return;
+        }
+        boolean hasSuccess = responses.keySet().stream().anyMatch(code -> code.startsWith("2"));
+        Content successContent = null;
+        for (var entry : responses.entrySet()) {
+            String code = entry.getKey();
+            if (code.startsWith("4") || code.startsWith("5")) {
+                if (successContent == null) {
+                    successContent = entry.getValue().getContent();
+                }
+                entry.getValue().setContent(new Content().addMediaType("application/json", new MediaType().schema(errorRef)));
+            }
+        }
+        if (!hasSuccess) {
+            ApiResponse ok = new ApiResponse().description("OK");
+            if (successContent != null) {
+                ok.setContent(successContent);
+            }
+            ApiResponses reordered = new ApiResponses();
+            reordered.addApiResponse("200", ok);
+            responses.forEach(reordered::addApiResponse);
+            operation.setResponses(reordered);
+        }
     }
 }

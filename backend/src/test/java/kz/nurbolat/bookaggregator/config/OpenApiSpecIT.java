@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Checks that every operation is described and that the committed spec {@code docs/api/openapi.json}
+ * Checks that every operation is described, has a success response and error responses use ErrorResponse and that the committed spec {@code docs/api/openapi.json}
  * matches the one the application serves. After changing controller annotations or DTOs, re-export with
  * {@code ./mvnw -B verify -Dit.test=OpenApiSpecIT -Dopenapi.update=true}.
  */
@@ -51,9 +51,34 @@ class OpenApiSpecIT extends AbstractIntegrationTest {
             if (op.getValue().path("tags").isEmpty()) {
                 problems.add(id + ": no tag");
             }
+            checkResponses(id, op.getValue().path("responses"), problems);
         }));
 
         assertThat(problems).isEmpty();
+    }
+
+    private static void checkResponses(String id, JsonNode responses, List<String> problems) {
+        boolean hasSuccess = false;
+        for (var it = responses.fields(); it.hasNext(); ) {
+            var response = it.next();
+            String code = response.getKey();
+            if (code.startsWith("2")) {
+                hasSuccess = true;
+                if (response.getValue().path("description").asText().isBlank()) {
+                    problems.add(id + ": " + code + " has no description");
+                }
+            } else if (code.startsWith("4") || code.startsWith("5")) {
+                response.getValue().path("content").elements().forEachRemaining(media -> {
+                    String ref = media.path("schema").path("$ref").asText();
+                    if (!ref.equals("#/components/schemas/ErrorResponse")) {
+                        problems.add(id + ": " + code + " references " + ref + " instead of ErrorResponse");
+                    }
+                });
+            }
+        }
+        if (!hasSuccess) {
+            problems.add(id + ": no 2xx response");
+        }
     }
 
     @Test

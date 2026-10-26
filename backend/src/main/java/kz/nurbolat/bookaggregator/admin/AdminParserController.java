@@ -40,6 +40,7 @@ public class AdminParserController {
      * Queues a crawl of the store; the store's queue runs it, results appear in parser_runs.
      */
     @Operation(summary = "Запустить обход магазина", description = "Ставит обход магазина в очередь; результаты появляются в parser_runs.")
+    @ApiResponse(responseCode = "202", description = "Обход поставлен в очередь")
     @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
     @ApiResponse(responseCode = "422", description = "Ошибка валидации")
     @PostMapping("/{storeCode}/run")

@@ -77,7 +77,7 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -85,6 +85,16 @@
                   "items" : {
                     "$ref" : "#/components/schemas/AdminActivityDay"
                   }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -130,7 +140,7 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -138,13 +148,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Нужна роль ADMIN"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PageResponseAdminEventResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -160,11 +180,21 @@
         "description" : "Статус БД, Redis, RabbitMQ, почты и планировщика с метриками нагрузки.",
         "operationId" : "health",
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/AdminHealthResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -202,11 +232,21 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/PageResponseReviewOfferResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -241,11 +281,21 @@
           "required" : true
         },
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ReviewOfferResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -253,9 +303,9 @@
           },
           "404" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ReviewOfferResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -263,9 +313,9 @@
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ReviewOfferResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -290,7 +340,7 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -298,13 +348,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Нужна роль ADMIN"
           },
           "404" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ReviewOfferResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -320,7 +380,7 @@
         "description" : "Последний запуск, доля успехов и circuit breaker по каждому магазину.",
         "operationId" : "parsers",
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -328,6 +388,16 @@
                   "items" : {
                     "$ref" : "#/components/schemas/AdminParserResponse"
                   }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -361,7 +431,7 @@
           }
         },
         "responses" : {
-          "403" : {
+          "202" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -369,13 +439,23 @@
                 }
               }
             },
+            "description" : "Обход поставлен в очередь"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Нужна роль ADMIN"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ParserRunQueuedResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -391,7 +471,7 @@
         "description" : "Готовые и неподтверждённые сообщения, потребители и скорость подтверждений по очередям kr.*.",
         "operationId" : "queues",
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -399,6 +479,16 @@
                   "items" : {
                     "$ref" : "#/components/schemas/QueueStats"
                   }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -414,11 +504,21 @@
         "description" : "Возвращает до 500 сообщений из очереди недоставленных в исходный обменник.",
         "operationId" : "requeue",
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/RequeueResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -443,7 +543,7 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -454,16 +554,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Нужна роль ADMIN"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/SearchQueryStat"
-                  }
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -488,7 +595,7 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -499,16 +606,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Нужна роль ADMIN"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/SearchQueryStat"
-                  }
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -533,7 +647,7 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -541,13 +655,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Нужна роль ADMIN"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AdminStatsResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -582,7 +706,7 @@
           "required" : true
         },
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -590,13 +714,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Нужна роль ADMIN"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/StoreState"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -634,11 +768,21 @@
           }
         } ],
         "responses" : {
-          "403" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/PageResponseAdminUserResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -668,6 +812,13 @@
             "description" : "Запрос принят"
           },
           "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Слишком много запросов"
           }
         },
@@ -699,11 +850,21 @@
           "required" : true
         },
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/AuthResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -711,9 +872,9 @@
           },
           "403" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AuthResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -721,9 +882,9 @@
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AuthResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -731,9 +892,9 @@
           },
           "429" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AuthResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -764,6 +925,13 @@
             "description" : "Сессия завершена"
           },
           "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Ошибка валидации"
           }
         },
@@ -795,7 +963,7 @@
           "required" : true
         },
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -803,13 +971,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Сессия недействительна или истекла"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AuthResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -848,9 +1026,9 @@
           },
           "409" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/RegisterResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -858,9 +1036,9 @@
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/RegisterResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -868,9 +1046,9 @@
           },
           "429" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/RegisterResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -901,6 +1079,13 @@
             "description" : "Запрос принят"
           },
           "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Слишком много запросов"
           }
         },
@@ -928,12 +1113,33 @@
             "description" : "Пароль изменён"
           },
           "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Токен недействителен"
           },
           "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Срок действия токена истёк"
           },
           "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Ошибка валидации"
           }
         },
@@ -961,9 +1167,23 @@
             "description" : "Email подтверждён"
           },
           "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Токен недействителен"
           },
           "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Срок действия токена истёк"
           }
         },
@@ -986,7 +1206,7 @@
           }
         } ],
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -994,6 +1214,16 @@
                   "items" : {
                     "$ref" : "#/components/schemas/BeaconResponse"
                   }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1029,9 +1259,9 @@
           },
           "401" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/BeaconResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1039,9 +1269,9 @@
           },
           "404" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/BeaconResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1049,9 +1279,9 @@
           },
           "409" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/BeaconResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1059,9 +1289,9 @@
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/BeaconResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1087,7 +1317,7 @@
           "required" : true
         },
         "responses" : {
-          "400" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1095,13 +1325,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Токен недействителен"
           },
           "401" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/UnsubscribeResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1130,9 +1370,23 @@
             "description" : "Маячок удалён"
           },
           "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Требуется авторизация"
           },
           "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Маячок не найден"
           }
         },
@@ -1162,11 +1416,21 @@
           "required" : true
         },
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/BeaconResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1174,9 +1438,9 @@
           },
           "404" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/BeaconResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1184,9 +1448,9 @@
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/BeaconResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1211,11 +1475,21 @@
           }
         } ],
         "responses" : {
-          "404" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/BookResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1241,11 +1515,21 @@
           }
         } ],
         "responses" : {
-          "404" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/EditionDetailResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1280,11 +1564,21 @@
           }
         } ],
         "responses" : {
-          "404" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/PriceHistoryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1301,7 +1595,7 @@
         "description" : "Избранные книги текущего пользователя.",
         "operationId" : "getFavorites",
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1309,6 +1603,16 @@
                   "items" : {
                     "$ref" : "#/components/schemas/BookResponse"
                   }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1336,6 +1640,13 @@
             "description" : "Книга убрана"
           },
           "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Требуется авторизация"
           }
         },
@@ -1355,7 +1666,7 @@
           }
         } ],
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1366,16 +1677,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Требуется авторизация"
           },
           "404" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "type" : "string"
-                  }
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1400,7 +1718,7 @@
           }
         } ],
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1408,6 +1726,16 @@
                   "additionalProperties" : {
                     "type" : "boolean"
                   }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1435,7 +1763,7 @@
           }
         } ],
         "responses" : {
-          "422" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1443,6 +1771,16 @@
                   "items" : {
                     "$ref" : "#/components/schemas/DropItem"
                   }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1459,11 +1797,21 @@
         "description" : "Данные текущего пользователя.",
         "operationId" : "get",
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1487,7 +1835,7 @@
           "required" : true
         },
         "responses" : {
-          "401" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1495,13 +1843,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Требуется авторизация"
           },
           "422" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/UserResponse"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1630,7 +1988,7 @@
           }
         } ],
         "responses" : {
-          "422" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1638,13 +1996,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Ошибка валидации"
           },
           "429" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PageResponseSearchItem"
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -1671,7 +2039,7 @@
           }
         } ],
         "responses" : {
-          "422" : {
+          "200" : {
             "content" : {
               "*/*" : {
                 "schema" : {
@@ -1682,16 +2050,23 @@
                 }
               }
             },
+            "description" : "OK"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
             "description" : "Ошибка валидации"
           },
           "429" : {
             "content" : {
-              "*/*" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/Suggestion"
-                  }
+                  "$ref" : "#/components/schemas/ErrorResponse"
                 }
               }
             },
@@ -2271,6 +2646,46 @@
           "sent" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "enum" : [ "VALIDATION_FAILED", "NOT_FOUND", "UNAUTHORIZED", "FORBIDDEN", "EMAIL_NOT_VERIFIED", "EMAIL_TAKEN", "INVALID_CREDENTIALS", "TOKEN_EXPIRED", "TOKEN_INVALID", "RATE_LIMITED", "CONFLICT", "SERVICE_UNAVAILABLE", "INTERNAL_ERROR" ]
+          },
+          "fieldErrors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FieldError"
+            }
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "FieldError" : {
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
           }
         }
       },
