@@ -1,6 +1,8 @@
 package kz.nurbolat.bookaggregator.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -19,13 +21,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "Admin: Offers", description = "Ручная проверка предложений")
 @RequestMapping("/api/v1/admin/offers")
 @RequiredArgsConstructor
 public class AdminOfferController {
 
     private final OfferReviewService offerReviewService;
 
-    @Operation(summary = "Offers the matcher left for manual review")
+    @Operation(summary = "Предложения на проверку", description = "Предложения, которые матчер не смог привязать к изданию.")
+    @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
     @GetMapping("/pending-review")
     ResponseEntity<PageResponse<ReviewOfferResponse>> pendingReview(
             @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -33,14 +37,19 @@ public class AdminOfferController {
         return ResponseEntity.ok(offerReviewService.pendingReview(page, size));
     }
 
-    @Operation(summary = "Link an offer to an edition")
+    @Operation(summary = "Привязать предложение", description = "Привязывает предложение к изданию.")
+    @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
+    @ApiResponse(responseCode = "404", description = "Не найдено")
+    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
     @PostMapping("/{offerId}/match")
     ResponseEntity<ReviewOfferResponse> match(@PathVariable Long offerId,
                                               @Valid @RequestBody OfferMatchRequest request) {
         return ResponseEntity.ok(offerReviewService.match(offerId, request.editionId()));
     }
 
-    @Operation(summary = "Reject an offer that is not a book")
+    @Operation(summary = "Отклонить предложение", description = "Помечает предложение как не относящееся к книгам.")
+    @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
+    @ApiResponse(responseCode = "404", description = "Не найдено")
     @PostMapping("/{offerId}/reject")
     ResponseEntity<ReviewOfferResponse> reject(@PathVariable Long offerId) {
         return ResponseEntity.ok(offerReviewService.reject(offerId));

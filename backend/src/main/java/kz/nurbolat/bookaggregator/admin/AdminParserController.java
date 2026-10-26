@@ -1,6 +1,8 @@
 package kz.nurbolat.bookaggregator.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kz.nurbolat.bookaggregator.admin.dto.AdminParserResponse;
 import kz.nurbolat.bookaggregator.admin.dto.ParserRunQueuedResponse;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@Tag(name = "Admin: Parsers", description = "Парсеры магазинов")
 @RequestMapping("/api/v1/admin/parsers")
 @RequiredArgsConstructor
 public class AdminParserController {
@@ -26,7 +29,8 @@ public class AdminParserController {
     private final ManualRunService manualRunService;
     private final AdminParserService parserService;
 
-    @Operation(summary = "Status of every store parser: last run, success rate, circuit breaker")
+    @Operation(summary = "Состояние парсеров", description = "Последний запуск, доля успехов и circuit breaker по каждому магазину.")
+    @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
     @GetMapping
     List<AdminParserResponse> parsers() {
         return parserService.parsers();
@@ -35,7 +39,9 @@ public class AdminParserController {
     /**
      * Queues a crawl of the store; the store's queue runs it, results appear in parser_runs.
      */
-    @Operation(summary = "Queue a crawl of a store")
+    @Operation(summary = "Запустить обход магазина", description = "Ставит обход магазина в очередь; результаты появляются в parser_runs.")
+    @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
+    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
     @PostMapping("/{storeCode}/run")
     ResponseEntity<ParserRunQueuedResponse> run(@PathVariable StoreCode storeCode,
                                                 @Valid @RequestBody(required = false) ParserRunRequest request) {
