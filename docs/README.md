@@ -14,6 +14,8 @@
 | [03-api-contract.md](03-api-contract.md) | REST API v1 |
 | [04-conventions.md](04-conventions.md) | Код, ошибки, логи, тесты, Git, коммиты |
 | [05-parsing-policy.md](05-parsing-policy.md) | Как парсим магазины и сопоставляем издания |
+| [performance.md](performance.md) | Замер производительности k6: поиск и карточка на холодном и тёплом кэше, параметры машины |
+| [api/openapi.json](api/openapi.json) | Экспортированная спецификация OpenAPI (проверяется тестом `OpenApiSpecIT`) |
 | [adr/](adr/) | Архитектурные решения |
 | [brand/](brand/README.md) | Логотип, иконки, цвета, правила использования |
 | [frontend/ROADMAP.md](frontend/ROADMAP.md) | План frontend-вех |
