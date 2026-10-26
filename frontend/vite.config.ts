@@ -18,6 +18,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     restoreMocks: true,
+    // Newer Node versions expose an experimental global localStorage that shadows jsdom's; disable it in test workers.
     pool: 'forks',
     poolOptions: { forks: { execArgv: ['--no-experimental-webstorage'] } },
   },

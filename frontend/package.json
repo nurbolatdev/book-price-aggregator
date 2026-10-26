@@ -2,6 +2,9 @@
   "name": "book-price-aggregator-frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.4"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
