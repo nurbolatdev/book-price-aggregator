@@ -94,6 +94,7 @@ management:
         enabled: true
 
 springdoc:
+  writer-with-order-by-keys: true
   swagger-ui:
     path: /swagger-ui.html
 

@@ -44,4 +44,25 @@ class AdminHealthServiceTest {
         assertThat(response.components().get("redis").details()).isEqualTo("Connection refused");
         assertThat(response.metrics().redisUsedMemoryBytes()).isNull();
     }
+
+    @Test
+    void shouldReportRedisAndRabbitDownTogether() {
+        Map<String, org.springframework.boot.actuate.health.HealthComponent> parts = new LinkedHashMap<>();
+        parts.put("db", Health.up().build());
+        parts.put("redis", Health.down().withDetail("error", "Connection refused").build());
+        parts.put("rabbit", Health.down().withDetail("error", "Broker unreachable").build());
+        CompositeHealth root = mock(CompositeHealth.class);
+        when(root.getStatus()).thenReturn(Status.DOWN);
+        when(root.getComponents()).thenReturn(parts);
+        when(healthEndpoint.health()).thenReturn(root);
+        when(redis.execute(any(RedisCallback.class), anyBoolean())).thenThrow(new IllegalStateException("redis is down"));
+
+        AdminHealthResponse response = service.health();
+
+        assertThat(response.status()).isEqualTo("DOWN");
+        assertThat(response.components().get("redis").status()).isEqualTo("DOWN");
+        assertThat(response.components().get("rabbit").status()).isEqualTo("DOWN");
+        assertThat(response.components().get("rabbit").details()).isEqualTo("Broker unreachable");
+        assertThat(response.components().get("db").status()).isEqualTo("UP");
+    }
 }

@@ -5,6 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse;
 import kz.nurbolat.bookaggregator.edition.dto.PriceHistoryResponse;
 import kz.nurbolat.bookaggregator.scheduler.RefreshOnDemandService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@Tag(name = "Editions", description = "Карточка издания: цены по магазинам и история цены")
+@SecurityRequirements
 @RequestMapping("/api/v1/editions")
 @RequiredArgsConstructor
 public class EditionController {
@@ -25,12 +31,16 @@ public class EditionController {
     private final RefreshOnDemandService refreshOnDemandService;
 
     /** Answers from stored prices; stale ones are refreshed in the background. */
+    @Operation(summary = "Карточка издания", description = "Отдаёт сохранённые цены; устаревшие обновляются в фоне.")
+    @ApiResponse(responseCode = "404", description = "Издание не найдено")
     @GetMapping("/{id}")
     ResponseEntity<EditionDetailResponse> getDetail(@PathVariable Long id) {
         refreshOnDemandService.requestIfStale(List.of(id));
         return ResponseEntity.ok(editionService.getDetail(id));
     }
 
+    @Operation(summary = "История цены", description = "Минимальная цена по дням за период 1M, 3M или 6M.")
+    @ApiResponse(responseCode = "404", description = "Издание не найдено")
     @GetMapping("/{id}/price-history")
     ResponseEntity<PriceHistoryResponse> getPriceHistory(
             @PathVariable Long id,

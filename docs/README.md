@@ -14,6 +14,8 @@
 | [03-api-contract.md](03-api-contract.md) | REST API v1 |
 | [04-conventions.md](04-conventions.md) | Код, ошибки, логи, тесты, Git, коммиты |
 | [05-parsing-policy.md](05-parsing-policy.md) | Как парсим магазины и сопоставляем издания |
+| [performance.md](performance.md) | Замер производительности k6: поиск и карточка на холодном и тёплом кэше, параметры машины |
+| [api/openapi.json](api/openapi.json) | Экспортированная спецификация OpenAPI (проверяется тестом `OpenApiSpecIT`) |
 | [adr/](adr/) | Архитектурные решения |
 | [brand/](brand/README.md) | Логотип, иконки, цвета, правила использования |
 | [frontend/ROADMAP.md](frontend/ROADMAP.md) | План frontend-вех |
@@ -39,8 +41,8 @@
 | [M17](backend/M17-rabbitmq.md) | RabbitMQ: очереди парсинга и событий цен | `feature/m17-rabbitmq` | ✅ |
 | [M18](backend/M18-auth-v2.md) | Auth v2: подтверждение email, refresh, сброс пароля, лимиты | `feature/m18-auth-v2` | ✅ |
 | [M19](backend/M19-beacons-notifications.md) | Маячки и email-уведомления | `feature/m19-beacons-notifications` | ✅ |
-| [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ⬜ |
-| [M21](backend/M21-quality-release.md) | Качество, CI, README, релиз backend | `feature/m21-quality-release` | ⬜ |
+| [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ✅ |
+| [M21](backend/M21-quality-release.md) | Качество, CI, README, релиз backend | `feature/m21-quality-release` | 🟡 |
 
 Фаза 3 — frontend: F1–F6, см. [frontend/ROADMAP.md](frontend/ROADMAP.md).
 Фаза 4 (по желанию): Kafka для потока цен, Telegram, ИИ-функции.

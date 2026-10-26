@@ -1,6 +1,8 @@
 package kz.nurbolat.bookaggregator.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kz.nurbolat.bookaggregator.admin.dto.QueueStats;
 import kz.nurbolat.bookaggregator.admin.dto.RequeueResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,19 +14,24 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@Tag(name = "Admin: Queues", description = "Очереди RabbitMQ")
 @RequestMapping("/api/v1/admin/queues")
 @RequiredArgsConstructor
 public class AdminQueueController {
 
     private final AdminQueueService queueService;
 
-    @Operation(summary = "Ready, unacknowledged messages, consumers and ack rate per kr.* queue")
+    @Operation(summary = "Состояние очередей", description = "Готовые и неподтверждённые сообщения, потребители и скорость подтверждений по очередям kr.*.")
+    @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
+    @ApiResponse(responseCode = "503", description = "RabbitMQ Management API недоступен")
     @GetMapping
     List<QueueStats> queues() {
         return queueService.queues();
     }
 
-    @Operation(summary = "Return up to 500 messages from the dead-letter queue to their original exchange")
+    @Operation(summary = "Вернуть из DLQ", description = "Возвращает до 500 сообщений из очереди недоставленных в исходный обменник.")
+    @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
+    @ApiResponse(responseCode = "503", description = "RabbitMQ Management API недоступен")
     @PostMapping("/dead-letter/requeue")
     RequeueResponse requeue() {
         return queueService.requeueDeadLetters();

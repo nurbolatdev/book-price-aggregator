@@ -1,5 +1,6 @@
 package kz.nurbolat.bookaggregator.beacon.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -18,11 +19,13 @@ import java.math.BigDecimal;
  */
 @ValidBeaconCondition(typeOptional = true)
 public record UpdateBeaconRequest(
-        BeaconCondition conditionType,
+        @Schema(description = "Новый тип условия; передаётся вместе с его значением") BeaconCondition conditionType,
+        @Schema(description = "Целевая цена в тенге для BELOW_PRICE", example = "4500")
         @DecimalMin(value = "0.01", message = "должно быть больше 0") @DecimalMax("10000000")
         @Digits(integer = 8, fraction = 2) BigDecimal targetPrice,
+        @Schema(description = "Падение цены в процентах для DISCOUNT_PERCENT", example = "20")
         @Min(1) @Max(90) Integer targetPercent,
-        BeaconStatus status
+        @Schema(description = "Новый статус: ACTIVE или PAUSED") BeaconStatus status
 ) implements BeaconConditionFields {
 
     @AssertTrue(message = "можно поставить только ACTIVE или PAUSED")

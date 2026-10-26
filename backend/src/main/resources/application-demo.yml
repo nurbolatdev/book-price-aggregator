@@ -1,0 +1,8 @@
+# Demo profile (docker,demo): loads the demo catalog on startup and keeps parser runs short and polite.
+app:
+  dev:
+    seed: true
+  parser:
+    max-editions-per-run: 20
+    max-discovery-per-run: 10
+    max-browse-pages-per-run: 1
