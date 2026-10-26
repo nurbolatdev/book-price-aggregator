@@ -6,7 +6,7 @@
 - **Текущая веха:** M22 — API под макеты frontend ([задание](backend/M22-api-for-ui.md)); F1 ✅ (PR #26)
 - **Ветка:** `feature/m22-api-for-ui` (ещё не создана) — от свежего `main`
 - **Статус:** не начата
-- **Следующий шаг:** scout → planner по заданию M22 (12 задач, 11 коммитов). После мерджа M22 — F2 по [`frontend/F2-home-search.md`](frontend/F2-home-search.md): ветку `feature/f2-search` пересоздать от `main` (её коммит `docs: close F1` уже не нужен — F1 закрыта здесь)
+- **Следующий шаг:** scout → planner по заданию M22 (14 задач, 13 коммитов). После мерджа M22 — F2 по [`frontend/F2-home-search.md`](frontend/F2-home-search.md): ветку `feature/f2-search` пересоздать от `main` (её коммит `docs: close F1` уже не нужен — F1 закрыта здесь)
 - **Следующая свободная миграция:** V19 (M22 использует V19 и V20)
 - **Ждёт автора:** проверить favicon и шрифты F1 в браузере; тег `v2.0.0-backend` на 8c4a9b0
 

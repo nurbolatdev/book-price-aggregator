@@ -1,6 +1,6 @@
 # M22 — API под макеты frontend
 
-**Ветка:** `feature/m22-api-for-ui` · **Зависит от:** M21 · **Оценка:** 2–3 дня
+**Ветка:** `feature/m22-api-for-ui` · **Зависит от:** M21 · **Оценка:** 3 дня
 
 ## Цель
 Закрыть пробелы между макетами (`docs/frontend/mockups/`, 23 экрана) и API: у каждой кнопки и каждого числа на экране должен быть источник данных. После M22 frontend F1–F7 не меняет backend.
@@ -75,7 +75,22 @@
 - [ ] Все сообщения валидации в DTO — на русском, как у маячков («должно быть больше 0»); проверить `RegisterRequest`, `ResetPasswordRequest`, `EmailRequest`, `UpdateProfileRequest`.
 - [ ] Описание `conditionType` в `CreateBeaconRequest`: «ANY_DROP, BELOW_PRICE или DISCOUNT_PERCENT» (сейчас `ANY_DROP` не упомянут, хотя поддерживается).
 
-### 12. Документация
+### 12. Refresh-токен в cookie `HttpOnly` — `auth/`
+Сейчас refresh-токен приходит в теле ответа и frontend хранит его в `localStorage`, откуда его может прочитать любой внедрённый скрипт (XSS). В cookie `HttpOnly` скрипт его не видит.
+- [ ] `login`, `refresh` ставят cookie `kr_refresh`: `HttpOnly`, `Secure` (кроме профиля `dev`), `SameSite=Strict`, `Path=/api/v1/auth`, `Max-Age` = срок жизни refresh-токена. `logout`, `logout-all`, смена и сброс пароля, удаление аккаунта — очищают cookie (`Max-Age=0`).
+- [ ] `refresh` и `logout` берут токен из cookie; если cookie нет — из тела (переходный режим, чтобы frontend F1 работал до F4). В ответе `refreshToken` в теле пока остаётся, помечен в Swagger `deprecated`; убрать в F4 одновременно с переходом frontend.
+- [ ] `POST /me/password` определяет текущую сессию по cookie (поле `refreshToken` в теле — только в переходном режиме).
+- [ ] CSRF: cookie уходит только на `/api/v1/auth/**` и только со своего сайта (`SameSite=Strict`, frontend и API на одном домене через nginx); дополнительно `refresh`/`logout` принимают запрос только с `Origin`, совпадающим с `app.cors.allowed-origins` (иначе 403).
+- [ ] CORS: `allowCredentials=true` для разрешённых origin.
+
+### 13. Две вкладки обновляют токен одновременно — окно повтора
+Проблема: в двух открытых вкладках истекает access-токен, обе почти одновременно шлют `POST /auth/refresh` с одним и тем же refresh-токеном. Первая ротирует его, вторая приходит со «старым» — backend считает это кражей (ADR-004) и завершает всю сессию: пользователь вылетает в обеих вкладках.
+- [ ] Окно повтора `app.jwt.refresh-reuse-grace` (по умолчанию 10 с, `JWT_REFRESH_REUSE_GRACE`): если отозванный **ротацией** токен предъявлен в течение окна после ротации, — не завершать сессию, а выдать текущий действующий токен этого семейства (тот же, что получила первая вкладка) и новый access-токен. Событие `system_events` INFO, не WARN.
+- [ ] Вне окна, а также для токена, отозванного выходом, сменой пароля или лимитом сессий, — поведение прежнее (кража → сессия завершается).
+- [ ] Ротация и выдача — в одной транзакции с блокировкой строки семейства (`SELECT … FOR UPDATE`), чтобы два параллельных запроса не создали два новых токена.
+- [ ] ADR-005 «Refresh-токен в cookie и окно повтора» в `docs/adr/` (что меняется относительно ADR-004 и почему); frontend-часть (Web Locks между вкладками) — в F4.
+
+### 14. Документация
 - [ ] `docs/03-api-contract.md`: снять пометку «план M22» у сделанного, описать форматы ответов.
 - [ ] Обновить `docs/api/openapi.json` (тест `OpenApiSpecIT`), Swagger-описания на русском, как у остальных.
 - [ ] `docs/02-data-model.md`: новые колонки, удалённая таблица.
@@ -89,6 +104,8 @@
 - [ ] `ProfileSecurityIT` — смена пароля оставляет текущее семейство и отзывает остальные; `logout-all`; удаление аккаунта (каскад, 409 для ADMIN).
 - [ ] `WeeklyDigestIT` — получатели, одно письмо в неделю, пустая подборка — без письма.
 - [ ] `AdminNotificationsIT` — фильтры, повтор только для FAILED.
+- [ ] `RefreshCookieIT` — cookie ставится при входе и обновлении с нужными атрибутами, очищается при выходе; refresh из cookie и из тела (переходный режим); чужой `Origin` → 403.
+- [ ] `RefreshReuseGraceIT` — два параллельных refresh одним токеном → оба успешны, один новый токен, сессия жива; повтор через 11 с → сессия завершена; повтор токена после logout в окне → сессия завершена.
 - [ ] `PasswordRulesIT` — 7 символов → 422 с русским сообщением у регистрации, сброса и смены пароля; вход со старым 6-символьным паролем работает.
 
 ## Критерии приёмки
@@ -108,4 +125,6 @@
 8. `feat: admin user search and notification log with retry`
 9. `refactor: remove legacy favorites`
 10. `fix: password length and russian validation messages`
-11. `docs: api contract and openapi for m22`
+11. `feat: refresh token in httponly cookie`
+12. `fix: refresh reuse grace window for parallel tabs`
+13. `docs: api contract, openapi and adr-005 for m22`

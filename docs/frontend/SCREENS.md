@@ -192,7 +192,7 @@
 
 | Элемент | Действие / данные |
 |---|---|
-| «Войти» | `POST /auth/login` → сохранить `accessToken` в памяти (Zustand), `refreshToken` — в `localStorage` (ключ `kr.refreshToken`; backend отдаёт его в теле ответа, не cookie; сделано в F1); `user` — в кэш `/me`; переход на `next` или `/` |
+| «Войти» | `POST /auth/login` → сохранить `accessToken` в памяти (Zustand); refresh-токен — в cookie `HttpOnly` (с M22/F4, ADR-005; до F4 — `localStorage`, ключ `kr.refreshToken`); `user` — в кэш `/me`; переход на `next` или `/` |
 | `INVALID_CREDENTIALS` | красная плашка над формой, поле email с красной рамкой |
 | `RATE_LIMITED` | жёлтая плашка + кнопка неактивна с отсчётом `Retry-After` |
 | «Забыли пароль?» | `/forgot-password` |

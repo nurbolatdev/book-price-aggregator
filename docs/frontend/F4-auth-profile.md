@@ -10,6 +10,11 @@
 
 ## Задачи
 
+### 0. Refresh-токен в cookie (backend сделал в M22, ADR-005)
+- [ ] API-клиент: `withCredentials: true` для `/auth/**`; `refresh` и `logout` — без тела; убрать `kr.refreshToken` из `localStorage` (при первом запуске — удалить старое значение). Восстановление сессии при старте — просто `POST /auth/refresh` (cookie уйдёт сама).
+- [ ] Между вкладками: обновление токена под `navigator.locks.request('kr-refresh', …)`; новая пара и выход рассылаются через `BroadcastChannel('kr-auth')` — вторая вкладка не шлёт свой refresh, а берёт результат первой; выход в одной вкладке — выход во всех.
+- [ ] После перехода — попросить backend убрать `refreshToken` из тела ответа (отдельный коммит `refactor(auth): drop refresh token from response body` в этой же ветке, с тестом).
+
 ### 1. Формы — общие правила
 - [ ] Новые компоненты в `src/components/ui/`: `Modal` (focus trap, Esc, возврат фокуса; на телефоне — `Sheet`), `PasswordInput` (показать/скрыть). Зависимости `react-hook-form`, `zod`, `@hookform/resolvers`.
 - [ ] React Hook Form + Zod; схемы в `features/auth/schemas.ts`: email, пароль 8–100 («Минимум 8 символов»), имя 1–100.

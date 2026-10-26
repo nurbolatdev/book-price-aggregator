@@ -193,4 +193,6 @@
 | GET | `/admin/notifications?status=&delivery=&page=` | страница `{id, createdAt, sentAt, userEmail, title, delivery, status, error}` |
 | POST | `/admin/notifications/{id}/retry` | только `FAILED` → снова `QUEUED`; иначе 409 |
 
+Refresh-токен: cookie `kr_refresh` (`HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/v1/auth`); `refresh`/`logout` читают cookie, тело — только в переходном режиме до F4. Повтор только что ротированного токена в течение 10 с не завершает сессию (две вкладки). Подробно — ADR-005 (пишется в M22).
+
 Плюс: еженедельное письмо «Подборка недели» (по флагу `weeklyDigest`, макет `docs/frontend/mockups/24-email-weekly-digest.html`); пароль при регистрации, сбросе и смене — 8–100 символов, сообщения валидации на русском.
