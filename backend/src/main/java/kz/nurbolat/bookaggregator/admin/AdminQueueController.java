@@ -23,6 +23,7 @@ public class AdminQueueController {
 
     @Operation(summary = "Состояние очередей", description = "Готовые и неподтверждённые сообщения, потребители и скорость подтверждений по очередям kr.*.")
     @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
+    @ApiResponse(responseCode = "503", description = "RabbitMQ Management API недоступен")
     @GetMapping
     List<QueueStats> queues() {
         return queueService.queues();
@@ -30,6 +31,7 @@ public class AdminQueueController {
 
     @Operation(summary = "Вернуть из DLQ", description = "Возвращает до 500 сообщений из очереди недоставленных в исходный обменник.")
     @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
+    @ApiResponse(responseCode = "503", description = "RabbitMQ Management API недоступен")
     @PostMapping("/dead-letter/requeue")
     RequeueResponse requeue() {
         return queueService.requeueDeadLetters();

@@ -88,7 +88,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -148,7 +148,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -188,7 +188,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -240,7 +240,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -289,7 +289,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -348,7 +348,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -391,7 +391,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -482,7 +482,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -493,6 +493,16 @@
               }
             },
             "description" : "Нужна роль ADMIN"
+          },
+          "503" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "RabbitMQ Management API недоступен"
           }
         },
         "summary" : "Состояние очередей",
@@ -512,7 +522,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -523,6 +533,16 @@
               }
             },
             "description" : "Нужна роль ADMIN"
+          },
+          "503" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "RabbitMQ Management API недоступен"
           }
         },
         "summary" : "Вернуть из DLQ",
@@ -554,7 +574,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -606,7 +626,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -655,7 +675,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -714,7 +734,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -776,7 +796,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "403" : {
             "content" : {
@@ -858,7 +878,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -971,7 +991,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1217,7 +1237,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1325,7 +1345,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "400" : {
             "content" : {
@@ -1424,7 +1444,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1483,7 +1503,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "404" : {
             "content" : {
@@ -1523,7 +1543,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "404" : {
             "content" : {
@@ -1572,7 +1592,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "404" : {
             "content" : {
@@ -1606,7 +1626,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1677,7 +1697,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1729,7 +1749,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1774,7 +1794,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "422" : {
             "content" : {
@@ -1805,7 +1825,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1843,7 +1863,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "401" : {
             "content" : {
@@ -1996,7 +2016,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "422" : {
             "content" : {
@@ -2050,7 +2070,7 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Успешный ответ"
           },
           "422" : {
             "content" : {

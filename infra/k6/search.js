@@ -1,8 +1,8 @@
 // k6 load test for the public read API: search and edition card.
 //
 // Usage (from the repo root, stack running):
-//   docker run --rm -i --add-host=host.docker.internal:host-gateway \
-//     -e BASE_URL=http://host.docker.internal:8080 [-e SCENARIO=cold] \
+//   docker run --rm -i --network kitapradar_default \
+//     -e BASE_URL=http://backend:8080 [-e SCENARIO=cold] \
 //     grafana/k6 run - < infra/k6/search.js
 //
 // SCENARIO=warm (default): a short fixed list of queries, repeated, so the cache is hot.

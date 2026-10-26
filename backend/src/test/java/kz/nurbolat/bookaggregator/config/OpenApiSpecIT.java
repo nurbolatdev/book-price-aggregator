@@ -37,14 +37,20 @@ class OpenApiSpecIT extends AbstractIntegrationTest {
 
     @Test
     void everyOperationHasSummaryAndTag() throws Exception {
-        JsonNode spec = fetch("/v3/api-docs");
-
         List<String> problems = new ArrayList<>();
+        for (String url : List.of("/v3/api-docs", "/v3/api-docs/public", "/v3/api-docs/user", "/v3/api-docs/admin")) {
+            checkOperations(url, fetch(url), problems);
+        }
+
+        assertThat(problems).isEmpty();
+    }
+
+    private static void checkOperations(String url, JsonNode spec, List<String> problems) {
         spec.get("paths").fields().forEachRemaining(path -> path.getValue().fields().forEachRemaining(op -> {
             if (!METHODS.contains(op.getKey())) {
                 return;
             }
-            String id = op.getKey().toUpperCase() + " " + path.getKey();
+            String id = url + " " + op.getKey().toUpperCase() + " " + path.getKey();
             if (op.getValue().path("summary").asText().isBlank()) {
                 problems.add(id + ": no summary");
             }
@@ -53,8 +59,6 @@ class OpenApiSpecIT extends AbstractIntegrationTest {
             }
             checkResponses(id, op.getValue().path("responses"), problems);
         }));
-
-        assertThat(problems).isEmpty();
     }
 
     private static void checkResponses(String id, JsonNode responses, List<String> problems) {

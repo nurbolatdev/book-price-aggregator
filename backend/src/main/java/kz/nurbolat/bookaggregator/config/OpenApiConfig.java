@@ -99,7 +99,7 @@ public class OpenApiConfig {
             }
         }
         if (!hasSuccess) {
-            ApiResponse ok = new ApiResponse().description("OK");
+            ApiResponse ok = new ApiResponse().description("Успешный ответ");
             if (successContent != null) {
                 ok.setContent(successContent);
             }

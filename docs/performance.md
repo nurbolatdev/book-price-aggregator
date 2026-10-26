@@ -65,13 +65,13 @@ docker compose up -d backend
 # 2. Холодный прогон
 docker exec kitapradar-redis redis-cli FLUSHALL
 docker restart kitapradar-backend   # дождаться healthy
-docker run --rm -i --add-host=host.docker.internal:host-gateway \
-  -e BASE_URL=http://host.docker.internal:8080 -e SCENARIO=cold \
+docker run --rm -i --network kitapradar_default \
+  -e BASE_URL=http://backend:8080 -e SCENARIO=cold \
   grafana/k6 run - < infra/k6/search.js
 
 # 3. Тёплый прогон
-docker run --rm -i --add-host=host.docker.internal:host-gateway \
-  -e BASE_URL=http://host.docker.internal:8080 \
+docker run --rm -i --network kitapradar_default \
+  -e BASE_URL=http://backend:8080 \
   grafana/k6 run - < infra/k6/search.js
 
 # 4. Вернуть RATE_LIMIT_ENABLED=true и перезапустить backend
