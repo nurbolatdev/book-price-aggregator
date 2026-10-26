@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar Admin — пользователи</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «AdminUsers». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="font-family: Onest, system-ui, sans-serif; color: #0E1A2B; background: #F4F6F8; min-height: 100vh; display: flex; flex-wrap: wrap">
+  <nav aria-label="Админ-меню" style="flex: 1 1 220px; max-width: 240px; background: #0E1A2B; color: #FFFFFF; padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; box-sizing: border-box">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 18px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg>
+      <span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 15px">Admin</span>
+    </div>
+    <a href="09-admin-overview.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Обзор</a>
+    <a href="18-admin-parsers.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Парсеры</a>
+    <a href="19-admin-queues.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Очереди RabbitMQ</a>
+    <a href="20-admin-users.html" aria-current="page" style="padding: 10px 12px; border-radius: 10px; background: #1F2E44; color: #FFFFFF; text-decoration: none; font-weight: 600">Пользователи</a>
+    <a href="21-admin-notifications.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Маячки и письма</a>
+    <a href="22-admin-matching.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Каталог и сопоставление</a>
+    <a href="23-admin-events.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Журнал событий</a>
+    <a href="01-main.html" style="margin-top: 16px; padding: 10px 12px; color: #C9D1DC; font-size: 14px">← На сайт</a>
+  </nav>
+  <main style="flex: 999 1 640px; min-width: 0; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+      <div>
+        <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 26px">Пользователи</h1>
+        <p style="margin: 4px 0 0; color: #5A6576; font-size: 14px">Всего 128 · новых за неделю 14 · подтвердили почту 117</p>
+      </div>
+      
+    </div>
+    <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+      <form style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center" role="search">
+        <label for="uq" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Поиск по email</label>
+        <input id="uq" type="search" placeholder="Поиск по email или имени" style="font: inherit; font-weight: 400; font-size: 16px; padding: 12px 14px; border: 1px solid #DDE2E8; border-radius: 10px; flex: 1 1 320px">
+        <div role="group" aria-label="Фильтр по почте" style="display: flex; flex-wrap: wrap; gap: 8px"><button type="button" aria-pressed="true" style="font: inherit; padding: 8px 14px; border-radius: 999px; border: 0; background: #0E1A2B; color: #FFFFFF; font-weight: 600; cursor: pointer">Все</button><button type="button" aria-pressed="false" style="font: inherit; padding: 8px 14px; border-radius: 999px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer; color: #0E1A2B">Подтверждённые</button><button type="button" aria-pressed="false" style="font: inherit; padding: 8px 14px; border-radius: 999px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer; color: #0E1A2B">Не подтверждённые</button></div>
+      </form>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px">
+          <thead><tr style="text-align: left; color: #5A6576; font-size: 12px"><th scope="col" style="padding: 8px 10px; font-weight: 600">Email</th><th scope="col" style="padding: 8px 10px; font-weight: 600">Имя</th><th scope="col" style="padding: 8px 10px; font-weight: 600">Регистрация</th><th scope="col" style="padding: 8px 10px; font-weight: 600">Почта</th><th scope="col" style="padding: 8px 10px; font-weight: 600">Маячков</th></tr></thead>
+          <tbody>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px">nurbo@example.com</td><td style="padding: 12px 10px">Нурболат</td><td style="padding: 12px 10px">20.10.2026</td><td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #E7F5EE; color: #0F6B45; font-size: 13px; font-weight: 600">подтверждён</span></td><td style="padding: 12px 10px">5</td></tr>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px">aigerim.s@example.com</td><td style="padding: 12px 10px">Айгерим</td><td style="padding: 12px 10px">21.10.2026</td><td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #E7F5EE; color: #0F6B45; font-size: 13px; font-weight: 600">подтверждён</span></td><td style="padding: 12px 10px">2</td></tr>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px">daniyar@example.com</td><td style="padding: 12px 10px">Данияр</td><td style="padding: 12px 10px">22.10.2026</td><td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #E7F5EE; color: #0F6B45; font-size: 13px; font-weight: 600">подтверждён</span></td><td style="padding: 12px 10px">11</td></tr>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px">aliya.k@example.com</td><td style="padding: 12px 10px">Алия</td><td style="padding: 12px 10px">23.10.2026</td><td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #FFF4E0; color: #8A4B00; font-size: 13px; font-weight: 600">не подтверждён</span></td><td style="padding: 12px 10px">1</td></tr>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px">test.user@example.com</td><td style="padding: 12px 10px">Тест</td><td style="padding: 12px 10px">25.10.2026</td><td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #FFF4E0; color: #8A4B00; font-size: 13px; font-weight: 600">не подтверждён</span></td><td style="padding: 12px 10px">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; color: #5A6576">
+        <span>Показаны 1–5 из 128 · по 20 на странице</span>
+        <div style="display: flex; gap: 6px"><button type="button" disabled style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer; color: #0E1A2B; min-height: 40px; opacity: 0.5">Назад</button><button type="button" style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer; color: #0E1A2B; min-height: 40px">Вперёд</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

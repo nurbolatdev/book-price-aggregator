@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar — карточка книги</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «Book». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="font-family: Onest, system-ui, sans-serif; color: #0E1A2B; background: #F4F6F8; min-height: 100vh">
+
+<header style="background: #FFFFFF; border-bottom: 1px solid #DDE2E8">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 20px">
+    <a href="01-main.html" style="display: flex; align-items: center; gap: 10px; color: #0E1A2B; text-decoration: none">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg>
+      <span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 18px">KitapRadar</span>
+    </a>
+    <form style="flex: 1 1 360px; display: flex; align-items: center; gap: 10px; background: #F4F6F8; border: 1px solid #DDE2E8; border-radius: 12px; padding: 0 14px; height: 46px">
+      <label for="q3" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Поиск книги</label>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6576" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+      <input id="q3" type="search" placeholder="Название, автор или ISBN" style="border: 0; outline: none; font: inherit; font-size: 16px; flex-grow: 1; background: transparent">
+    </form>
+    <a href="05-beacons.html" style="color: #0E1A2B; text-decoration: none; font-weight: 500">Мои маячки</a>
+    <a href="10-login.html" style="padding: 9px 16px; border-radius: 10px; border: 1px solid #DDE2E8; color: #0E1A2B; text-decoration: none; font-weight: 600">Войти</a>
+  </div>
+</header>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 64px; display: flex; flex-direction: column; gap: 24px">
+  <nav aria-label="Навигация" style="font-size: 14px; color: #5A6576; display: flex; gap: 8px; flex-wrap: wrap">
+    <a href="01-main.html">Главная</a><span>/</span><a href="02-search.html">Поиск «Мастер и Маргарита»</a><span>/</span><span>Мастер и Маргарита</span>
+  </nav>
+
+  <section style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+    <div style="flex: 0 0 260px; height: 380px; border-radius: 14px; background: #FCE3D3; display: flex; align-items: end; padding: 24px; box-sizing: border-box; font-family: Unbounded, sans-serif; font-size: 24px; line-height: 1.2">Мастер и Маргарита</div>
+
+    <div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 700; font-size: 36px; line-height: 1.15">Мастер и Маргарита</h1>
+      <span style="font-size: 18px; color: #5A6576">Михаил Булгаков</span>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-weight: 600; font-size: 14px">Издание</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <button type="button" aria-pressed="true" style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 2px solid #0E1A2B; background: #FFFFFF; cursor: pointer">АСТ 2023 · твёрдый</button>
+          <button type="button" aria-pressed="false" style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer">Азбука 2022 · мягкий</button>
+          <button type="button" aria-pressed="false" style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer">Эксмо 2021 · подарочное</button>
+        </div>
+      </div>
+      <dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; font-size: 14px">
+        <dt style="color: #5A6576">ISBN</dt><dd style="margin: 0">978-5-17-090630-4</dd>
+        <dt style="color: #5A6576">Страниц</dt><dd style="margin: 0">480</dd>
+        <dt style="color: #5A6576">Язык</dt><dd style="margin: 0">Русский</dd>
+      </dl>
+      <p style="margin: 0; line-height: 1.6; color: #34404F">Роман о визите дьявола в Москву 1930-х, о Мастере, его романе о Понтии Пилате и о Маргарите, готовой на всё ради любви.</p>
+    </div>
+
+    <aside style="flex: 1 1 300px; max-width: 360px; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+      <span style="color: #5A6576; font-size: 14px">Лучшая цена сейчас</span>
+      <span style="font-size: 40px; font-weight: 700; line-height: 1">3 150 ₸</span>
+      <span style="font-size: 15px"><strong>Flip.kz</strong> · в наличии · доставка 1–2 дня</span>
+      <span style="display: inline-flex; align-self: flex-start; gap: 6px; align-items: center; padding: 6px 10px; border-radius: 8px; background: #E7F5EE; color: #0F6B45; font-size: 14px; font-weight: 600">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 17-8.5-8.5-5 5L2 7" /><path d="M16 17h6v-6" /></svg>
+        Ниже средней за 3 месяца на 12%
+      </span>
+      <a href="#offers" style="display: flex; justify-content: center; align-items: center; gap: 8px; padding: 14px; border-radius: 12px; background: #0E1A2B; color: #FFFFFF; text-decoration: none; font-weight: 600">Перейти в Flip.kz
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
+      </a>
+      <a href="04-beacon-modal.html" style="display: flex; justify-content: center; align-items: center; gap: 8px; padding: 14px; border-radius: 12px; background: #C2410C; color: #FFFFFF; text-decoration: none; font-weight: 600">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+        Следить за ценой
+      </a>
+      <span style="font-size: 13px; color: #5A6576; line-height: 1.5">Обновлено 2 часа назад. Цена на сайте магазина может отличаться.</span>
+    </aside>
+  </section>
+
+  <section id="offers" style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 22px">
+    <h2 style="margin: 0 0 16px; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 22px">Цены в 3 магазинах</h2>
+    <div style="overflow-x: auto">
+      <table style="width: 100%; border-collapse: collapse; font-size: 15px; min-width: 720px">
+        <thead>
+          <tr style="text-align: left; color: #5A6576; font-size: 13px">
+            <th scope="col" style="padding: 10px 12px; font-weight: 600">Магазин</th>
+            <th scope="col" style="padding: 10px 12px; font-weight: 600">Цена</th>
+            <th scope="col" style="padding: 10px 12px; font-weight: 600">Было</th>
+            <th scope="col" style="padding: 10px 12px; font-weight: 600">Доставка</th>
+            <th scope="col" style="padding: 10px 12px; font-weight: 600">Наличие</th>
+            <th scope="col" style="padding: 10px 12px; font-weight: 600">Обновлено</th>
+            <th scope="col" style="padding: 10px 12px"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Действие</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr style="border-top: 1px solid #EDF0F3; background: #F1FAF5">
+              <td style="padding: 14px 12px; font-weight: 600">Flip.kz</td>
+              <td style="padding: 14px 12px; font-weight: 700; font-size: 17px">3 150 ₸</td>
+              <td style="padding: 14px 12px; color: #5A6576; text-decoration: line-through">3 850 ₸</td>
+              <td style="padding: 14px 12px">1–2 дня, Алматы</td>
+              <td style="padding: 14px 12px">В наличии</td>
+              <td style="padding: 14px 12px; color: #5A6576">2 ч назад</td>
+              <td style="padding: 14px 12px; text-align: right"><a href="#offers" style="font-weight: 600">В магазин</a></td>
+            </tr>
+          
+            <tr style="border-top: 1px solid #EDF0F3; background: #FFFFFF">
+              <td style="padding: 14px 12px; font-weight: 600">Ozon</td>
+              <td style="padding: 14px 12px; font-weight: 700; font-size: 17px">3 720 ₸</td>
+              <td style="padding: 14px 12px; color: #5A6576; text-decoration: line-through"></td>
+              <td style="padding: 14px 12px">5–7 дней</td>
+              <td style="padding: 14px 12px">В наличии</td>
+              <td style="padding: 14px 12px; color: #5A6576">4 ч назад</td>
+              <td style="padding: 14px 12px; text-align: right"><a href="#offers" style="font-weight: 600">В магазин</a></td>
+            </tr>
+          
+            <tr style="border-top: 1px solid #EDF0F3; background: #FFFFFF">
+              <td style="padding: 14px 12px; font-weight: 600">Meloman</td>
+              <td style="padding: 14px 12px; font-weight: 700; font-size: 17px">3 990 ₸</td>
+              <td style="padding: 14px 12px; color: #5A6576; text-decoration: line-through"></td>
+              <td style="padding: 14px 12px">Самовывоз</td>
+              <td style="padding: 14px 12px">Нет в наличии</td>
+              <td style="padding: 14px 12px; color: #5A6576">5 ч назад</td>
+              <td style="padding: 14px 12px; text-align: right"><a href="#offers" style="font-weight: 600">В магазин</a></td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+      <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 22px">История минимальной цены</h2>
+      <div role="group" aria-label="Период" style="display: flex; gap: 4px; background: #F4F6F8; border-radius: 10px; padding: 4px">
+        <button type="button" style="font: inherit; font-size: 14px; padding: 6px 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer">1 мес</button>
+        <button type="button" aria-pressed="true" style="font: inherit; font-size: 14px; padding: 6px 12px; border: 0; border-radius: 8px; background: #FFFFFF; font-weight: 600; cursor: pointer">3 мес</button>
+        <button type="button" style="font: inherit; font-size: 14px; padding: 6px 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer">6 мес</button>
+      </div>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px">
+      <span><span style="color: #5A6576">Минимум:</span> <strong>3 150 ₸</strong></span>
+      <span><span style="color: #5A6576">Средняя:</span> <strong>3 580 ₸</strong></span>
+      <span><span style="color: #5A6576">Максимум:</span> <strong>3 990 ₸</strong></span>
+    </div>
+    <svg viewBox="0 0 800 240" style="width: 100%; height: auto" role="img" aria-label="График: минимальная цена снизилась с 3 990 до 3 150 тенге за 3 месяца">
+      <g stroke="#EDF0F3" stroke-width="1">
+        <line x1="40" y1="20" x2="780" y2="20" /><line x1="40" y1="83" x2="780" y2="83" /><line x1="40" y1="147" x2="780" y2="147" /><line x1="40" y1="210" x2="780" y2="210" />
+      </g>
+      <g font-family="Onest, sans-serif" font-size="12" fill="#5A6576">
+        <text x="0" y="24">4 200</text><text x="0" y="87">3 800</text><text x="0" y="151">3 400</text><text x="0" y="214">3 000</text>
+        <text x="40" y="234">июль</text><text x="400" y="234">август</text><text x="720" y="234">октябрь</text>
+      </g>
+      <polyline fill="none" stroke="#C2410C" stroke-width="3" stroke-linejoin="round" points="40,53 100,53 160,75 220,75 280,96 340,53 400,113 460,113 520,148 580,113 640,150 700,186 760,186" />
+      <circle cx="760" cy="186" r="6" fill="#C2410C" />
+    </svg>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 16px">
+    <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 22px">Похожие книги</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px">
+      <a href="03-book.html" style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; color: #0E1A2B; text-decoration: none"><strong>Собачье сердце</strong><span style="color: #5A6576; font-size: 14px">М. Булгаков</span><span style="font-weight: 700">от 1 450 ₸</span></a>
+      <a href="03-book.html" style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; color: #0E1A2B; text-decoration: none"><strong>Белая гвардия</strong><span style="color: #5A6576; font-size: 14px">М. Булгаков</span><span style="font-weight: 700">от 2 100 ₸</span></a>
+      <a href="03-book.html" style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; color: #0E1A2B; text-decoration: none"><strong>Двенадцать стульев</strong><span style="color: #5A6576; font-size: 14px">И. Ильф, Е. Петров</span><span style="font-weight: 700">от 2 350 ₸</span></a>
+      <a href="03-book.html" style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; color: #0E1A2B; text-decoration: none"><strong>Пикник на обочине</strong><span style="color: #5A6576; font-size: 14px">А. и Б. Стругацкие</span><span style="font-weight: 700">от 1 990 ₸</span></a>
+    </div>
+  </section>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar Admin — очереди</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «AdminQueues». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="font-family: Onest, system-ui, sans-serif; color: #0E1A2B; background: #F4F6F8; min-height: 100vh; display: flex; flex-wrap: wrap">
+  <nav aria-label="Админ-меню" style="flex: 1 1 220px; max-width: 240px; background: #0E1A2B; color: #FFFFFF; padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; box-sizing: border-box">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 18px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg>
+      <span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 15px">Admin</span>
+    </div>
+    <a href="09-admin-overview.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Обзор</a>
+    <a href="18-admin-parsers.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Парсеры</a>
+    <a href="19-admin-queues.html" aria-current="page" style="padding: 10px 12px; border-radius: 10px; background: #1F2E44; color: #FFFFFF; text-decoration: none; font-weight: 600">Очереди RabbitMQ</a>
+    <a href="20-admin-users.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Пользователи</a>
+    <a href="21-admin-notifications.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Маячки и письма</a>
+    <a href="22-admin-matching.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Каталог и сопоставление</a>
+    <a href="23-admin-events.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Журнал событий</a>
+    <a href="01-main.html" style="margin-top: 16px; padding: 10px 12px; color: #C9D1DC; font-size: 14px">← На сайт</a>
+  </nav>
+  <main style="flex: 999 1 640px; min-width: 0; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+      <div>
+        <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 26px">Очереди RabbitMQ</h1>
+        <p style="margin: 4px 0 0; color: #5A6576; font-size: 14px">Обновляется каждые 30 секунд, пока вкладка открыта · exchange kr.events, DLX kr.dlx</p>
+      </div>
+      
+    </div>
+    <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 18px">Очереди</h2>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px">
+          <thead><tr style="text-align: left; color: #5A6576; font-size: 12px"><th scope="col" style="padding: 8px 10px; font-weight: 600">Очередь</th><th scope="col" style="padding: 8px 10px; font-weight: 600">Готовы к обработке</th><th scope="col" style="padding: 8px 10px; font-weight: 600">В работе (unacked)</th><th scope="col" style="padding: 8px 10px; font-weight: 600">Консьюмеры</th><th scope="col" style="padding: 8px 10px; font-weight: 600">Скорость подтверждения</th></tr></thead>
+          <tbody>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px"><code style="font-size: 13px">kr.parse.requests</code><br><span style="color: #5A6576; font-size: 13px">задачи на парсинг</span></td><td style="padding: 12px 10px">12</td><td style="padding: 12px 10px">3</td><td style="padding: 12px 10px">2</td><td style="padding: 12px 10px">38/мин</td></tr>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px"><code style="font-size: 13px">kr.price.changed</code><br><span style="color: #5A6576; font-size: 13px">события изменения цены</span></td><td style="padding: 12px 10px">0</td><td style="padding: 12px 10px">0</td><td style="padding: 12px 10px">2</td><td style="padding: 12px 10px">120/мин</td></tr>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px"><code style="font-size: 13px">kr.notification.email</code><br><span style="color: #5A6576; font-size: 13px">письма к отправке</span></td><td style="padding: 12px 10px">4</td><td style="padding: 12px 10px">1</td><td style="padding: 12px 10px">1</td><td style="padding: 12px 10px">6/мин</td></tr>
+            <tr style="border-top: 1px solid #EDF0F3"><td style="padding: 12px 10px"><code style="font-size: 13px">kr.dead-letter</code><br><span style="color: #5A6576; font-size: 13px">сообщения с ошибкой</span></td><td style="padding: 12px 10px"><strong style="color: #A11B1B">7</strong></td><td style="padding: 12px 10px">0</td><td style="padding: 12px 10px">0</td><td style="padding: 12px 10px">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; border-color: #F3C4C4">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+        <div>
+          <h2 style="margin: 0; font-size: 18px">Dead letter: 7 сообщений</h2>
+          <p style="margin: 4px 0 0; color: #5A6576; font-size: 14px">Сообщения, которые не удалось обработать после повторов. Перед возвратом проверьте журнал событий.</p>
+        </div>
+        <button type="button" style="font: inherit; padding: 12px 18px; border-radius: 10px; border: 0; background: #0E1A2B; color: #FFFFFF; font-weight: 600; cursor: pointer">Вернуть в работу</button>
+      </div>
+      <div role="status" style="padding: 12px 14px; border-radius: 10px; background: #E7F5EE; color: #0F6B45; font-size: 14px">Возвращено 6, пропущено 1 (неизвестная очередь назначения).</div>
+      <a href="23-admin-events.html" style="font-weight: 600; font-size: 14px">Открыть журнал событий с уровнем ERROR</a>
+    </section>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar — поиск на телефоне</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «SearchMobile». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F6F8; font-family: Onest, system-ui, sans-serif; color: #0E1A2B; display: flex; flex-direction: column; overflow: hidden">
+  <header style="background: #FFFFFF; border-bottom: 1px solid #DDE2E8; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <a href="01-main.html" style="display: flex; align-items: center; gap: 8px; color: #0E1A2B; text-decoration: none"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg><span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 16px">KitapRadar</span></a>
+      <a href="05-beacons.html" aria-label="Мои маячки" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #0E1A2B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></a>
+    </div>
+    <form style="display: flex; align-items: center; gap: 8px; background: #F4F6F8; border: 1px solid #DDE2E8; border-radius: 12px; padding: 0 12px; height: 46px">
+      <label for="qm" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Поиск книги</label>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6576" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+      <input id="qm" type="search" value="Мастер и Маргарита" style="border: 0; outline: none; font: inherit; font-size: 16px; flex-grow: 1; min-width: 0; background: transparent">
+    </form>
+  </header>
+  <div style="padding: 12px; display: flex; gap: 8px; align-items: center">
+    <a href="17-filters-mobile.html" style="display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-radius: 10px; border: 1px solid #DDE2E8; background: #FFFFFF; color: #0E1A2B; text-decoration: none; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M7 12h10" /><path d="M10 18h4" /></svg> Фильтры · 2</a>
+    <label style="flex-grow: 1; display: flex"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Сортировка</span>
+      <select style="font: inherit; width: 100%; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px; background: #FFFFFF"><option>Сначала дешевле</option></select>
+    </label>
+  </div>
+  <p style="margin: 0 12px 8px; color: #5A6576; font-size: 14px">Найдено 12 изданий</p>
+  <div style="padding: 0 12px; display: flex; flex-direction: column; gap: 10px; overflow: hidden">
+    <article style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 12px; display: flex; gap: 12px">
+      <div style="width: 64px; height: 92px; border-radius: 6px; background: #FCE3D3; flex-shrink: 0"></div>
+      <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+        <a href="07-book-mobile.html" style="color: #0E1A2B; text-decoration: none; font-weight: 700">Мастер и Маргарита</a>
+        <span style="font-size: 13px; color: #5A6576">АСТ 2023 · твёрдый · 3 магазина</span>
+        <span style="display: flex; align-items: baseline; gap: 6px; margin-top: auto"><strong style="font-size: 18px">3 150 ₸</strong><span style="font-size: 13px; color: #0F6B45; font-weight: 600">Flip.kz</span></span>
+      </div>
+      <a href="04-beacon-modal.html" aria-label="Поставить маячок" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #DDE2E8; color: #C2410C; align-self: flex-end"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></a>
+    </article>
+    <article style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 12px; display: flex; gap: 12px">
+      <div style="width: 64px; height: 92px; border-radius: 6px; background: #F7EDD0; flex-shrink: 0"></div>
+      <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+        <a href="07-book-mobile.html" style="color: #0E1A2B; text-decoration: none; font-weight: 700">Мастер и Маргарита</a>
+        <span style="font-size: 13px; color: #5A6576">Азбука 2022 · мягкий · 2 магазина</span>
+        <span style="display: flex; align-items: baseline; gap: 6px; margin-top: auto"><strong style="font-size: 18px">1 890 ₸</strong><span style="font-size: 13px; color: #0F6B45; font-weight: 600">Ozon</span></span>
+      </div>
+      <a href="04-beacon-modal.html" aria-label="Поставить маячок" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #DDE2E8; color: #C2410C; align-self: flex-end"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></a>
+    </article>
+    <article style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 12px; display: flex; gap: 12px">
+      <div style="width: 64px; height: 92px; border-radius: 6px; background: #E3E7F0; flex-shrink: 0"></div>
+      <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+        <a href="07-book-mobile.html" style="color: #0E1A2B; text-decoration: none; font-weight: 700">Мастер и Маргарита (подарочное)</a>
+        <span style="font-size: 13px; color: #5A6576">Эксмо 2021 · 2 магазина</span>
+        <span style="display: flex; align-items: baseline; gap: 6px; margin-top: auto"><strong style="font-size: 18px">9 400 ₸</strong><span style="font-size: 13px; color: #0F6B45; font-weight: 600">Meloman</span></span>
+      </div>
+      <a href="04-beacon-modal.html" aria-label="Поставить маячок" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #DDE2E8; color: #C2410C; align-self: flex-end"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></a>
+    </article>
+    <article style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 12px; display: flex; gap: 12px">
+      <div style="width: 64px; height: 92px; border-radius: 6px; background: #DCE8FB; flex-shrink: 0"></div>
+      <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+        <a href="07-book-mobile.html" style="color: #0E1A2B; text-decoration: none; font-weight: 700">Мастер и Маргарита</a>
+        <span style="font-size: 13px; color: #5A6576">Махаон 2020 · твёрдый · 1 магазин</span>
+        <span style="display: flex; align-items: baseline; gap: 6px; margin-top: auto"><strong style="font-size: 18px">4 200 ₸</strong><span style="font-size: 13px; color: #0F6B45; font-weight: 600">Flip.kz</span></span>
+      </div>
+      <a href="04-beacon-modal.html" aria-label="Поставить маячок" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #DDE2E8; color: #C2410C; align-self: flex-end"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg></a>
+    </article>
+  </div>
+</div>
+</body>
+</html>

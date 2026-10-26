@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar — подтверждение email</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «VerifyEmail». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="width: 960px; height: 560px; box-sizing: border-box; background: #F4F6F8; font-family: Onest, system-ui, sans-serif; color: #0E1A2B; padding: 40px; display: grid; gap: 32px; grid-template-columns: repeat(2, minmax(0, 1fr))">
+  <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 20px; padding: 30px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
+    <span style="font-size: 13px; color: #5A6576; font-weight: 600">/verify-email?token=… · успех (204)</span>
+    <div style="width: 64px; height: 64px; border-radius: 16px; background: #E7F5EE; display: flex; align-items: center; justify-content: center; color: #0F6B45"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></div>
+    <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 24px">Почта подтверждена</h1>
+    <p style="margin: 0; color: #34404F; line-height: 1.6">Готово, <strong>nurbo@example.com</strong> подтверждён. Теперь маячки будут присылать письма, когда цена упадёт.</p>
+    <a href="05-beacons.html" style="padding: 13px 20px; border-radius: 12px; background: #C2410C; color: #FFFFFF; text-decoration: none; font-weight: 700">К моим маячкам</a>
+    <a href="01-main.html" style="font-weight: 600; font-size: 14px">На главную</a>
+  </section>
+  <form style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 20px; padding: 30px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start">
+    <span style="font-size: 13px; color: #5A6576; font-weight: 600">Ссылка недействительна или устарела</span>
+    <div style="width: 64px; height: 64px; border-radius: 16px; background: #FFF4E0; display: flex; align-items: center; justify-content: center; color: #8A4B00"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg></div>
+    <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 24px">Ссылка не сработала</h1>
+    <p style="margin: 0; color: #34404F; line-height: 1.6">Ссылка уже использована или прошло больше 24 часов. Отправим новую.</p>
+    <label style="display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 14px; align-self: stretch">Email
+      <input type="email" value="nurbo@example.com" style="font: inherit; font-weight: 400; font-size: 16px; padding: 12px 14px; border: 1px solid #DDE2E8; border-radius: 10px">
+    </label>
+    <button type="submit" style="font: inherit; padding: 12px 18px; border-radius: 10px; border: 0; background: #0E1A2B; color: #FFFFFF; font-weight: 600; cursor: pointer">Отправить письмо ещё раз</button>
+  </form>
+</div>
+</body>
+</html>

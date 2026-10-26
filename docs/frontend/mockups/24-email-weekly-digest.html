@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Письмо: подборка недели</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Письмо еженедельной подборки (M22, задача 8), стиль как у письма 06. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="width: 600px; box-sizing: border-box; background: #EEF1F4; font-family: Onest, Arial, sans-serif; color: #0E1A2B; display: flex; flex-direction: column">
+  <div style="background: #FFFFFF; border-bottom: 1px solid #DDE2E8; padding: 14px 20px; display: flex; flex-direction: column; gap: 4px; font-size: 13px">
+    <span><span style="color: #5A6576">От:</span> KitapRadar &lt;alerts@kitapradar.local&gt;</span>
+    <span><span style="color: #5A6576">Тема:</span> <strong>Подборка недели: 8 книг подешевели до −32%</strong></span>
+  </div>
+
+  <div style="padding: 28px 24px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg>
+      <span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 17px">KitapRadar</span>
+    </div>
+
+    <div style="background: #FFFFFF; border-radius: 16px; padding: 26px; display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="color: #5A6576; font-size: 13px">Подборка недели · 19–26 октября</span>
+        <h1 style="margin: 0; font-size: 24px; line-height: 1.25">Нурболат, эти книги сильнее всего подешевели за неделю</h1>
+      </div>
+
+      <!-- Карточка книги: повторяется до 8 раз (подборка «подешевели за неделю», тот же сервис, что /home/drops) -->
+      <a href="03-book.html" style="display: flex; gap: 14px; align-items: center; padding: 12px; border: 1px solid #EDF0F3; border-radius: 12px; text-decoration: none; color: inherit">
+        <div style="width: 56px; height: 80px; border-radius: 6px; background: #FCE3D3; flex-shrink: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0">
+          <strong style="font-size: 15px">Мастер и Маргарита</strong>
+          <span style="color: #5A6576; font-size: 13px">М. Булгаков · Flip.kz</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+          <strong style="font-size: 17px">3 150 ₸</strong>
+          <span style="font-size: 12px; font-weight: 700; color: #0F6B45; background: #E7F5EE; border-radius: 6px; padding: 2px 6px">−18%</span>
+        </div>
+      </a>
+      <a href="03-book.html" style="display: flex; gap: 14px; align-items: center; padding: 12px; border: 1px solid #EDF0F3; border-radius: 12px; text-decoration: none; color: inherit">
+        <div style="width: 56px; height: 80px; border-radius: 6px; background: #DCE8FB; flex-shrink: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0">
+          <strong style="font-size: 15px">Атомные привычки</strong>
+          <span style="color: #5A6576; font-size: 13px">Джеймс Клир · Meloman</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+          <strong style="font-size: 17px">4 290 ₸</strong>
+          <span style="font-size: 12px; font-weight: 700; color: #0F6B45; background: #E7F5EE; border-radius: 6px; padding: 2px 6px">−32%</span>
+        </div>
+      </a>
+      <a href="03-book.html" style="display: flex; gap: 14px; align-items: center; padding: 12px; border: 1px solid #EDF0F3; border-radius: 12px; text-decoration: none; color: inherit">
+        <div style="width: 56px; height: 80px; border-radius: 6px; background: #E2F1E6; flex-shrink: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0">
+          <strong style="font-size: 15px">Абай жолы</strong>
+          <span style="color: #5A6576; font-size: 13px">Мұхтар Әуезов · Ozon</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+          <strong style="font-size: 17px">5 600 ₸</strong>
+          <span style="font-size: 12px; font-weight: 700; color: #0F6B45; background: #E7F5EE; border-radius: 6px; padding: 2px 6px">−21%</span>
+        </div>
+      </a>
+      <span style="color: #5A6576; font-size: 13px; text-align: center">…и ещё 5 книг</span>
+
+      <a href="01-main.html" style="display: block; text-align: center; padding: 15px; border-radius: 12px; background: #C2410C; color: #FFFFFF; text-decoration: none; font-weight: 700; font-size: 16px">Все скидки недели</a>
+      <span style="font-size: 13px; color: #5A6576; text-align: center">Хотите знать о конкретной книге? Поставьте на неё маячок — письмо придёт, как только цена упадёт.</span>
+    </div>
+
+    <p style="margin: 0; font-size: 12px; color: #5A6576; line-height: 1.6; text-align: center">Вы получили это письмо, потому что включили еженедельную подборку на KitapRadar. Цены собраны автоматически 26.10.2026 в 10:00 и могут измениться.<br><a href="14-profile.html">Отключить подборку</a> · <a href="14-profile.html">Настройки уведомлений</a></p>
+  </div>
+</div>
+</body>
+</html>

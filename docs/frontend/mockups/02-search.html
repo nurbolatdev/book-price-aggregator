@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar — результаты поиска</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «Search». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="font-family: Onest, system-ui, sans-serif; color: #0E1A2B; background: #F4F6F8; min-height: 100vh">
+
+<header style="background: #FFFFFF; border-bottom: 1px solid #DDE2E8">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 20px">
+    <a href="01-main.html" style="display: flex; align-items: center; gap: 10px; color: #0E1A2B; text-decoration: none">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg>
+      <span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 18px">KitapRadar</span>
+    </a>
+    <form style="flex: 1 1 360px; display: flex; align-items: center; gap: 10px; background: #F4F6F8; border: 1px solid #DDE2E8; border-radius: 12px; padding: 0 14px; height: 46px">
+      <label for="q2" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Поиск книги</label>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6576" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+      <input id="q2" type="search" value="Мастер и Маргарита" style="border: 0; outline: none; font: inherit; font-size: 16px; flex-grow: 1; background: transparent">
+    </form>
+    <a href="05-beacons.html" style="display: flex; align-items: center; gap: 8px; color: #0E1A2B; text-decoration: none; font-weight: 500">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+      Мои маячки
+    </a>
+    <a href="10-login.html" style="padding: 9px 16px; border-radius: 10px; border: 1px solid #DDE2E8; color: #0E1A2B; text-decoration: none; font-weight: 600">Войти</a>
+  </div>
+</header>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 24px 56px; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+
+  <aside aria-label="Фильтры" style="flex: 1 1 240px; max-width: 280px; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 22px">
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <legend style="font-weight: 700; margin-bottom: 10px">Магазины</legend>
+            <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox" checked> Flip.kz <span style="margin-left: auto; color: #5A6576; font-size: 14px">6</span></label>
+      <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox" checked> Meloman <span style="margin-left: auto; color: #5A6576; font-size: 14px">4</span></label>
+            <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox" checked> Ozon <span style="margin-left: auto; color: #5A6576; font-size: 14px">8</span></label>
+    </fieldset>
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <legend style="font-weight: 700; margin-bottom: 10px">Цена, ₸</legend>
+      <div style="display: flex; gap: 8px">
+        <label style="flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A6576">от<input type="number" placeholder="0" style="font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid #DDE2E8; border-radius: 8px; width: 100%; box-sizing: border-box"></label>
+        <label style="flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A6576">до<input type="number" placeholder="10 000" style="font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid #DDE2E8; border-radius: 8px; width: 100%; box-sizing: border-box"></label>
+      </div>
+    </fieldset>
+    <label style="display: flex; gap: 10px; align-items: center; font-weight: 600"><input type="checkbox" checked> Только в наличии</label>
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <legend style="font-weight: 700; margin-bottom: 10px">Переплёт</legend>
+      <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox"> Твёрдый</label>
+      <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox"> Мягкий</label>
+    </fieldset>
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <legend style="font-weight: 700; margin-bottom: 10px">Язык</legend>
+      <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox" checked> Русский</label>
+      <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox"> Қазақша</label>
+      <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox"> English</label>
+    </fieldset>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+      <div>
+        <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 24px">«Мастер и Маргарита»</h1>
+        <p style="margin: 4px 0 0; color: #5A6576">Найдено 12 изданий</p>
+      </div>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 15px">Сортировка
+        <select style="font: inherit; padding: 9px 12px; border: 1px solid #DDE2E8; border-radius: 10px; background: #FFFFFF">
+          <option>Сначала дешевле</option>
+          <option>Максимальная скидка</option>
+          <option>По релевантности</option>
+          <option>Больше магазинов</option>
+        </select>
+      </label>
+    </div>
+
+    
+      <article style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 18px; display: flex; flex-wrap: wrap; gap: 20px">
+        <div style="width: 110px; height: 160px; border-radius: 8px; background: #FCE3D3; flex-shrink: 0; display: flex; align-items: end; padding: 10px; box-sizing: border-box; font-family: Unbounded, sans-serif; font-size: 12px">Мастер и Маргарита</div>
+        <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+          <a href="03-book.html" style="color: #0E1A2B; text-decoration: none; font-size: 19px; font-weight: 700">Мастер и Маргарита</a>
+          <span style="color: #5A6576">М. Булгаков · АСТ, 2023, твёрдый переплёт, 480 с.</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px">
+            
+              <span style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DDE2E8; font-size: 14px; background: #E7F5EE">Flip <strong>3 150 ₸</strong></span>
+            
+              <span style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DDE2E8; font-size: 14px; background: #FFFFFF">Ozon <strong>3 720 ₸</strong></span>
+            
+              <span style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DDE2E8; font-size: 14px; background: #FFFFFF">Meloman <strong>3 990 ₸</strong></span>
+            
+          </div>
+        </div>
+        <div style="flex: 0 1 220px; display: flex; flex-direction: column; gap: 10px; align-items: stretch">
+          <span style="color: #5A6576; font-size: 13px">Лучшая цена</span>
+          <span style="font-size: 26px; font-weight: 700">3 150 ₸</span>
+          <span style="font-size: 14px; color: #0F6B45; font-weight: 600">Flip.kz · в наличии</span>
+          <div style="display: flex; gap: 8px">
+            <a href="03-book.html" style="flex-grow: 1; text-align: center; padding: 11px 12px; border-radius: 10px; background: #0E1A2B; color: #FFFFFF; text-decoration: none; font-weight: 600">Сравнить</a>
+            <a href="04-beacon-modal.html" aria-label="Поставить маячок" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #DDE2E8; color: #C2410C">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+    
+      <article style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 18px; display: flex; flex-wrap: wrap; gap: 20px">
+        <div style="width: 110px; height: 160px; border-radius: 8px; background: #F7EDD0; flex-shrink: 0; display: flex; align-items: end; padding: 10px; box-sizing: border-box; font-family: Unbounded, sans-serif; font-size: 12px">Мастер и Маргарита</div>
+        <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+          <a href="03-book.html" style="color: #0E1A2B; text-decoration: none; font-size: 19px; font-weight: 700">Мастер и Маргарита</a>
+          <span style="color: #5A6576">М. Булгаков · Азбука, 2022, мягкая обложка, 512 с.</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px">
+            
+              <span style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DDE2E8; font-size: 14px; background: #E7F5EE">Ozon <strong>1 890 ₸</strong></span>
+            
+              <span style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DDE2E8; font-size: 14px; background: #FFFFFF">Flip <strong>2 040 ₸</strong></span>
+            
+          </div>
+        </div>
+        <div style="flex: 0 1 220px; display: flex; flex-direction: column; gap: 10px; align-items: stretch">
+          <span style="color: #5A6576; font-size: 13px">Лучшая цена</span>
+          <span style="font-size: 26px; font-weight: 700">1 890 ₸</span>
+          <span style="font-size: 14px; color: #0F6B45; font-weight: 600">Ozon · в наличии</span>
+          <div style="display: flex; gap: 8px">
+            <a href="03-book.html" style="flex-grow: 1; text-align: center; padding: 11px 12px; border-radius: 10px; background: #0E1A2B; color: #FFFFFF; text-decoration: none; font-weight: 600">Сравнить</a>
+            <a href="04-beacon-modal.html" aria-label="Поставить маячок" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #DDE2E8; color: #C2410C">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+    
+      <article style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 18px; display: flex; flex-wrap: wrap; gap: 20px">
+        <div style="width: 110px; height: 160px; border-radius: 8px; background: #E3E7F0; flex-shrink: 0; display: flex; align-items: end; padding: 10px; box-sizing: border-box; font-family: Unbounded, sans-serif; font-size: 12px">Подарочное издание</div>
+        <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+          <a href="03-book.html" style="color: #0E1A2B; text-decoration: none; font-size: 19px; font-weight: 700">Мастер и Маргарита (подарочное издание)</a>
+          <span style="color: #5A6576">М. Булгаков · Эксмо, 2021, иллюстрации, 640 с.</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px">
+            
+              <span style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DDE2E8; font-size: 14px; background: #E7F5EE">Meloman <strong>9 400 ₸</strong></span>
+            
+              <span style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DDE2E8; font-size: 14px; background: #FFFFFF">Flip <strong>10 200 ₸</strong></span>
+            
+          </div>
+        </div>
+        <div style="flex: 0 1 220px; display: flex; flex-direction: column; gap: 10px; align-items: stretch">
+          <span style="color: #5A6576; font-size: 13px">Лучшая цена</span>
+          <span style="font-size: 26px; font-weight: 700">9 400 ₸</span>
+          <span style="font-size: 14px; color: #0F6B45; font-weight: 600">Meloman · в наличии</span>
+          <div style="display: flex; gap: 8px">
+            <a href="03-book.html" style="flex-grow: 1; text-align: center; padding: 11px 12px; border-radius: 10px; background: #0E1A2B; color: #FFFFFF; text-decoration: none; font-weight: 600">Сравнить</a>
+            <a href="04-beacon-modal.html" aria-label="Поставить маячок" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid #DDE2E8; color: #C2410C">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+            </a>
+          </div>
+        </div>
+      </article>
+    
+
+    <div style="display: flex; justify-content: center; padding-top: 8px">
+      <button type="button" style="font: inherit; padding: 12px 24px; border-radius: 10px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer">Показать ещё 9 изданий</button>
+    </div>
+  </main>
+</div>
+</div>
+</body>
+</html>
