@@ -44,7 +44,17 @@
 | [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ✅ |
 | [M21](backend/M21-quality-release.md) | Качество, CI, README, релиз backend | `feature/m21-quality-release` | ✅ |
 
-Фаза 3 — frontend: F1–F6, см. [frontend/ROADMAP.md](frontend/ROADMAP.md).
+Фаза 3 — frontend (объём — [frontend/ROADMAP.md](frontend/ROADMAP.md)):
+
+| Веха | Название | Ветка | Статус |
+|---|---|---|---|
+| [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент | `feature/f1-foundation` | ⬜ |
+| F2 | Главная и поиск | `feature/f2-search` | ⬜ |
+| F3 | Карточка издания | `feature/f3-edition-page` | ⬜ |
+| F4 | Auth и профиль | `feature/f4-auth` | ⬜ |
+| F5 | Маячки | `feature/f5-beacons` | ⬜ |
+| F6 | Админ-панель | `feature/f6-admin` | ⬜ |
+| F7 | Полировка, доступность, CI frontend | `feature/f7-polish` | ⬜ |
 Фаза 4 (по желанию): Kafka для потока цен, Telegram, ИИ-функции.
 
 Обозначения статуса: ⬜ не начато · 🟡 в работе · ✅ готово (смерджено в main).
