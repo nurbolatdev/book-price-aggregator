@@ -51,7 +51,7 @@ Frontend остался от M0–M11 (JavaScript, `.jsx`). Он вызывае�
 - [ ] README: раздел про frontend (команды `dev`, `lint`, `test`, `gen:api`).
 
 ## Критерии приёмки
-- [ ] `npm run lint`, `npm test`, `npm run build` зелёные; `bash .claude/gate.sh` → `GATE PASS`.
+- [ ] `npm run lint`, `npm test`, `npm run build` зелёные.
 - [ ] Тесты: перехватчик refresh (один refresh на несколько параллельных 401, повтор запросов, выход при неудачном refresh), `ApiError`, `formatPrice`, Error Boundary, toasts, `RequireAuth`.
 - [ ] В вкладке браузера — favicon KitapRadar, шрифты Unbounded/Onest загружаются.
 - [ ] Каждая страница — отдельный чанк в `dist/assets`; основной чанк < 200 КБ gzip.
