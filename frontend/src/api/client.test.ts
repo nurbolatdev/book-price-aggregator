@@ -125,4 +125,75 @@ describe('api client', () => {
     await expect(api.get('/me')).rejects.toMatchObject({ code: 'NETWORK_ERROR' })
     expect(localStorage.getItem('kr.refreshToken')).toBe('r1')
   })
+
+  it('keeps the refresh token on 429 and rejects with RATE_LIMITED', async () => {
+    startSession()
+    mockApi((config) =>
+      config.url === '/auth/refresh'
+        ? [429, { status: 429, code: 'RATE_LIMITED', message: 'slow down' }]
+        : [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }],
+    )
+    await expect(api.get('/me')).rejects.toMatchObject({ code: 'RATE_LIMITED' })
+    expect(localStorage.getItem('kr.refreshToken')).toBe('r1')
+  })
+
+  it('keeps the refresh token and status on 503', async () => {
+    startSession()
+    mockApi((config) =>
+      config.url === '/auth/refresh'
+        ? [503, { status: 503, code: 'SERVICE_UNAVAILABLE', message: 'down' }]
+        : [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }],
+    )
+    await expect(api.get('/me')).rejects.toMatchObject({ status: 503 })
+    expect(localStorage.getItem('kr.refreshToken')).toBe('r1')
+    expect(useAuthStore.getState().status).toBe('authenticated')
+  })
+
+  it('drops the refresh result when the session was cleared meanwhile', async () => {
+    startSession()
+    mockApi(async (config) => {
+      if (config.url === '/auth/refresh') {
+        useAuthStore.getState().clearSession()
+        return [200, authBody('new', 'r2')]
+      }
+      return [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }]
+    })
+    await expect(api.get('/me')).rejects.toBeInstanceOf(ApiError)
+    expect(useAuthStore.getState().status).toBe('anonymous')
+    expect(localStorage.getItem('kr.refreshToken')).toBeNull()
+  })
+
+  it('clears the session when a 2xx refresh body is incomplete', async () => {
+    startSession()
+    mockApi((config) =>
+      config.url === '/auth/refresh'
+        ? [200, { accessToken: 'new' }]
+        : [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }],
+    )
+    await expect(api.get('/me')).rejects.toBeInstanceOf(ApiError)
+    expect(useAuthStore.getState().status).toBe('anonymous')
+    expect(localStorage.getItem('kr.refreshToken')).toBeNull()
+  })
+
+  it('retries with the current token without refreshing when it changed meanwhile', async () => {
+    startSession('old', 'r1')
+    let refreshCalls = 0
+    const seen: string[] = []
+    mockApi((config) => {
+      if (config.url === '/auth/refresh') {
+        refreshCalls += 1
+        return [200, authBody('x', 'rx')]
+      }
+      const auth = authorizationOf(config.headers)
+      seen.push(auth)
+      if (auth === 'Bearer old') {
+        startSession('new', 'r2')
+        return [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }]
+      }
+      return [200, {}]
+    })
+    await api.get('/me')
+    expect(refreshCalls).toBe(0)
+    expect(seen).toEqual(['Bearer old', 'Bearer new'])
+  })
 })

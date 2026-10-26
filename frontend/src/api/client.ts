@@ -35,13 +35,22 @@ async function doRefresh(): Promise<void> {
     clearSession()
     throw new ApiError(401, 'UNAUTHORIZED', ERROR_MESSAGES.UNAUTHORIZED)
   }
+  let data: AuthResponse
   try {
-    const { data } = await api.post<AuthResponse>('/auth/refresh', { refreshToken })
-    setSession(data)
+    data = (await api.post<AuthResponse>('/auth/refresh', { refreshToken })).data
   } catch (e) {
     const error = toApiError(e)
-    if (error.status >= 400 && error.status < 500) clearSession()
+    if (error.status === 401 && getRefreshToken() === refreshToken) clearSession()
     throw error
+  }
+  if (getRefreshToken() !== refreshToken) {
+    throw new ApiError(401, 'UNAUTHORIZED', ERROR_MESSAGES.UNAUTHORIZED)
+  }
+  try {
+    setSession(data)
+  } catch {
+    clearSession()
+    throw new ApiError(500, 'INTERNAL_ERROR', ERROR_MESSAGES.INTERNAL_ERROR)
   }
 }
 
