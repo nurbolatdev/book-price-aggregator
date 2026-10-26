@@ -48,7 +48,7 @@
 
 | Веха | Название | Ветка | Статус |
 |---|---|---|---|
-| [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент | `feature/f1-foundation` | ⬜ |
+| [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент | `feature/f1-foundation` | 🟡 |
 | F2 | Главная и поиск | `feature/f2-search` | ⬜ |
 | F3 | Карточка издания | `feature/f3-edition-page` | ⬜ |
 | F4 | Auth и профиль | `feature/f4-auth` | ⬜ |
