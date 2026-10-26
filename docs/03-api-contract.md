@@ -172,5 +172,25 @@
 | Путь | Судьба |
 |---|---|
 | `/api/alerts/**` | удаляется в M13 (заменён маячками) |
-| `/api/favorites/**` | переносится на `/api/v1/favorites` в M12, удаляется в F3 вместе с переходом фронта |
+| `/api/v1/favorites/**` | перенесён в M12, **удаляется в M22** (таблица `favorites` — миграцией V20); новый frontend избранное не использует |
 | `/api/books/search` | заменяется `/api/v1/search` в M14 |
+
+## 8. План M22 — API под макеты frontend
+Источник требований — `docs/frontend/SCREENS.md` (пометки **[M22]**), задание — `docs/backend/M22-api-for-ui.md`. После M22 пометка «план» снимается, описания переносятся в разделы выше.
+
+| Метод | Путь | Что меняется / ответ |
+|---|---|---|
+| GET | `/search` | `q` необязателен: без `q` — режим каталога (сортировка по умолчанию `STORES_DESC`, `RELEVANCE` без `q` → 422, в `search_log` не пишется); `binding` и `language` принимают списки через запятую |
+| GET | `/search/facets` | те же фильтры, что у `/search`; `{stores:[{code,count}], bindings:[{value,count}], languages:[{value,count}]}`; каждый счётчик — без учёта собственного фильтра; число изданий |
+| GET | `/search/popular?limit=6` | `["Мастер и Маргарита", …]` — топ запросов за 7 дней с результатами, дополняется списком из настроек; публично, кэш 1 ч |
+| GET | `/home/drops` | в элементе добавляется `storesCount` |
+| GET | `/editions/{id}/similar?limit=4` | `[{bookId, editionId, title, author, coverUrl, bestPrice}]`; сначала тот же автор |
+| GET | `/beacons?editionId=41` | фильтр по изданию (0 или 1 элемент); в элементе добавляются `currentBestUrl`, `createdAt`, `statusChangedAt` |
+| POST | `/me/password` | `{currentPassword, newPassword, refreshToken}` → 204; неверный текущий → 422 `fieldErrors.currentPassword`; отзываются все сессии, кроме текущей |
+| POST | `/auth/logout-all` | авторизованный → 204, отзывает все сессии |
+| DELETE | `/me` | `{password}` → 204, каскадное удаление; ADMIN → 409 |
+| GET | `/admin/users?q=&verified=&page=` | поиск по email/имени, фильтр подтверждения |
+| GET | `/admin/notifications?status=&delivery=&page=` | страница `{id, createdAt, sentAt, userEmail, title, delivery, status, error}` |
+| POST | `/admin/notifications/{id}/retry` | только `FAILED` → снова `QUEUED`; иначе 409 |
+
+Плюс: еженедельное письмо «Подборка недели» (по флагу `weeklyDigest`, макет `docs/frontend/mockups/24-email-weekly-digest.html`); пароль при регистрации, сбросе и смене — 8–100 символов, сообщения валидации на русском.
