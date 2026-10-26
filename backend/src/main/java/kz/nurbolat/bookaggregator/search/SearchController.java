@@ -8,6 +8,10 @@ import kz.nurbolat.bookaggregator.scheduler.RefreshOnDemandService;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem;
 import kz.nurbolat.bookaggregator.search.dto.SearchRequest;
 import kz.nurbolat.bookaggregator.search.dto.Suggestion;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@Tag(name = "Search", description = "Поиск изданий и подсказки")
+@SecurityRequirements
 @RequestMapping("/api/v1/search")
 @RequiredArgsConstructor
 public class SearchController {
@@ -28,6 +34,9 @@ public class SearchController {
     private final RefreshOnDemandService refreshOnDemandService;
 
     /** The first page also refreshes stale prices of its editions in the background. */
+    @Operation(summary = "Поиск изданий", description = "Ищет по названию, автору или ISBN; фильтры по магазинам, цене, переплёту и языку.")
+    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
+    @ApiResponse(responseCode = "429", description = "Слишком много запросов")
     @GetMapping
     ResponseEntity<PageResponse<SearchItem>> search(@Valid @ParameterObject SearchRequest request) {
         PageResponse<SearchItem> page = searchService.search(request);
@@ -37,6 +46,9 @@ public class SearchController {
         return ResponseEntity.ok(page);
     }
 
+    @Operation(summary = "Подсказки поиска", description = "Варианты для строки ввода от 2 символов.")
+    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
+    @ApiResponse(responseCode = "429", description = "Слишком много запросов")
     @GetMapping("/suggest")
     ResponseEntity<List<Suggestion>> suggest(@RequestParam @NotBlank @Size(min = 2, max = 200) String q) {
         return ResponseEntity.ok(suggestionService.suggest(q));

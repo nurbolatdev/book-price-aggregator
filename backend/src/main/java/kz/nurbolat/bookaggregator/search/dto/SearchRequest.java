@@ -22,14 +22,14 @@ public record SearchRequest(
         @NotBlank @Size(min = 2, max = 200) String q,
         @Schema(description = "Коды магазинов через запятую", example = "FLIP,KASPI")
         List<StoreCode> stores,
-        @PositiveOrZero BigDecimal minPrice,
-        @PositiveOrZero BigDecimal maxPrice,
-        @Schema(defaultValue = "true") Boolean inStock,
-        Binding binding,
-        @Pattern(regexp = "ru|kk|en") String language,
-        @Schema(defaultValue = "RELEVANCE") SearchSort sort,
-        @Schema(defaultValue = "0") @Min(0) Integer page,
-        @Schema(defaultValue = "20") @Min(1) @Max(50) Integer size
+        @Schema(description = "Минимальная цена в тенге", example = "1000") @PositiveOrZero BigDecimal minPrice,
+        @Schema(description = "Максимальная цена в тенге", example = "10000") @PositiveOrZero BigDecimal maxPrice,
+        @Schema(description = "Только издания в наличии", defaultValue = "true") Boolean inStock,
+        @Schema(description = "Переплёт") Binding binding,
+        @Schema(description = "Язык: ru, kk или en", example = "ru") @Pattern(regexp = "ru|kk|en") String language,
+        @Schema(description = "Сортировка", defaultValue = "RELEVANCE") SearchSort sort,
+        @Schema(description = "Номер страницы с нуля", defaultValue = "0") @Min(0) Integer page,
+        @Schema(description = "Размер страницы, до 50", defaultValue = "20") @Min(1) @Max(50) Integer size
 ) {
 
     public SearchRequest {
