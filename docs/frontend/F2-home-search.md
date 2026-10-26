@@ -1,14 +1,28 @@
-# F2 — Главная, поиск, каталог, скидки
+# F2 — Добор фундамента, главная, поиск, каталог, скидки
 
-**Ветка:** `feature/f2-home-search` · **Зависит от:** F1 · **Оценка:** 3 дня
+**Ветка:** `feature/f2-search` · **Зависит от:** F1, M22 · **Оценка:** 4 дня
 
 ## Цель
 Пользователь находит книгу: главная с поиском и подсказками, результаты с фильтрами в URL, каталог без строки поиска, страница «Скидки недели». Всё совпадает с макетами 01, 02, 16, 17, 25.
+
+F1 сделана по более узкому заданию, поэтому F2 начинается с **добора фундамента** (задача 0): без него ни F2, ни следующие вехи нельзя сверить с макетами.
 
 ## Перед началом прочитать
 `docs/frontend/SCREENS.md` — §1 и экраны «01 · Главная», «02 · Результаты поиска»; макеты `01-main`, `02-search`, `16-search-mobile`, `17-filters-mobile`, `25-main-mobile`, состояния в `15-states`; `docs/03-api-contract.md` — `GET /search` (параметры), `/search/suggest`, `/search/facets`, `/search/popular`, `/home/drops`, `/stores`.
 
 ## Задачи
+
+### 0. Добор фундамента (то, чего нет после F1) — коммиты 1–3
+Опираться на то, что уже есть: `src/components/ui` (Skeleton, Toaster), `src/components/layout` (AppLayout, Header, Footer), `src/api` (client, errors, schema), `src/stores` (auth, toast), `src/lib/format.ts`. Не переписывать готовое — дополнять.
+- [ ] **Компоненты по макету 15** в `src/components/ui/`: `Button` (primary/secondary/dark/ghost; 40/44/48/52 px; загрузка), `IconButton` (обязателен `aria-label`), `Input`, `Checkbox`, `Radio`, `Select`, `Field` (подпись, подсказка, ошибка), `Chip` (с числом и состоянием), `Badge` (ok/warn/danger/neutral/good), `PriceTag`, `Cover` (lazy-картинка, фиксированный размер, цветная заглушка по `editionId % 6`), `Sheet` (нижняя панель на телефоне), `Alert` (info/warn/danger/offline), `EmptyState`, `ErrorBlock` («Не удалось загрузить… Повторить»), `NotFound` по макету 15. `Modal`, `Tabs`, `PasswordInput` — в F4/F5, когда понадобятся.
+- [ ] **Иконки** — `lucide-react`. **Утилиты** в `src/lib/`: `formatRelative`, `pluralRu`, `languageName`, `coverColor`, хуки `useDebounce`, `useMediaQuery`, `useOnline`.
+- [ ] **Шапка двух вариантов** (`SCREENS.md` §1 «Шапка»): А — навигация «Каталог / Скидки недели / Мои маячки», Б — поле поиска; меню пользователя по макету 15; на телефоне — логотип + иконки + меню «≡» (макеты 16, 25, 26). Подвал — по макету 01.
+- [ ] **Маршруты** `/catalog` и `/deals` (lazy), остальные новые маршруты из `SCREENS.md` добавляются в своих вехах.
+- [ ] **Моки MSW** (`msw`): обработчики для эндпоинтов F2 с фикстурами из данных макетов (`src/mocks/`), режим `npm run dev:mock` без backend. Тесты страниц — на MSW (существующий `src/test/mockAdapter.ts` оставить для тестов клиента).
+- [ ] **Снимки для сверки:** `npm run screens` (Playwright) — открывает приложение в режиме моков и сохраняет снимки маршрутов из `e2e/screens.config.ts` при 1280 и 390 px в `frontend/screens/` (в `.gitignore`). Список пополняется в каждой вехе.
+- [ ] **CI frontend** `.github/workflows/frontend.yml`: при изменениях `frontend/**` или `docs/api/openapi.json` — `npm ci`, `lint`, `test`, `build`, и `npm run gen:api` не меняет `schema.d.ts` (`git diff --exit-code`).
+- [ ] Шрифты из Google Fonts оставить как сделано в F1; если favicon или шрифты не грузятся в собранном образе — исправить здесь.
+
 
 ### 1. Поле поиска с подсказками — `features/search/SearchBox.tsx`
 - [ ] Один компонент для главной (крупный, макет 01/25) и шапки варианта Б (макет 02/16).
@@ -27,7 +41,7 @@
 - [ ] Левая колонка фильтров (макет 02): «Магазины» (чекбоксы включённых магазинов, числа из `GET /search/facets`), «Цена, ₸ от/до» (применяется по blur/Enter), «Только в наличии» (по умолчанию вкл.), «Переплёт», «Язык» (несколько значений, числа из facets). Значения с нулём — неактивны, но видны.
 - [ ] Сортировка: `RELEVANCE` (по умолчанию при `q`, скрыта на `/catalog`), `PRICE_ASC`, `DISCOUNT_DESC`, `STORES_DESC` (по умолчанию на `/catalog`).
 - [ ] Заголовок ««{q}»» + «Найдено N изданий»; на `/catalog` — «Каталог».
-- [ ] Карточка результата `EditionResultCard` (макет 02): обложка, название → `/editions/{id}`, «автор · издательство, год, переплёт», чипы цен по магазинам (лучшая — `good-soft`), справа лучшая цена, «Сравнить», кнопка-колокольчик (гость → вход с `returnTo=/editions/{id}?beacon=1`; вошёл → окно маячка из F5 — до F5 ведёт на карточку с `?beacon=1`). Prefetch `GET /editions/{id}` при наведении/фокусе.
+- [ ] Карточка результата `EditionResultCard` (макет 02): обложка, название → `/editions/{id}`, «автор · издательство, год, переплёт», чипы цен по магазинам (лучшая — `good-soft`), справа лучшая цена, «Сравнить», кнопка-колокольчик (гость → вход с `next=/editions/{id}?beacon=1`; вошёл → окно маячка из F5 — до F5 ведёт на карточку с `?beacon=1`). Prefetch `GET /editions/{id}` при наведении/фокусе.
 - [ ] Телефон (макеты 16, 17): кнопка «Фильтры · N» открывает `Sheet` с теми же фильтрами, «Показать N изданий» (число из facets) применяет и закрывает, «Сбросить» очищает; сортировка — `select` рядом.
 - [ ] Пусто — блок «Ничего не нашли» (макет 15) с «Сбросить фильтры» и «Часто ищут»; ошибка — `ErrorBlock`; загрузка — 3 скелетона карточки.
 
@@ -42,19 +56,24 @@
 - [ ] `useSearchFilters.test.ts` — чтение/запись URL, сброс страницы при смене фильтра, списки `binding`/`language`.
 - [ ] `SearchPage.test.tsx` (MSW) — «Показать ещё» дописывает, пустой результат, ошибка с «Повторить».
 - [ ] `HomePage.test.tsx` — тёмный блок только гостю, выключенные магазины серой фразой.
+- [ ] Тесты новых компонентов: `Button` (загрузка блокирует повторный клик), `Sheet` (Esc закрывает, фокус возвращается), `Cover` (заглушка без `coverUrl`).
 
 ## Критерии приёмки
+- [ ] CI frontend зелёный на PR; `npm run dev:mock` открывает приложение без backend.
 - [ ] Снимки `npm run screens` для `/`, `/search`, `/catalog` при 1280 и 390 px совпадают с макетами 01, 02, 16, 17, 25: порядок блоков, тексты, размеры, отступы, цвета.
 - [ ] Фильтры и сортировка восстанавливаются из URL после перезагрузки; кнопка «Назад» возвращает предыдущие фильтры.
 - [ ] Подсказки не отправляют больше одного запроса на паузу ввода; устаревшие ответы не перетирают новые.
 - [ ] Нет сдвигов вёрстки при загрузке (CLS < 0.1 в Lighthouse), обложки с фиксированными размерами.
 - [ ] Клавиатура: всё доступно Tab/Enter/Esc, фокус виден.
-- [ ] `npm run lint`, `typecheck`, `test`, `build` зелёные, CI frontend проходит.
+- [ ] `npm run lint`, `test`, `build` (включает `tsc`) зелёные, CI frontend проходит.
 
 ## План коммитов
-1. `feat: search box with suggestions`
-2. `feat: home page with popular queries and weekly drops`
-3. `feat: search results with url filters and facets`
-4. `feat: catalog and deals pages`
-5. `feat: mobile search and filters sheet`
-6. `test: home and search screens`
+1. `feat(frontend): ui components from states mockup`
+2. `feat(frontend): header variants, mobile menu and new routes`
+3. `build(frontend): msw mocks, screenshot script and frontend ci`
+4. `feat: search box with suggestions`
+5. `feat: home page with popular queries and weekly drops`
+6. `feat: search results with url filters and facets`
+7. `feat: catalog and deals pages`
+8. `feat: mobile search and filters sheet`
+9. `test: home and search screens`

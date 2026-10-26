@@ -29,7 +29,7 @@
 
 Фаза 1 (готово): M0–M11 — каркас, домен, поиск, кэш, JWT, избранное, алерты, история цен, React, Docker.
 
-**Порядок строгий:** сначала все backend-вехи M12 → M22, затем frontend F1 → F7, затем v2. В работе одновременно только одна веха; следующая начинается после мерджа предыдущей.
+**Порядок строгий:** backend M12 → M21, frontend F1, затем **M22** (API под макеты), затем F2 → F7, затем v2. В работе одновременно только одна веха; следующая начинается после мерджа предыдущей.
 
 Фаза 2 — backend:
 
@@ -51,13 +51,13 @@
 
 | Веха | Название | Ветка | Статус |
 |---|---|---|---|
-| [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент, компоненты, CI | `feature/f1-foundation` | ⬜ |
-| [F2](frontend/F2-home-search.md) | Главная, поиск, каталог, скидки | `feature/f2-home-search` | ⬜ |
-| [F3](frontend/F3-edition.md) | Карточка издания | `feature/f3-edition` | ⬜ |
-| [F4](frontend/F4-auth-profile.md) | Вход, регистрация, пароль, профиль | `feature/f4-auth-profile` | ⬜ |
+| [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент | `feature/f1-foundation` | ✅ |
+| [F2](frontend/F2-home-search.md) | Добор фундамента (компоненты, моки, снимки, CI) + главная, поиск, каталог, скидки | `feature/f2-search` | ⬜ |
+| [F3](frontend/F3-edition.md) | Карточка издания | `feature/f3-edition-page` | ⬜ |
+| [F4](frontend/F4-auth-profile.md) | Вход, регистрация, пароль, профиль | `feature/f4-auth` | ⬜ |
 | [F5](frontend/F5-beacons.md) | Маячки | `feature/f5-beacons` | ⬜ |
 | [F6](frontend/F6-admin.md) | Админ-панель | `feature/f6-admin` | ⬜ |
-| [F7](frontend/F7-polish-release.md) | Полировка, доступность, скорость, релиз | `feature/f7-polish-release` | ⬜ |
+| [F7](frontend/F7-polish-release.md) | Полировка, доступность, скорость, релиз | `feature/f7-polish` | ⬜ |
 Фаза 4 (по желанию): Kafka для потока цен, Telegram, ИИ-функции.
 
 Обозначения статуса: ⬜ не начато · 🟡 в работе · ✅ готово (смерджено в main).

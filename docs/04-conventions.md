@@ -111,8 +111,8 @@ V.. — ...
 - Новая переменная окружения → добавить в `.env.example` с комментарием и в `docker-compose.yml`.
 
 ## 9. Frontend (вехи F1–F7)
-- **Структура `frontend/src/`:** `app/` (провайдеры, роутер, layout), `pages/<Page>Page.tsx` (одна страница — один lazy-модуль), `features/<feature>/` (компоненты и хуки одной функции: `search`, `edition`, `beacons`, `auth`, `admin`), `shared/ui/` (общие компоненты), `shared/lib/` (форматирование, хуки), `api/` (клиент, `schema.d.ts`, `queryKeys`), `mocks/` (MSW).
-- **TypeScript strict**, без `any` и `@ts-ignore`. Типы ответов — только из `api/schema.d.ts` (генерируется из `docs/api/openapi.json`).
+- **Структура `frontend/src/`** (заложена в F1): `app/` (провайдеры, роутер), `pages/<Page>Page.tsx` (одна страница — один lazy-модуль), `features/<feature>/` (компоненты и хуки одной функции: `search`, `edition`, `beacons`, `auth`, `admin`), `components/ui/` (общие компоненты), `components/layout/` (шапка, подвал, layout), `components/auth/` (защита маршрутов), `lib/` (форматирование, хуки), `stores/` (Zustand: сессия, toasts), `api/` (клиент, ошибки, `schema.d.ts`), `mocks/` (MSW), `test/`.
+- **TypeScript strict**, без `any` и `@ts-ignore`. Типы ответов — только из `api/schema.d.ts` (`npm run gen:api` из `docs/api/openapi.json`).
 - **Имена:** компоненты `PascalCase.tsx`, хуки `useXxx.ts`, тесты рядом `Xxx.test.tsx`. Тексты интерфейса — на русском прямо в компонентах, как в макетах.
 - **Стили:** только Tailwind-классы и токены из `tailwind.config.ts`; произвольные значения (`w-[372px]`) — только если так в макете. Inline-стили и новые цвета вне макетов не вводить.
 - **Данные:** все запросы через TanStack Query; ключи — из `queryKeys`; состояние фильтров — в URL; глобальное состояние (Zustand) — только сессия.

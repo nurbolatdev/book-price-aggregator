@@ -56,7 +56,7 @@
 - [ ] `WeeklyDigestScheduler` — по понедельникам в 10:00 Asia/Almaty (`app.scheduler.weekly-digest-cron`), ShedLock.
 - [ ] Получатели: `weekly_digest = true` и `email_verified = true`. Содержание: до 8 изданий из подборки «подешевели за неделю» (тот же сервис, что `/home/drops`); если подборка пуста — письмо не отправляется.
 - [ ] Письмо идёт через ту же надёжную доставку, что письма маячков (таблица `notifications` и RabbitMQ). Миграция **V19** (та же или следующая): `notifications.delivery` допускает `WEEKLY`, `beacon_id` уже необязателен. Не больше одного письма в неделю на пользователя (уникальность по пользователю и ISO-неделе).
-- [ ] Шаблон `weekly-digest.html` — по макету `docs/frontend/mockups/24-email-weekly-digest.html` (стиль письма 06): заголовок, карточки книг с ценой и скидкой, кнопка «Все скидки недели» → `/deals`; внизу ссылка «Отключить подборку» → `/settings`.
+- [ ] Шаблон `weekly-digest.html` — по макету `docs/frontend/mockups/24-email-weekly-digest.html` (стиль письма 06): заголовок, карточки книг с ценой и скидкой, кнопка «Все скидки недели» → `/deals`; внизу ссылка «Отключить подборку» → `/profile`.
 
 ### 9. Админка: поиск пользователей и журнал писем — `admin/`
 - [ ] `GET /api/v1/admin/users?q=&verified=&page=&size=` — `q` ищет по email и имени (ILIKE), `verified` — `true|false`.

@@ -60,7 +60,7 @@
 - [ ] Код админки не попадает в чанки пользовательских страниц (`npm run analyze`).
 - [ ] Опрос останавливается, когда вкладка скрыта.
 - [ ] Опасные действия (выключение магазина, возврат DLQ) — только после подтверждения.
-- [ ] `npm run lint`, `typecheck`, `test`, `build` зелёные, CI frontend проходит.
+- [ ] `npm run lint`, `test`, `build` (включает `tsc`) зелёные, CI frontend проходит.
 
 ## План коммитов
 1. `feat: admin layout, polling and access guard`
