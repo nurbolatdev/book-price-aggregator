@@ -58,32 +58,35 @@ flowchart LR
 ```text
 backend/src/main/java/kz/nurbolat/bookaggregator/
 ├── BookAggregatorApplication.java
-├── common/                  # общее: ApiError, исключения, PageResponse, утилиты текста
-│   ├── error/               #   GlobalExceptionHandler, ErrorCode, ApiError
-│   └── text/                #   TextNormalizer (нормализация названий для поиска)
-├── config/                  # Spring-конфиги: Async, Redis, RabbitMQ, OpenAPI, Web, Clock
-├── security/                # JWT, фильтр, SecurityConfig, rate limit (Bucket4j)
-├── user/                    # пользователь, регистрация, вход, профиль
-├── auth/                    # email verification, refresh tokens, сброс пароля
-├── book/                    # книга (произведение) — Book, BookRepository
-├── edition/                 # издание: Edition, EditionService, EditionController
-├── store/                   # справочник магазинов: Store, StoreCode (enum)
+├── common/
+│   ├── error/               # GlobalExceptionHandler, ErrorCode, ErrorResponse, AppException
+│   ├── text/                # TextNormalizer, IsbnUtils, Money, Hashing
+│   └── web/                 # PageResponse, TraceIdFilter
+├── config/                  # AppProperties, SecurityConfig, RedisConfig, OpenApiConfig, SchedulingConfig, TimeConfig
+├── security/                # JwtService, JwtAuthFilter, ratelimit/ (Bucket4j)
+├── user/                    # регистрация, вход, профиль, AdminBootstrap
+├── auth/                    # email verification, refresh tokens, сброс пароля, очистка токенов
+├── book/                    # Book, BookService, CatalogService, BookController
+├── edition/                 # Edition, EditionService, история цен, EditionController
+├── store/                   # Store, StoreCode, StoreController
 ├── offer/                   # Offer, PriceHistory, OfferIngestionService (upsert + событие)
-├── search/                  # SearchService (pg_trgm), фильтры, подсказки, SearchLog
+├── search/                  # SearchService (pg_trgm), подсказки, SearchLogWriter, CatalogSeeder
+├── favorite/                # избранное: Favorite, FavoriteService, FavoriteController
+├── home/                    # «подешевели»: DropsService, DropsRefreshJob, HomeController
 ├── metadata/                # GoogleBooksClient — только метаданные
 ├── parser/
-│   ├── core/                # StoreParser, ParsedOffer, HtmlFetcher, ParserRunService
+│   ├── core/                # StoreParser, HtmlFetcher, BrowserFetcher, ParserRunService, StoreResilience
 │   ├── matching/            # EditionMatcher: ISBN → похожесть названия/автора
 │   ├── flip/                # FlipParser + селекторы
-│   ├── kaspi/
-│   ├── meloman/
-│   ├── wildberries/
-│   └── ozon/
-├── messaging/               # топология RabbitMQ, сообщения (record), publisher-ы, listener-ы
-├── scheduler/               # расписания: обход магазинов, пересчёт «подешевели», чистка
-├── beacon/                  # маячки: Beacon, условия, BeaconChecker, BeaconController
-├── notification/            # EmailSender, шаблоны, Notification, unsubscribe
-└── admin/                   # AdminStatsService, AdminController, SystemEvent
+│   ├── meloman/             # MelomanParser + селекторы
+│   └── ozon/                # OzonParser + селекторы
+├── messaging/               # топология RabbitMQ, сообщения (message/), publisher-ы, listener-ы
+├── scheduler/               # CrawlScheduler, CleanupScheduler, DigestScheduler, ManualRunService
+├── beacon/                  # Beacon, BeaconChecker, BeaconService, BeaconController
+├── notification/            # EmailSender, шаблоны, Notification, EmailListener
+├── metrics/                 # KrMetrics (метрики kr.*)
+├── dev/                     # DevDataLoader (демо-данные, профиль demo)
+└── admin/                   # Admin*Controller, Admin*Service, SystemEvent, RabbitAdminClient
 ```
 
 ## Технологии
@@ -150,9 +153,11 @@ curl -X POST localhost:8080/api/v1/admin/parsers/FLIP/run -H "Authorization: Bea
 
 ```bash
 docker compose up -d postgres redis rabbitmq mailpit
-cd backend && ./mvnw spring-boot:run     # backend с хоста
-cd frontend && npm install && npm run dev
+(cd backend && ./mvnw spring-boot:run)                  # терминал 1: backend с хоста
+(cd frontend && npm install && npm run dev)             # терминал 2: frontend
 ```
+
+Две последние команды запускаются в разных терминалах и друг от друга не зависят.
 
 - Тесты: `cd backend && ./mvnw verify` (нужен Docker для Testcontainers). Отчёт покрытия — `backend/target/site/jacoco/index.html`; порог для сервисов — 70% строк.
 - Нагрузочный тест k6 и результаты — [docs/performance.md](docs/performance.md).
