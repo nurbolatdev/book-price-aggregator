@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar — фильтры на телефоне</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «FiltersMobile». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#FFFFFF}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: rgba(14,26,43,0.45); font-family: Onest, system-ui, sans-serif; color: #0E1A2B; display: flex; flex-direction: column; justify-content: flex-end">
+  <div role="dialog" aria-labelledby="fm-title" style="background: #FFFFFF; border-radius: 20px 20px 0 0; padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 16px; max-height: 760px; box-sizing: border-box">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <h2 id="fm-title" style="margin: 0; font-size: 18px">Фильтры</h2>
+      <a href="16-search-mobile.html" aria-label="Закрыть" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #0E1A2B"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></a>
+    </div>
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px">
+      <legend style="font-weight: 700; margin-bottom: 8px">Магазины</legend>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox" checked> Flip.kz · 6</label>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox" checked> Meloman · 4</label>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox"> Ozon · 8</label>
+    </fieldset>
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; gap: 8px">
+      <legend style="font-weight: 700; margin-bottom: 8px">Цена, ₸</legend>
+      <label style="flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A6576">от<input type="number" inputmode="numeric" placeholder="0" style="font: inherit; font-size: 16px; padding: 10px; border: 1px solid #DDE2E8; border-radius: 8px; width: 100%; box-sizing: border-box"></label>
+      <label style="flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5A6576">до<input type="number" inputmode="numeric" placeholder="10 000" style="font: inherit; font-size: 16px; padding: 10px; border: 1px solid #DDE2E8; border-radius: 8px; width: 100%; box-sizing: border-box"></label>
+    </fieldset>
+    <label style="display: flex; gap: 10px; align-items: center; font-weight: 600"><input type="checkbox" checked> Только в наличии</label>
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px">
+      <legend style="font-weight: 700; margin-bottom: 8px">Переплёт</legend>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox"> Твёрдый · 7</label>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox"> Мягкий · 5</label>
+    </fieldset>
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px">
+      <legend style="font-weight: 700; margin-bottom: 8px">Язык</legend>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox" checked> Русский · 11</label>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox"> Қазақша · 1</label>
+      <label style="display: flex; gap: 8px; align-items: center; padding: 10px 12px; border: 1px solid #DDE2E8; border-radius: 10px"><input type="checkbox"> English · 0</label>
+    </fieldset>
+    <div style="display: flex; gap: 10px">
+      <button type="button" style="font: inherit; padding: 12px 18px; border-radius: 10px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer; color: #0E1A2B; flex: 1">Сбросить</button>
+      <a href="16-search-mobile.html" style="flex: 2; display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 10px; background: #0E1A2B; color: #FFFFFF; text-decoration: none; font-weight: 600">Показать 9 изданий</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

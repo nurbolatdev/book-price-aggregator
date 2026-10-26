@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar — настройка маячка</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «BeaconModal». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="width: 560px; height: 760px; box-sizing: border-box; background: rgba(14,26,43,0.45); padding: 24px; display: flex; align-items: center; justify-content: center; font-family: Onest, system-ui, sans-serif; color: #0E1A2B">
+  <div role="dialog" aria-labelledby="bm-title" style="width: 100%; background: #FFFFFF; border-radius: 20px; padding: 26px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <h2 id="bm-title" style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 22px">Маячок на книгу</h2>
+      <a href="03-book.html" aria-label="Закрыть" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #0E1A2B">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+      </a>
+    </div>
+
+    <div style="display: flex; gap: 14px; align-items: center; padding: 12px; border-radius: 12px; background: #F4F6F8">
+      <div style="width: 48px; height: 68px; border-radius: 6px; background: #FCE3D3; flex-shrink: 0"></div>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <strong>Мастер и Маргарита</strong>
+        <span style="font-size: 14px; color: #5A6576">АСТ 2023 · твёрдый переплёт</span>
+        <span style="font-size: 14px">Сейчас от <strong>3 610 ₸</strong></span>
+      </div>
+    </div>
+
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <legend style="font-weight: 700; margin-bottom: 10px">Когда сообщить</legend>
+      <label style="display: flex; gap: 10px; align-items: center; padding: 12px; border: 1px solid #DDE2E8; border-radius: 12px"><input type="radio" name="mode"> При любом снижении цены</label>
+      <label style="display: flex; gap: 10px; align-items: center; padding: 12px; border: 2px solid #C2410C; border-radius: 12px; flex-wrap: wrap"><input type="radio" name="mode" checked> Когда цена станет ниже
+        <span style="display: flex; align-items: center; gap: 6px; margin-left: auto"><input type="number" value="3200" aria-label="Желаемая цена" style="font: inherit; width: 100px; padding: 8px 10px; border: 1px solid #DDE2E8; border-radius: 8px"> ₸</span>
+      </label>
+      <label style="display: flex; gap: 10px; align-items: center; padding: 12px; border: 1px solid #DDE2E8; border-radius: 12px; flex-wrap: wrap"><input type="radio" name="mode"> При скидке от
+        <span style="display: flex; align-items: center; gap: 6px; margin-left: auto"><input type="number" value="15" aria-label="Процент скидки" style="font: inherit; width: 70px; padding: 8px 10px; border: 1px solid #DDE2E8; border-radius: 8px"> %</span>
+      </label>
+    </fieldset>
+
+    <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px">
+      <legend style="font-weight: 700; margin-bottom: 10px">Куда отправить</legend>
+      <label style="display: flex; gap: 10px; align-items: center"><input type="checkbox" checked> Email: nurbo@example.com</label>
+      <label style="display: flex; gap: 10px; align-items: center; color: #5A6576"><input type="checkbox" disabled> Telegram — скоро</label>
+    </fieldset>
+
+    <p style="margin: 0; font-size: 13px; color: #5A6576; line-height: 1.5">Проверяем цены во всех магазинах каждые 6 часов. Отключить маячок можно в один клик из письма.</p>
+
+    <div style="display: flex; gap: 10px; justify-content: flex-end">
+      <a href="03-book.html" style="padding: 13px 20px; border-radius: 12px; border: 1px solid #DDE2E8; color: #0E1A2B; text-decoration: none; font-weight: 600">Отмена</a>
+      <a href="05-beacons.html" style="padding: 13px 22px; border-radius: 12px; background: #C2410C; color: #FFFFFF; text-decoration: none; font-weight: 600">Поставить маячок</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

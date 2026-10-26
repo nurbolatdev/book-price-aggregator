@@ -18,7 +18,9 @@
 | [api/openapi.json](api/openapi.json) | Экспортированная спецификация OpenAPI (проверяется тестом `OpenApiSpecIT`) |
 | [adr/](adr/) | Архитектурные решения |
 | [brand/](brand/README.md) | Логотип, иконки, цвета, правила использования |
-| [frontend/ROADMAP.md](frontend/ROADMAP.md) | План frontend-вех |
+| [frontend/ROADMAP.md](frontend/ROADMAP.md) | План frontend-вех, стек, дизайн-токены, приёмы скорости |
+| [frontend/SCREENS.md](frontend/SCREENS.md) | Каждый экран: маршрут, элементы, кнопки → эндпоинты, ошибки и состояния |
+| [frontend/mockups/](frontend/mockups/README.md) | 26 макетов UI (HTML + PNG) и правила адаптивности |
 | [backend/M19-report.md](backend/M19-report.md) | Итоги M19: как работают маячки и письма, гарантии доставки, решения и итоги ревью |
 | [backend/M18-report.md](backend/M18-report.md) | Итоги M18: что сделано сверх плана и иначе, чем в задании, принятые решения, результаты ревью |
 | [backend/parsing-report-M15-M16.md](backend/parsing-report-M15-M16.md) | Итоги M15–M16: как работает парсинг, какие магазины работают и почему остальные нет, что проверено |
@@ -27,7 +29,7 @@
 
 Фаза 1 (готово): M0–M11 — каркас, домен, поиск, кэш, JWT, избранное, алерты, история цен, React, Docker.
 
-**Порядок строгий:** сначала все backend-вехи M12 → M21, затем frontend F1 → F7, затем v2. В работе одновременно только одна веха; следующая начинается после мерджа предыдущей.
+**Порядок строгий:** backend M12 → M21, frontend F1, затем **M22** (API под макеты), затем F2 → F7, затем v2. В работе одновременно только одна веха; следующая начинается после мерджа предыдущей.
 
 Фаза 2 — backend:
 
@@ -43,18 +45,19 @@
 | [M19](backend/M19-beacons-notifications.md) | Маячки и email-уведомления | `feature/m19-beacons-notifications` | ✅ |
 | [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ✅ |
 | [M21](backend/M21-quality-release.md) | Качество, CI, README, релиз backend | `feature/m21-quality-release` | ✅ |
+| [M22](backend/M22-api-for-ui.md) | API под макеты frontend: каталог, счётчики фильтров, похожие, профиль, подборка недели, журнал писем | `feature/m22-api-for-ui` | ⬜ |
 
-Фаза 3 — frontend (объём — [frontend/ROADMAP.md](frontend/ROADMAP.md)):
+Фаза 3 — frontend ([план и токены](frontend/ROADMAP.md) · [экраны и кнопки → API](frontend/SCREENS.md) · [макеты](frontend/mockups/README.md)):
 
 | Веха | Название | Ветка | Статус |
 |---|---|---|---|
-| [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент | `feature/f1-foundation` | 🟡 |
-| F2 | Главная и поиск | `feature/f2-search` | ⬜ |
-| F3 | Карточка издания | `feature/f3-edition-page` | ⬜ |
-| F4 | Auth и профиль | `feature/f4-auth` | ⬜ |
-| F5 | Маячки | `feature/f5-beacons` | ⬜ |
-| F6 | Админ-панель | `feature/f6-admin` | ⬜ |
-| F7 | Полировка, доступность, CI frontend | `feature/f7-polish` | ⬜ |
+| [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент | `feature/f1-foundation` | ✅ |
+| [F2](frontend/F2-home-search.md) | Добор фундамента (компоненты, моки, снимки, CI) + главная, поиск, каталог, скидки | `feature/f2-search` | ⬜ |
+| [F3](frontend/F3-edition.md) | Карточка издания | `feature/f3-edition-page` | ⬜ |
+| [F4](frontend/F4-auth-profile.md) | Вход, регистрация, пароль, профиль | `feature/f4-auth` | ⬜ |
+| [F5](frontend/F5-beacons.md) | Маячки | `feature/f5-beacons` | ⬜ |
+| [F6](frontend/F6-admin.md) | Админ-панель | `feature/f6-admin` | ⬜ |
+| [F7](frontend/F7-polish-release.md) | Полировка, доступность, скорость, релиз | `feature/f7-polish` | ⬜ |
 Фаза 4 (по желанию): Kafka для потока цен, Telegram, ИИ-функции.
 
 Обозначения статуса: ⬜ не начато · 🟡 в работе · ✅ готово (смерджено в main).

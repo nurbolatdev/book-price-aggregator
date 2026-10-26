@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar Admin — сопоставление</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «AdminMatching». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="font-family: Onest, system-ui, sans-serif; color: #0E1A2B; background: #F4F6F8; min-height: 100vh; display: flex; flex-wrap: wrap">
+  <nav aria-label="Админ-меню" style="flex: 1 1 220px; max-width: 240px; background: #0E1A2B; color: #FFFFFF; padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; box-sizing: border-box">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 18px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg>
+      <span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 15px">Admin</span>
+    </div>
+    <a href="09-admin-overview.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Обзор</a>
+    <a href="18-admin-parsers.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Парсеры</a>
+    <a href="19-admin-queues.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Очереди RabbitMQ</a>
+    <a href="20-admin-users.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Пользователи</a>
+    <a href="21-admin-notifications.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Маячки и письма</a>
+    <a href="22-admin-matching.html" aria-current="page" style="padding: 10px 12px; border-radius: 10px; background: #1F2E44; color: #FFFFFF; text-decoration: none; font-weight: 600">Каталог и сопоставление</a>
+    <a href="23-admin-events.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Журнал событий</a>
+    <a href="01-main.html" style="margin-top: 16px; padding: 10px 12px; color: #C9D1DC; font-size: 14px">← На сайт</a>
+  </nav>
+  <main style="flex: 999 1 640px; min-width: 0; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+      <div>
+        <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 26px">Каталог и сопоставление</h1>
+        <p style="margin: 4px 0 0; color: #5A6576; font-size: 14px">Книг 1 842 · изданий 2 917 · сопоставлено предложений 4 105</p>
+      </div>
+      
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+      <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; flex: 1 1 340px; max-width: 420px">
+        <h2 style="margin: 0; font-size: 18px">Ждут проверки · 23</h2>
+        <p style="margin: 0; font-size: 13px; color: #5A6576">Предложения, которые парсер не смог уверенно привязать к изданию.</p>
+        <button type="button" aria-pressed="true" style="font: inherit; text-align: left; background: #FFFFFF; border: 2px solid #0E1A2B; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; color: #0E1A2B">
+          <span style="font-size: 12px; color: #5A6576; font-weight: 600">Ozon · найдено сегодня</span>
+          <span style="font-weight: 600">Булгаков М. Мастер и Маргарита / Михаил Булгаков (тв.)</span>
+          <strong>3 720 ₸</strong>
+        </button>
+<button type="button" aria-pressed="false" style="font: inherit; text-align: left; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; color: #0E1A2B">
+          <span style="font-size: 12px; color: #5A6576; font-weight: 600">Meloman · найдено вчера</span>
+          <span style="font-weight: 600">Мастер и Маргарита. Роман (подарочное изд.)</span>
+          <strong>10 200 ₸</strong>
+        </button>
+<button type="button" aria-pressed="false" style="font: inherit; text-align: left; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; color: #0E1A2B">
+          <span style="font-size: 12px; color: #5A6576; font-weight: 600">Flip.kz · найдено 24.10</span>
+          <span style="font-weight: 600">Блокнот «Мастер и Маргарита» А5</span>
+          <strong>1 990 ₸</strong>
+        </button>
+<button type="button" aria-pressed="false" style="font: inherit; text-align: left; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; color: #0E1A2B">
+          <span style="font-size: 12px; color: #5A6576; font-weight: 600">Ozon · найдено 24.10</span>
+          <span style="font-weight: 600">Атомные привычки. Как приобрести хорошие привычки</span>
+          <strong>5 450 ₸</strong>
+        </button>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; color: #5A6576">
+        <span>1–4 из 23</span>
+        <div style="display: flex; gap: 6px"><button type="button" disabled style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer; color: #0E1A2B; min-height: 40px; opacity: 0.5">Назад</button><button type="button" style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer; color: #0E1A2B; min-height: 40px">Вперёд</button></div>
+      </div>
+      </section>
+      <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; flex: 999 1 420px">
+        <span style="font-size: 12px; color: #5A6576; font-weight: 600">Ozon · найдено сегодня · <a href="22-admin-matching.html">открыть на сайте магазина</a></span>
+        <h2 style="margin: 0; font-size: 20px">Булгаков М. Мастер и Маргарита / Михаил Булгаков (тв.)</h2>
+        <dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; font-size: 14px">
+          <dt style="color: #5A6576">Цена</dt><dd style="margin: 0; font-weight: 700">3 720 ₸</dd>
+          <dt style="color: #5A6576">Наличие</dt><dd style="margin: 0">в наличии</dd>
+          <dt style="color: #5A6576">ID у магазина</dt><dd style="margin: 0"><code>ozon-1182934</code></dd>
+        </dl>
+        <form role="search" style="display: flex; gap: 10px">
+          <label for="eq" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Найти издание</label>
+          <input id="eq" type="search" value="мастер и маргарита" style="font: inherit; font-weight: 400; font-size: 16px; padding: 12px 14px; border: 1px solid #DDE2E8; border-radius: 10px; flex-grow: 1">
+          <button type="submit" style="font: inherit; font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer; color: #0E1A2B; min-height: 40px">Найти издание</button>
+        </form>
+        <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+          <legend style="font-weight: 700; margin-bottom: 8px">Привязать к изданию</legend>
+          <label style="display: flex; gap: 12px; align-items: center; padding: 12px; border: 2px solid #C2410C; border-radius: 12px">
+            <input type="radio" name="edition" checked>
+            <span style="display: flex; flex-direction: column; gap: 2px"><strong>Мастер и Маргарита</strong><span style="font-size: 13px; color: #5A6576">АСТ 2023 · твёрдый · ISBN 978-5-17-090630-4 · 3 предложения</span></span>
+          </label>
+<label style="display: flex; gap: 12px; align-items: center; padding: 12px; border: 1px solid #DDE2E8; border-radius: 12px">
+            <input type="radio" name="edition">
+            <span style="display: flex; flex-direction: column; gap: 2px"><strong>Мастер и Маргарита</strong><span style="font-size: 13px; color: #5A6576">Азбука 2022 · мягкий · ISBN 978-5-389-01686-6 · 2 предложения</span></span>
+          </label>
+<label style="display: flex; gap: 12px; align-items: center; padding: 12px; border: 1px solid #DDE2E8; border-radius: 12px">
+            <input type="radio" name="edition">
+            <span style="display: flex; flex-direction: column; gap: 2px"><strong>Мастер и Маргарита (подарочное)</strong><span style="font-size: 13px; color: #5A6576">Эксмо 2021 · ISBN 978-5-04-116720-5 · 2 предложения</span></span>
+          </label>
+        </fieldset>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px">
+          <button type="button" style="font: inherit; padding: 12px 18px; border-radius: 10px; border: 0; background: #0E1A2B; color: #FFFFFF; font-weight: 600; cursor: pointer">Привязать к изданию</button>
+          <button type="button" style="font: inherit; padding: 12px 18px; border-radius: 10px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer; color: #0E1A2B; color: #A11B1B">Отклонить: не книга / мусор</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

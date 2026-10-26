@@ -47,7 +47,7 @@
 | База проекта | Репозиторий `book-price-aggregator`, продолжаем историю вех |
 | Парсеры | Java-модуль внутри backend (Jsoup + Playwright for Java) |
 | Брокер | RabbitMQ (Kafka — v2), см. [ADR-001](adr/ADR-001-rabbitmq.md) |
-| Frontend | React + Vite, UI по макетам «KitapRadar — макеты UI» |
+| Frontend | React + Vite + TypeScript, UI строго по макетам `docs/frontend/mockups/` (26 экранов), поведение — `docs/frontend/SCREENS.md` |
 | Цена с доставкой? | Нет. Сравниваем цену товара, доставку показываем текстом от магазина |
 | Выбор города | Нет. Цены и доставка — как магазин показывает для Алматы/по умолчанию |
 | ИИ в MVP | Нет. Только в v2 |

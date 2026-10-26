@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitapRadar — админ-панель</title>
+<!-- Макет KitapRadar: статичная вёрстка-эталон. Данные — примеры. Источник: холст макетов, экран «Admin». -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;700&amp;display=swap">
+<style>
+body{margin:0;background:#F4F6F8}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+</style>
+</head>
+<body>
+<div style="font-family: Onest, system-ui, sans-serif; color: #0E1A2B; background: #F4F6F8; min-height: 100vh; display: flex; flex-wrap: wrap">
+
+  <nav aria-label="Админ-меню" style="flex: 1 1 220px; max-width: 240px; background: #0E1A2B; color: #FFFFFF; padding: 20px 14px; display: flex; flex-direction: column; gap: 4px; box-sizing: border-box">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 18px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /><path d="M12 12 19 5" /></svg>
+      <span style="font-family: Unbounded, sans-serif; font-weight: 700; font-size: 15px">Admin</span>
+    </div>
+    <a href="09-admin-overview.html" aria-current="page" style="padding: 10px 12px; border-radius: 10px; background: #1F2E44; color: #FFFFFF; text-decoration: none; font-weight: 600">Обзор</a>
+    <a href="18-admin-parsers.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Парсеры</a>
+    <a href="19-admin-queues.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Очереди RabbitMQ</a>
+    <a href="20-admin-users.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Пользователи</a>
+    <a href="21-admin-notifications.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Маячки и письма</a>
+    <a href="22-admin-matching.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Каталог и сопоставление</a>
+    <a href="23-admin-events.html" style="padding: 10px 12px; border-radius: 10px; color: #C9D1DC; text-decoration: none">Журнал событий</a>
+    <a href="01-main.html" style="margin-top: 16px; padding: 10px 12px; color: #C9D1DC; font-size: 14px">← На сайт</a>
+  </nav>
+
+  <main style="flex: 999 1 640px; min-width: 0; padding: 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+      <div>
+        <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-weight: 500; font-size: 26px">Обзор системы</h1>
+        <p style="margin: 4px 0 0; color: #5A6576; font-size: 14px">Обновляется каждые 30 секунд · последнее обновление 18:10</p>
+      </div>
+      <div role="group" aria-label="Период" style="display: flex; gap: 4px; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 10px; padding: 4px">
+        <button type="button" aria-pressed="true" style="font: inherit; font-size: 14px; padding: 6px 12px; border: 0; border-radius: 8px; background: #0E1A2B; color: #FFFFFF; cursor: pointer">24 ч</button>
+        <button type="button" style="font: inherit; font-size: 14px; padding: 6px 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer">7 дней</button>
+        <button type="button" style="font: inherit; font-size: 14px; padding: 6px 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer">30 дней</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px">
+      
+        <div style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+          <span style="color: #5A6576; font-size: 13px">Пользователи</span>
+          <span style="font-size: 28px; font-weight: 700">[ВСЕГО]</span>
+          <span style="font-size: 13px; color: #34404F">+[N] за неделю</span>
+        </div>
+      
+        <div style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+          <span style="color: #5A6576; font-size: 13px">Активны за 24 ч</span>
+          <span style="font-size: 28px; font-weight: 700">[N]</span>
+          <span style="font-size: 13px; color: #34404F">уникальные посетители</span>
+        </div>
+      
+        <div style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+          <span style="color: #5A6576; font-size: 13px">Активные маячки</span>
+          <span style="font-size: 28px; font-weight: 700">[N]</span>
+          <span style="font-size: 13px; color: #34404F">[N] сработали за 24 ч</span>
+        </div>
+      
+        <div style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+          <span style="color: #5A6576; font-size: 13px">Писем отправлено</span>
+          <span style="font-size: 28px; font-weight: 700">[N]</span>
+          <span style="font-size: 13px; color: #34404F">ошибок доставки: [N]</span>
+        </div>
+      
+        <div style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+          <span style="color: #5A6576; font-size: 13px">Поисков за 24 ч</span>
+          <span style="font-size: 28px; font-weight: 700">[N]</span>
+          <span style="font-size: 13px; color: #34404F">попадание в кэш [N]%</span>
+        </div>
+      
+        <div style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+          <span style="color: #5A6576; font-size: 13px">Книг / предложений</span>
+          <span style="font-size: 28px; font-weight: 700">[N] / [N]</span>
+          <span style="font-size: 13px; color: #34404F">в каталоге и у магазинов</span>
+        </div>
+      
+    </div>
+
+    <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 18px">Состояние сервисов</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px">
+        
+          <div style="border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+            <span style="display: flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #16A34A"></span>Backend API</span>
+            <span style="font-size: 13px; color: #34404F">Работает</span>
+            <span style="font-size: 12px; color: #5A6576">p95 ответа: [N] мс</span>
+          </div>
+        
+          <div style="border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+            <span style="display: flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #16A34A"></span>PostgreSQL</span>
+            <span style="font-size: 13px; color: #34404F">Работает</span>
+            <span style="font-size: 12px; color: #5A6576">подключений: [N]/20</span>
+          </div>
+        
+          <div style="border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+            <span style="display: flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #16A34A"></span>Redis</span>
+            <span style="font-size: 13px; color: #34404F">Работает</span>
+            <span style="font-size: 12px; color: #5A6576">память: [N] МБ</span>
+          </div>
+        
+          <div style="border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+            <span style="display: flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #16A34A"></span>RabbitMQ</span>
+            <span style="font-size: 13px; color: #34404F">Работает</span>
+            <span style="font-size: 12px; color: #5A6576">консьюмеров: [N]</span>
+          </div>
+        
+          <div style="border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+            <span style="display: flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #D97706"></span>SMTP (почта)</span>
+            <span style="font-size: 13px; color: #34404F">Медленно</span>
+            <span style="font-size: 12px; color: #5A6576">последняя отправка 2 мин назад</span>
+          </div>
+        
+          <div style="border: 1px solid #DDE2E8; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+            <span style="display: flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #16A34A"></span>Планировщик</span>
+            <span style="font-size: 13px; color: #34404F">Работает</span>
+            <span style="font-size: 12px; color: #5A6576">следующий запуск 00:00</span>
+          </div>
+        
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+        <h2 style="margin: 0; font-size: 18px">Парсеры магазинов</h2>
+        <button type="button" style="font: inherit; padding: 9px 14px; border-radius: 10px; border: 1px solid #DDE2E8; background: #FFFFFF; font-weight: 600; cursor: pointer">Запустить все</button>
+      </div>
+      <div style="overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px">
+          <thead>
+            <tr style="text-align: left; color: #5A6576; font-size: 12px">
+              <th scope="col" style="padding: 8px 10px; font-weight: 600">Магазин</th>
+              <th scope="col" style="padding: 8px 10px; font-weight: 600">Статус</th>
+              <th scope="col" style="padding: 8px 10px; font-weight: 600">Последний запуск</th>
+              <th scope="col" style="padding: 8px 10px; font-weight: 600">Успешно</th>
+              <th scope="col" style="padding: 8px 10px; font-weight: 600">Предложений</th>
+              <th scope="col" style="padding: 8px 10px; font-weight: 600">Ср. время</th>
+              <th scope="col" style="padding: 8px 10px"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Действие</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr style="border-top: 1px solid #EDF0F3">
+                <td style="padding: 12px 10px; font-weight: 600">Kaspi.kz</td>
+                <td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #EEF2F7; color: #34404F; font-weight: 600; font-size: 13px">Выключен</span></td>
+                <td style="padding: 12px 10px; color: #34404F">—</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px; text-align: right"><button type="button" style="font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer">Перезапустить</button></td>
+              </tr>
+            
+              <tr style="border-top: 1px solid #EDF0F3">
+                <td style="padding: 12px 10px; font-weight: 600">Flip.kz</td>
+                <td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #E7F5EE; color: #0F6B45; font-weight: 600; font-size: 13px">OK</span></td>
+                <td style="padding: 12px 10px; color: #34404F">сегодня 18:00</td>
+                <td style="padding: 12px 10px">100%</td>
+                <td style="padding: 12px 10px">[N]</td>
+                <td style="padding: 12px 10px">[N] с</td>
+                <td style="padding: 12px 10px; text-align: right"><button type="button" style="font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer">Перезапустить</button></td>
+              </tr>
+            
+              <tr style="border-top: 1px solid #EDF0F3">
+                <td style="padding: 12px 10px; font-weight: 600">Meloman</td>
+                <td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #FFF4E0; color: #8A4B00; font-weight: 600; font-size: 13px">Частичные ошибки</span></td>
+                <td style="padding: 12px 10px; color: #34404F">сегодня 18:00</td>
+                <td style="padding: 12px 10px">81%</td>
+                <td style="padding: 12px 10px">[N]</td>
+                <td style="padding: 12px 10px">[N] с</td>
+                <td style="padding: 12px 10px; text-align: right"><button type="button" style="font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer">Перезапустить</button></td>
+              </tr>
+            
+              <tr style="border-top: 1px solid #EDF0F3">
+                <td style="padding: 12px 10px; font-weight: 600">Wildberries</td>
+                <td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #EEF2F7; color: #34404F; font-weight: 600; font-size: 13px">Выключен</span></td>
+                <td style="padding: 12px 10px; color: #34404F">—</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px; text-align: right"><button type="button" style="font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer">Перезапустить</button></td>
+              </tr>
+            
+              <tr style="border-top: 1px solid #EDF0F3">
+                <td style="padding: 12px 10px; font-weight: 600">Ozon</td>
+                <td style="padding: 12px 10px"><span style="padding: 4px 10px; border-radius: 999px; background: #FDE8E8; color: #A11B1B; font-weight: 600; font-size: 13px">Не отвечает</span></td>
+                <td style="padding: 12px 10px; color: #34404F">сегодня 12:00</td>
+                <td style="padding: 12px 10px">0%</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px">—</td>
+                <td style="padding: 12px 10px; text-align: right"><button type="button" style="font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid #DDE2E8; background: #FFFFFF; cursor: pointer">Перезапустить</button></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 22px">
+      <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-size: 18px">Активность за 14 дней</h2>
+        <div style="display: flex; gap: 16px; font-size: 13px; color: #34404F">
+          <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #1D4ED8"></span>Поиски</span>
+          <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #F08A4B"></span>Новые маячки</span>
+        </div>
+        <svg viewBox="0 0 420 180" style="width: 100%; height: auto" role="img" aria-label="Столбчатая диаграмма поисков и новых маячков за 14 дней, плавный рост">
+          <line x1="0" y1="160" x2="420" y2="160" stroke="#DDE2E8" />
+          <g fill="#1D4ED8">
+            <rect x="6" y="100" width="12" height="60" rx="2" /><rect x="36" y="92" width="12" height="68" rx="2" /><rect x="66" y="96" width="12" height="64" rx="2" /><rect x="96" y="84" width="12" height="76" rx="2" /><rect x="126" y="80" width="12" height="80" rx="2" /><rect x="156" y="88" width="12" height="72" rx="2" /><rect x="186" y="70" width="12" height="90" rx="2" /><rect x="216" y="66" width="12" height="94" rx="2" /><rect x="246" y="60" width="12" height="100" rx="2" /><rect x="276" y="64" width="12" height="96" rx="2" /><rect x="306" y="52" width="12" height="108" rx="2" /><rect x="336" y="44" width="12" height="116" rx="2" /><rect x="366" y="40" width="12" height="120" rx="2" /><rect x="396" y="30" width="12" height="130" rx="2" />
+          </g>
+          <g fill="#F08A4B">
+            <rect x="19" y="142" width="8" height="18" rx="2" /><rect x="49" y="140" width="8" height="20" rx="2" /><rect x="79" y="144" width="8" height="16" rx="2" /><rect x="109" y="136" width="8" height="24" rx="2" /><rect x="139" y="134" width="8" height="26" rx="2" /><rect x="169" y="138" width="8" height="22" rx="2" /><rect x="199" y="130" width="8" height="30" rx="2" /><rect x="229" y="128" width="8" height="32" rx="2" /><rect x="259" y="126" width="8" height="34" rx="2" /><rect x="289" y="128" width="8" height="32" rx="2" /><rect x="319" y="120" width="8" height="40" rx="2" /><rect x="349" y="116" width="8" height="44" rx="2" /><rect x="379" y="112" width="8" height="48" rx="2" /><rect x="409" y="106" width="8" height="54" rx="2" />
+          </g>
+        </svg>
+      </section>
+
+      <section style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+        <h2 style="margin: 0; font-size: 18px">Очереди RabbitMQ</h2>
+        
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid #EDF0F3; gap: 12px">
+            <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><code style="font-size: 13px">parse.requests</code><span style="font-size: 12px; color: #5A6576">задачи на парсинг</span></span>
+            <span style="text-align: right; font-size: 13px; flex-shrink: 0"><strong style="font-size: 16px">[N]</strong> в очереди<br><span style="color: #5A6576">[N]/мин обработано</span></span>
+          </div>
+        
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid #EDF0F3; gap: 12px">
+            <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><code style="font-size: 13px">price.changed</code><span style="font-size: 12px; color: #5A6576">события изменения цены</span></span>
+            <span style="text-align: right; font-size: 13px; flex-shrink: 0"><strong style="font-size: 16px">[N]</strong> в очереди<br><span style="color: #5A6576">[N]/мин</span></span>
+          </div>
+        
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid #EDF0F3; gap: 12px">
+            <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><code style="font-size: 13px">notification.email</code><span style="font-size: 12px; color: #5A6576">письма к отправке</span></span>
+            <span style="text-align: right; font-size: 13px; flex-shrink: 0"><strong style="font-size: 16px">[N]</strong> в очереди<br><span style="color: #5A6576">[N]/мин</span></span>
+          </div>
+        
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid #EDF0F3; gap: 12px">
+            <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><code style="font-size: 13px">dead-letter</code><span style="font-size: 12px; color: #5A6576">сообщения с ошибкой</span></span>
+            <span style="text-align: right; font-size: 13px; flex-shrink: 0"><strong style="font-size: 16px">[N]</strong> в очереди<br><span style="color: #5A6576">требуют внимания</span></span>
+          </div>
+        
+      </section>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 22px">
+      <section style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-size: 18px">Последние события</h2>
+        
+          <div style="display: flex; gap: 12px; padding: 8px 0; border-top: 1px solid #EDF0F3; font-size: 14px">
+            <span style="color: #5A6576; flex-shrink: 0; width: 44px">18:02</span>
+            <span style="padding: 2px 8px; border-radius: 6px; background: #E7F5EE; color: #0F6B45; font-size: 12px; font-weight: 600; flex-shrink: 0; align-self: flex-start">INFO</span>
+            <span style="color: #34404F">Flip.kz: обновлено [N] предложений</span>
+          </div>
+        
+          <div style="display: flex; gap: 12px; padding: 8px 0; border-top: 1px solid #EDF0F3; font-size: 14px">
+            <span style="color: #5A6576; flex-shrink: 0; width: 44px">18:00</span>
+            <span style="padding: 2px 8px; border-radius: 6px; background: #FFF4E0; color: #8A4B00; font-size: 12px; font-weight: 600; flex-shrink: 0; align-self: flex-start">WARN</span>
+            <span style="color: #34404F">Meloman: изменилась вёрстка карточки, 19% страниц без цены</span>
+          </div>
+        
+          <div style="display: flex; gap: 12px; padding: 8px 0; border-top: 1px solid #EDF0F3; font-size: 14px">
+            <span style="color: #5A6576; flex-shrink: 0; width: 44px">17:41</span>
+            <span style="padding: 2px 8px; border-radius: 6px; background: #E7F5EE; color: #0F6B45; font-size: 12px; font-weight: 600; flex-shrink: 0; align-self: flex-start">INFO</span>
+            <span style="color: #34404F">Маячок сработал: «Мастер и Маргарита», письмо отправлено</span>
+          </div>
+        
+          <div style="display: flex; gap: 12px; padding: 8px 0; border-top: 1px solid #EDF0F3; font-size: 14px">
+            <span style="color: #5A6576; flex-shrink: 0; width: 44px">12:00</span>
+            <span style="padding: 2px 8px; border-radius: 6px; background: #FDE8E8; color: #A11B1B; font-size: 12px; font-weight: 600; flex-shrink: 0; align-self: flex-start">ERROR</span>
+            <span style="color: #34404F">Ozon: таймаут 3 раза подряд, парсер приостановлен (circuit breaker)</span>
+          </div>
+        
+          <div style="display: flex; gap: 12px; padding: 8px 0; border-top: 1px solid #EDF0F3; font-size: 14px">
+            <span style="color: #5A6576; flex-shrink: 0; width: 44px">11:15</span>
+            <span style="padding: 2px 8px; border-radius: 6px; background: #E7F5EE; color: #0F6B45; font-size: 12px; font-weight: 600; flex-shrink: 0; align-self: flex-start">INFO</span>
+            <span style="color: #34404F">Новый пользователь зарегистрирован, email подтверждён</span>
+          </div>
+        
+      </section>
+
+      <section style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #DDE2E8; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-size: 18px">Топ запросов за 24 ч</h2>
+        <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+          <li>Мастер и Маргарита <span style="color: #5A6576">— [N]</span></li>
+          <li>Атомные привычки <span style="color: #5A6576">— [N]</span></li>
+          <li>Абай жолы <span style="color: #5A6576">— [N]</span></li>
+          <li>Чистый код <span style="color: #5A6576">— [N]</span></li>
+          <li>Гарри Поттер <span style="color: #5A6576">— [N]</span></li>
+        </ol>
+        <span style="font-size: 13px; color: #5A6576">Запросы без результатов: <a href="23-admin-events.html">смотреть список</a> — подсказка, какие книги добавить.</span>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

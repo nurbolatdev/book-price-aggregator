@@ -53,7 +53,7 @@ Frontend остался от M0–M11 (JavaScript, `.jsx`). Он вызывае�
 ## Критерии приёмки
 - [x] `npm run lint`, `npm test`, `npm run build` зелёные.
 - [x] Тесты: перехватчик refresh (один refresh на несколько параллельных 401, повтор запросов, выход при неудачном refresh), `ApiError`, `formatPrice`, Error Boundary, toasts, `RequireAuth`.
-- [ ] В вкладке браузера — favicon KitapRadar, шрифты Unbounded/Onest загружаются.
+- [x] В вкладке браузера — favicon KitapRadar, шрифты Unbounded/Onest загружаются (проверено автором вручную 26.10).
 - [x] Каждая страница — отдельный чанк в `dist/assets`; основной чанк < 200 КБ gzip.
 - [x] В `frontend/src` нет `.js`/`.jsx` и обращений к удалённым эндпоинтам.
 
