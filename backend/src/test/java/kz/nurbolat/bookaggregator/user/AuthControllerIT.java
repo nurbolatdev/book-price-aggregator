@@ -73,11 +73,11 @@ class AuthControllerIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn401InErrorFormatWhenTokenIsMissing() throws Exception {
-        mockMvc.perform(get("/api/v1/favorites").header("X-Request-Id", "test-trace-1"))
+        mockMvc.perform(get("/api/v1/beacons").header("X-Request-Id", "test-trace-1"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().string("X-Request-Id", "test-trace-1"))
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
-                .andExpect(jsonPath("$.path").value("/api/v1/favorites"));
+                .andExpect(jsonPath("$.path").value("/api/v1/beacons"));
     }
 
     private ResultActions register(String email, String password) throws Exception {

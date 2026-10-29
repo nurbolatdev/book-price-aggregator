@@ -51,7 +51,7 @@ public class OpenApiConfig {
     GroupedOpenApi userApi() {
         return GroupedOpenApi.builder()
                 .group("user")
-                .pathsToMatch("/api/v1/me/**", "/api/v1/favorites/**", "/api/v1/beacons/**")
+                .pathsToMatch("/api/v1/me/**", "/api/v1/beacons/**")
                 .pathsToExclude("/api/v1/beacons/unsubscribe")
                 .build();
     }
