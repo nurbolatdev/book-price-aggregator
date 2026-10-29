@@ -7,5 +7,7 @@ public enum NotificationDelivery {
     /** Its own email right away. */
     INSTANT,
     /** One of the books in the next daily digest. */
-    DIGEST
+    DIGEST,
+    /** The weekly deals email: no beacon behind it. */
+    WEEKLY
 }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Подборка недели</title>
+</head>
+<body style="margin:0;padding:0;background:#F4F6F8;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6F8;padding:24px 12px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                   style="max-width:560px;background:#FFFFFF;border-radius:12px;">
+                <th:block th:replace="~{email/layout :: header}"></th:block>
+                <tr>
+                    <td style="padding:8px 32px 8px 32px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:#0E1A2B;">
+                        <p style="margin:0 0 6px 0;font-size:13px;color:#6B7280;" th:text="'Подборка недели · ' + ${periodText}">Подборка недели · 19–26 октября</p>
+                        <h1 style="margin:0 0 8px 0;font-size:22px;line-height:28px;"
+                            th:text="${name} != null ? ${name} + ', эти книги сильнее всего подешевели за неделю' : 'Эти книги сильнее всего подешевели за неделю'">Эти книги подешевели</h1>
+                    </td>
+                </tr>
+                <tr th:each="item : ${items}">
+                    <td style="padding:6px 32px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;color:#0E1A2B;">
+                        <a th:href="${item.editionUrl}" href="#" style="display:block;text-decoration:none;color:#0E1A2B;border:1px solid #EDF0F3;border-radius:12px;padding:12px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td th:if="${item.coverUrl}" width="56" valign="middle" style="padding-right:12px;">
+                                        <img th:src="${item.coverUrl}" src="#" width="56" alt="Обложка"
+                                             style="display:block;width:56px;height:auto;border-radius:6px;border:1px solid #E5E7EB;">
+                                    </td>
+                                    <td valign="middle">
+                                        <p style="margin:0;font-size:15px;font-weight:bold;" th:text="${item.title}">Название</p>
+                                        <p style="margin:2px 0 0 0;font-size:13px;color:#6B7280;"
+                                           th:text="${item.author} != null ? ${item.author} + ' · ' + ${item.storeName} : ${item.storeName}">Автор · Магазин</p>
+                                    </td>
+                                    <td valign="middle" align="right" style="padding-left:12px;white-space:nowrap;">
+                                        <p style="margin:0;font-size:17px;font-weight:bold;" th:text="${item.priceText}">3 150 ₸</p>
+                                        <p style="margin:4px 0 0 0;font-size:12px;font-weight:bold;color:#0F6B45;" th:text="'−' + ${item.dropPercent} + '%'">−18%</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:8px 32px 8px 32px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:#0E1A2B;">
+                        <th:block th:replace="~{email/layout :: button(${dealsUrl}, 'Все скидки недели')}"></th:block>
+                        <p style="margin:0;font-size:13px;color:#6B7280;">Хотите знать о конкретной книге? Поставьте на неё маячок — письмо придёт, как только цена упадёт.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:12px 32px 16px 32px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#6B7280;border-top:1px solid #E5E7EB;">
+                        Вы получили это письмо, потому что включили еженедельную подборку на KitapRadar.
+                        <span th:if="${collectedAtText}" th:text="'Цены собраны ' + ${collectedAtText} + '.'">Цены собраны 26.10.2026 10:00.</span>
+                        <a th:href="${settingsUrl}" href="#" style="color:#6B7280;">Отключить подборку</a>
+                        &nbsp;·&nbsp;
+                        <a th:href="${settingsUrl}" href="#" style="color:#6B7280;">Настройки уведомлений</a>
+                    </td>
+                </tr>
+                <th:block th:replace="~{email/layout :: footer}"></th:block>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

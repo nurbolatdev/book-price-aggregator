@@ -1,11 +1,15 @@
 package kz.nurbolat.bookaggregator.beacon;
 
+import kz.nurbolat.bookaggregator.config.AppProperties;
 import kz.nurbolat.bookaggregator.notification.EmailPublisher;
 import kz.nurbolat.bookaggregator.notification.EmailType;
 import kz.nurbolat.bookaggregator.notification.Notification;
+import kz.nurbolat.bookaggregator.notification.NotificationDelivery;
 import kz.nurbolat.bookaggregator.notification.NotificationErrors;
 import kz.nurbolat.bookaggregator.notification.NotificationRepository;
 import kz.nurbolat.bookaggregator.notification.NotificationStatus;
+import kz.nurbolat.bookaggregator.notification.WeeklyDigestEmail;
+import kz.nurbolat.bookaggregator.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -15,12 +19,13 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Publishes again the instant beacon emails that never reached RabbitMQ: the notification was committed, but the
+ * Publishes again the instant beacon emails and weekly digests that never reached RabbitMQ: the notification was committed, but the
  * broker was down or the application stopped before it confirmed the message ({@code published_at} is empty).
  * <ul>
- *     <li>Only {@code QUEUED} + {@code INSTANT} + unpublished rows: emails in a queue or in the dead-letter queue
+ *     <li>Only {@code QUEUED} + {@code INSTANT} or {@code WEEKLY} + unpublished rows: emails in a queue or in the dead-letter queue
  *     are published, so their retries stay with RabbitMQ; digest and refused notifications are not touched.</li>
  *     <li>Only rows older than {@link #MIN_AGE}: the first publication gives up after
  *     {@link EmailPublisher#CONFIRM_TIMEOUT}, so it is over by then and both never publish the same row at once.</li>
@@ -43,14 +48,16 @@ public class BeaconEmailRelay {
     private final NotificationRepository notifications;
     private final BeaconAlerts alerts;
     private final EmailPublisher emailPublisher;
+    private final AppProperties appProperties;
     private final TransactionTemplate transaction;
     private final Clock clock;
 
     public BeaconEmailRelay(NotificationRepository notifications, BeaconAlerts alerts, EmailPublisher emailPublisher,
-                            PlatformTransactionManager transactionManager, Clock clock) {
+                            AppProperties appProperties, PlatformTransactionManager transactionManager, Clock clock) {
         this.notifications = notifications;
         this.alerts = alerts;
         this.emailPublisher = emailPublisher;
+        this.appProperties = appProperties;
         this.transaction = new TransactionTemplate(transactionManager);
         this.clock = clock;
     }
@@ -58,7 +65,7 @@ public class BeaconEmailRelay {
     public Result run() {
         Instant now = clock.instant();
         Integer republished = transaction.execute(status -> republish(now));
-        Integer abandoned = transaction.execute(status -> notifications.failUnpublishedInstant(now.minus(GIVE_UP), NotificationErrors.NOT_PUBLISHED));
+        Integer abandoned = transaction.execute(status -> notifications.failUnpublished(now.minus(GIVE_UP), NotificationErrors.NOT_PUBLISHED));
         Result result = new Result(republished == null ? 0 : republished, abandoned == null ? 0 : abandoned);
         if (result.republished() > 0 || result.abandoned() > 0) {
             log.warn("Beacon email relay: {} emails published again, {} given up", result.republished(), result.abandoned());
@@ -67,9 +74,20 @@ public class BeaconEmailRelay {
     }
 
     private int republish(Instant now) {
-        List<Notification> stuck = notifications.lockUnpublishedInstant(now.minus(GIVE_UP), now.minus(MIN_AGE), BATCH);
+        List<Notification> stuck = notifications.lockUnpublished(now.minus(GIVE_UP), now.minus(MIN_AGE), BATCH);
         int published = 0;
         for (Notification notification : stuck) {
+            if (notification.getDelivery() == NotificationDelivery.WEEKLY) {
+                Map<String, Object> payload = notification.getPayload();
+                User user = notification.getUser();
+                if (emailPublisher.publishNow(EmailType.WEEKLY_DIGEST, user.getEmail(), WeeklyDigestEmail.subject(payload),
+                        WeeklyDigestEmail.model(payload, appProperties.baseUrl(), user.getName()),
+                        List.of(notification.getId()))) {
+                    notification.setPublishedAt(clock.instant());
+                    published++;
+                }
+                continue;
+            }
             Beacon beacon = notification.getBeacon();
             if (beacon == null || beacon.getStatus() == BeaconStatus.PAUSED) {
                 notification.setStatus(NotificationStatus.FAILED);
