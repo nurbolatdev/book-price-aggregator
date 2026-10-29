@@ -1892,19 +1892,19 @@
     },
     "/api/v1/search" : {
       "get" : {
-        "description" : "Ищет по названию, автору или ISBN; фильтры по магазинам, цене, переплёту и языку.",
+        "description" : "Ищет по названию, автору или ISBN; без q — каталог. Фильтры по магазинам, цене, переплёту и языку (списки через запятую).",
         "operationId" : "search",
         "parameters" : [ {
-          "description" : "Название, автор или ISBN",
+          "description" : "Название, автор или ISBN; необязателен: без него — каталог",
           "example" : "мастер маргарита",
           "in" : "query",
           "name" : "q",
-          "required" : true,
+          "required" : false,
           "schema" : {
             "maxLength" : 200,
             "minLength" : 2,
             "type" : "string",
-            "description" : "Название, автор или ISBN",
+            "description" : "Название, автор или ISBN; необязателен: без него — каталог",
             "example" : "мастер маргарита"
           }
         }, {
@@ -1953,35 +1953,35 @@
             "default" : "true"
           }
         }, {
-          "description" : "Переплёт",
+          "description" : "Переплёты через запятую",
+          "example" : "HARDCOVER,PAPERBACK",
           "in" : "query",
           "name" : "binding",
           "required" : false,
           "schema" : {
             "type" : "string",
-            "description" : "Переплёт"
+            "description" : "Переплёты через запятую",
+            "example" : "HARDCOVER,PAPERBACK"
           }
         }, {
-          "description" : "Язык: ru, kk или en",
-          "example" : "ru",
+          "description" : "Языки через запятую: ru, kk, en",
+          "example" : "ru,kk",
           "in" : "query",
           "name" : "language",
           "required" : false,
           "schema" : {
-            "pattern" : "ru|kk|en",
             "type" : "string",
-            "description" : "Язык: ru, kk или en",
-            "example" : "ru"
+            "description" : "Языки через запятую: ru, kk, en",
+            "example" : "ru,kk"
           }
         }, {
-          "description" : "Сортировка",
+          "description" : "Сортировка; по умолчанию RELEVANCE с запросом q и STORES_DESC без него",
           "in" : "query",
           "name" : "sort",
           "required" : false,
           "schema" : {
             "type" : "string",
-            "description" : "Сортировка",
-            "default" : "RELEVANCE"
+            "description" : "Сортировка; по умолчанию RELEVANCE с запросом q и STORES_DESC без него"
           }
         }, {
           "description" : "Номер страницы с нуля",

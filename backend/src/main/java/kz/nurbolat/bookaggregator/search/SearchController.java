@@ -34,7 +34,7 @@ public class SearchController {
     private final RefreshOnDemandService refreshOnDemandService;
 
     /** The first page also refreshes stale prices of its editions in the background. */
-    @Operation(summary = "Поиск изданий", description = "Ищет по названию, автору или ISBN; фильтры по магазинам, цене, переплёту и языку.")
+    @Operation(summary = "Поиск изданий", description = "Ищет по названию, автору или ISBN; без q — каталог. Фильтры по магазинам, цене, переплёту и языку (списки через запятую).")
     @ApiResponse(responseCode = "422", description = "Ошибка валидации")
     @ApiResponse(responseCode = "429", description = "Слишком много запросов")
     @GetMapping
