@@ -56,6 +56,15 @@ class SearchControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldServePopularQueriesPubliclyAndRejectLimitAboveTwelve() throws Exception {
+        mockMvc.perform(get("/api/v1/search/popular").param("limit", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", lessThanOrEqualTo(3)));
+        mockMvc.perform(get("/api/v1/search/popular").param("limit", "13"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
     void shouldReturn422WhenQueryIsTooShort() throws Exception {
         mockMvc.perform(get("/api/v1/search").param("q", "м"))
                 .andExpect(status().isUnprocessableEntity())

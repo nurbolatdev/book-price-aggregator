@@ -118,6 +118,17 @@ app:
     forgot-password: { requests: 3, period: 1m }
     search: { requests: 60, period: 1m }
     api: { requests: 120, period: 1m }
+  home:
+    # Pads the popular queries list while the search log is short
+    popular-fallback:
+      - Мастер и Маргарита
+      - Абай жолы
+      - Атомные привычки
+      - "1984"
+      - Маленький принц
+      - Гарри Поттер
+      - Преступление и наказание
+      - Алхимик
   admin:
     email: ${APP_ADMIN_EMAIL:}
     password: ${APP_ADMIN_PASSWORD:}

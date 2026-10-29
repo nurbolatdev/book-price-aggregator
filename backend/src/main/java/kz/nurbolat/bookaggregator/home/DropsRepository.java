@@ -35,6 +35,15 @@ class DropsRepository {
                       AND o.in_stock
                       AND s.enabled
                     ORDER BY o.edition_id, o.price
+                ), stores_count AS (
+                    SELECT o.edition_id, COUNT(DISTINCT o.store_id) AS cnt
+                    FROM offers o
+                    JOIN stores s ON s.id = o.store_id
+                    WHERE o.edition_id IN (SELECT edition_id FROM current_best)
+                      AND o.match_status = 'MATCHED'
+                      AND o.in_stock
+                      AND s.enabled
+                    GROUP BY o.edition_id
                 ), past_best AS (
                     SELECT o.edition_id, MIN(past.price) AS price
                     FROM offers o
@@ -53,9 +62,10 @@ class DropsRepository {
                     GROUP BY o.edition_id
                 )
                 SELECT e.id AS edition_id, e.book_id, b.title, b.author, e.cover_url,
-                       c.store_code, c.price, p.price AS previous_price
+                       c.store_code, c.price, p.price AS previous_price, sc.cnt AS stores_count
                 FROM current_best c
                 JOIN past_best p ON p.edition_id = c.edition_id
+                JOIN stores_count sc ON sc.edition_id = c.edition_id
                 JOIN editions e ON e.id = c.edition_id
                 JOIN books b ON b.id = e.book_id
                 WHERE c.price <= p.price * 0.99
@@ -73,7 +83,7 @@ class DropsRepository {
                     .intValue();
             return new DropItem(rs.getLong("edition_id"), rs.getLong("book_id"), rs.getString("title"),
                     rs.getString("author"), rs.getString("cover_url"), StoreCode.valueOf(rs.getString("store_code")),
-                    price, previous, dropPercent);
+                    price, previous, dropPercent, rs.getInt("stores_count"));
         });
     }
 }

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
  *
  * @param previousPrice best price seven days ago
  * @param dropPercent   rounded drop relative to the previous price
+ * @param storesCount   enabled stores with this edition in stock
  */
 public record DropItem(
         Long editionId,
@@ -19,6 +20,7 @@ public record DropItem(
         StoreCode store,
         BigDecimal price,
         BigDecimal previousPrice,
-        int dropPercent
+        int dropPercent,
+        int storesCount
 ) {
 }

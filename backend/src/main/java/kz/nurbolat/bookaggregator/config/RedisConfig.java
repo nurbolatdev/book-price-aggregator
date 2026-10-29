@@ -38,6 +38,7 @@ public class RedisConfig implements CachingConfigurer {
     public static final String SUGGEST = "suggest";
     public static final String EDITION = "edition";
     public static final String DROPS = "drops";
+    public static final String POPULAR = "popular";
     public static final String ADMIN_STATS = "admin-stats";
 
     /** Defaults for caches without their own configuration. */
@@ -61,8 +62,10 @@ public class RedisConfig implements CachingConfigurer {
                         types.constructCollectionType(List.class, Suggestion.class)))
                 .withCacheConfiguration(EDITION, cache(defaults, objectMapper, "edition:v1:", Duration.ofMinutes(30),
                         types.constructType(EditionDetailResponse.class)))
-                .withCacheConfiguration(DROPS, cache(defaults, objectMapper, "home:v1:", Duration.ofMinutes(15),
+                .withCacheConfiguration(DROPS, cache(defaults, objectMapper, "home:v2:", Duration.ofMinutes(15),
                         types.constructCollectionType(List.class, DropItem.class)))
+                .withCacheConfiguration(POPULAR, cache(defaults, objectMapper, "popular:v1:", Duration.ofHours(1),
+                        types.constructCollectionType(List.class, String.class)))
                 .withCacheConfiguration(ADMIN_STATS, cache(defaults, objectMapper, "admin:v1:stats:", Duration.ofMinutes(1),
                         types.constructType(AdminStatsResponse.class)));
     }

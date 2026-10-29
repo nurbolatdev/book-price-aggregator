@@ -2166,6 +2166,62 @@
         "tags" : [ "Search" ]
       }
     },
+    "/api/v1/search/popular" : {
+      "get" : {
+        "description" : "Топ запросов за 7 дней с результатами; если их мало — дополняется списком из настроек.",
+        "operationId" : "popular",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "maximum" : 12,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 6
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Ошибка валидации"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Популярные запросы",
+        "tags" : [ "Search" ]
+      }
+    },
     "/api/v1/search/suggest" : {
       "get" : {
         "description" : "Варианты для строки ввода от 2 символов.",
@@ -2671,6 +2727,10 @@
           "store" : {
             "type" : "string",
             "enum" : [ "KASPI", "FLIP", "MELOMAN", "WILDBERRIES", "OZON" ]
+          },
+          "storesCount" : {
+            "type" : "integer",
+            "format" : "int32"
           },
           "title" : {
             "type" : "string"

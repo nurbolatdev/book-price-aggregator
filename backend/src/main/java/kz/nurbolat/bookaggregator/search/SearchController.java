@@ -1,6 +1,8 @@
 package kz.nurbolat.bookaggregator.search;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
@@ -34,6 +36,7 @@ public class SearchController {
     private final SearchService searchService;
     private final SuggestionService suggestionService;
     private final SearchFacetsService facetsService;
+    private final PopularQueriesService popularQueriesService;
     private final RefreshOnDemandService refreshOnDemandService;
 
     /** The first page also refreshes stale prices of its editions in the background. */
@@ -64,5 +67,13 @@ public class SearchController {
     @GetMapping("/suggest")
     ResponseEntity<List<Suggestion>> suggest(@RequestParam @NotBlank @Size(min = 2, max = 200) String q) {
         return ResponseEntity.ok(suggestionService.suggest(q));
+    }
+
+    @Operation(summary = "Популярные запросы", description = "Топ запросов за 7 дней с результатами; если их мало — дополняется списком из настроек.")
+    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
+    @ApiResponse(responseCode = "429", description = "Слишком много запросов")
+    @GetMapping("/popular")
+    ResponseEntity<List<String>> popular(@RequestParam(defaultValue = "6") @Min(1) @Max(12) int limit) {
+        return ResponseEntity.ok(popularQueriesService.popular(limit));
     }
 }
