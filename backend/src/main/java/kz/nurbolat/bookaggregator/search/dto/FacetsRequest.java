@@ -18,8 +18,8 @@ public record FacetsRequest(
         @Size(min = 2, max = 200, message = "От 2 до 200 символов") String q,
         @Schema(description = "Коды магазинов через запятую", example = "FLIP,KASPI")
         List<StoreCode> stores,
-        @Schema(description = "Минимальная цена в тенге", example = "1000") @PositiveOrZero BigDecimal minPrice,
-        @Schema(description = "Максимальная цена в тенге", example = "10000") @PositiveOrZero BigDecimal maxPrice,
+        @Schema(description = "Минимальная цена в тенге", example = "1000") @PositiveOrZero(message = "Не меньше 0") BigDecimal minPrice,
+        @Schema(description = "Максимальная цена в тенге", example = "10000") @PositiveOrZero(message = "Не меньше 0") BigDecimal maxPrice,
         @Schema(description = "Только издания в наличии", defaultValue = "true") Boolean inStock,
         @Schema(description = "Переплёты через запятую", example = "HARDCOVER,PAPERBACK") List<Binding> binding,
         @Schema(description = "Языки через запятую: ru, kk, en", example = "ru,kk")

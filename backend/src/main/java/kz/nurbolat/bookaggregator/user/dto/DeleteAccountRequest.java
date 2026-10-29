@@ -5,6 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record DeleteAccountRequest(
         @Schema(description = "Текущий пароль для подтверждения", example = "secret123")
-        @NotBlank String password
+        @NotBlank(message = "Обязательное поле") String password
 ) {
 }

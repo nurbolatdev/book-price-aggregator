@@ -2940,7 +2940,7 @@
         "properties" : {
           "conditionType" : {
             "type" : "string",
-            "description" : "Тип условия: BELOW_PRICE или DISCOUNT_PERCENT",
+            "description" : "Тип условия: ANY_DROP, BELOW_PRICE или DISCOUNT_PERCENT",
             "enum" : [ "ANY_DROP", "BELOW_PRICE", "DISCOUNT_PERCENT" ]
           },
           "editionId" : {
@@ -3569,10 +3569,8 @@
             "example" : "Айгерим"
           },
           "password" : {
-            "maxLength" : 2147483647,
-            "minLength" : 6,
             "type" : "string",
-            "description" : "Пароль, не короче 6 символов",
+            "description" : "Пароль, 8–100 символов",
             "example" : "secret123"
           }
         }
@@ -3607,10 +3605,8 @@
         "type" : "object",
         "properties" : {
           "newPassword" : {
-            "maxLength" : 2147483647,
-            "minLength" : 6,
             "type" : "string",
-            "description" : "Новый пароль, не короче 6 символов",
+            "description" : "Новый пароль, 8–100 символов",
             "example" : "newSecret123"
           },
           "token" : {

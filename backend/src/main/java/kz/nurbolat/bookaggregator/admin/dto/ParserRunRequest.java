@@ -10,5 +10,5 @@ import java.util.List;
  *                   (within the run limits)
  */
 public record ParserRunRequest(@Schema(description = "Ограничить обход этими изданиями; без поля - весь каталог в пределах лимитов", example = "[1, 2, 3]")
-        @Size(max = 200) List<Long> editionIds) {
+        @Size(max = 200, message = "Не больше 200 элементов") List<Long> editionIds) {
 }
