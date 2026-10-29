@@ -27,10 +27,10 @@ import java.util.Map;
  * <ul>
  *     <li>Only {@code QUEUED} + {@code INSTANT} or {@code WEEKLY} + unpublished rows: emails in a queue or in the dead-letter queue
  *     are published, so their retries stay with RabbitMQ; digest and refused notifications are not touched.</li>
- *     <li>Only rows older than {@link #MIN_AGE}: the first publication gives up after
+ *     <li>Only rows queued more than {@link #MIN_AGE} ago ({@code queued_at}, moved forward when an admin retries a row): the first publication gives up after
  *     {@link EmailPublisher#CONFIRM_TIMEOUT}, so it is over by then and both never publish the same row at once.</li>
  *     <li>Rows are locked with {@code SKIP LOCKED}; together with ShedLock no two relays take the same row.</li>
- *     <li>After {@link #GIVE_UP} unpublished rows become {@code FAILED} ({@code NOT_PUBLISHED}), a final reason:
+ *     <li>{@link #GIVE_UP} after {@code queued_at} unpublished rows become {@code FAILED} ({@code NOT_PUBLISHED}), a final reason:
  *     if a copy did reach the broker after all (its confirmation was lost) and turns up later, the listener
  *     acknowledges it without sending.</li>
  * </ul>

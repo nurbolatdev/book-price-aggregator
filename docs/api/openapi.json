@@ -43,6 +43,9 @@
     "description" : "Здоровье системы",
     "name" : "Admin: Health"
   }, {
+    "description" : "Журнал писем и повторная отправка",
+    "name" : "Admin: Notifications"
+  }, {
     "description" : "Статистика и активность",
     "name" : "Admin: Stats"
   }, {
@@ -203,6 +206,143 @@
         },
         "summary" : "Здоровье системы",
         "tags" : [ "Admin: Health" ]
+      }
+    },
+    "/api/v1/admin/notifications" : {
+      "get" : {
+        "description" : "Письма пользователям, новые сверху; фильтры по статусу и типу доставки.",
+        "operationId" : "list_1",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "QUEUED", "SENT", "FAILED" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "delivery",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "INSTANT", "DIGEST", "WEEKLY" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseAdminNotificationResponse"
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Нужна роль ADMIN"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Ошибка валидации"
+          }
+        },
+        "summary" : "Журнал уведомлений",
+        "tags" : [ "Admin: Notifications" ]
+      }
+    },
+    "/api/v1/admin/notifications/{id}/retry" : {
+      "post" : {
+        "description" : "Возвращает неудачное (FAILED) уведомление в очередь; доставка подхватит его сама.",
+        "operationId" : "retry",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminNotificationResponse"
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Нужна роль ADMIN"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Уведомление не найдено"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Уведомление не в статусе FAILED или email пользователя не подтверждён"
+          }
+        },
+        "summary" : "Повторить отправку",
+        "tags" : [ "Admin: Notifications" ]
       }
     },
     "/api/v1/admin/offers/pending-review" : {
@@ -763,9 +903,25 @@
     },
     "/api/v1/admin/users" : {
       "get" : {
-        "description" : "Дата регистрации, подтверждение email и число маячков.",
+        "description" : "Дата регистрации, подтверждение email и число маячков. Поиск q — по части email или имени, verified — по подтверждению email.",
         "operationId" : "users",
         "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "verified",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
           "in" : "query",
           "name" : "page",
           "required" : false,
@@ -2576,6 +2732,44 @@
           }
         }
       },
+      "AdminNotificationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "delivery" : {
+            "type" : "string",
+            "description" : "INSTANT, DIGEST или WEEKLY"
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "Причина неудачи; null, если ошибки нет"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sentAt" : {
+            "type" : "string",
+            "description" : "Когда письмо отправлено; null — ещё нет",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "QUEUED, SENT или FAILED"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "Тема содержимого: книга для маячка, «Сводка за день» или «Подборка недели»"
+          },
+          "userEmail" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Письмо из журнала уведомлений"
+      },
       "AdminParserResponse" : {
         "type" : "object",
         "properties" : {
@@ -3273,6 +3467,33 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/AdminEventResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "PageResponseAdminNotificationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AdminNotificationResponse"
             }
           },
           "page" : {

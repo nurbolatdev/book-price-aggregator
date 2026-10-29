@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
@@ -32,17 +33,22 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     boolean existsWeekly(Long userId, String isoWeek);
 
     /**
-     * Instant and weekly notifications whose email never reached the broker, created in [from, to). Rows are
+     * Instant and weekly notifications whose email never reached the broker, queued in [from, to). Rows are
      * locked and rows locked by another relay are skipped.
      */
     @Query(value = """
             SELECT * FROM notifications
             WHERE status = 'QUEUED' AND delivery IN ('INSTANT', 'WEEKLY') AND published_at IS NULL
-              AND created_at >= :from AND created_at < :to
-            ORDER BY created_at
+              AND queued_at >= :from AND queued_at < :to
+            ORDER BY queued_at
             LIMIT :limit
             FOR UPDATE SKIP LOCKED""", nativeQuery = true)
     List<Notification> lockUnpublished(Instant from, Instant to, int limit);
+
+    /** One notification with its user, locked against a concurrent retry or the relay. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT n FROM Notification n JOIN FETCH n.user WHERE n.id = :id")
+    Optional<Notification> lockWithUser(Long id);
 
     @Modifying
     @Query("UPDATE Notification n SET n.publishedAt = :at WHERE n.id IN :ids AND n.publishedAt IS NULL")
@@ -52,7 +58,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("""
             UPDATE Notification n SET n.status = 'FAILED', n.error = :error
-            WHERE n.status = 'QUEUED' AND n.delivery IN ('INSTANT', 'WEEKLY') AND n.publishedAt IS NULL AND n.createdAt < :before""")
+            WHERE n.status = 'QUEUED' AND n.delivery IN ('INSTANT', 'WEEKLY') AND n.publishedAt IS NULL AND n.queuedAt < :before""")
     int failUnpublished(Instant before, String error);
 
     /**

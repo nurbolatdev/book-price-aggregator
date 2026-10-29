@@ -90,11 +90,11 @@ class WeeklyDigestIT extends AbstractMailIT {
     void shouldPublishAgainWeeklyDigestThatNeverReachedTheBroker() throws Exception {
         User recipient = user(true, true);
         long id = jdbc.queryForObject("""
-                INSERT INTO notifications (user_id, delivery, payload, created_at)
+                INSERT INTO notifications (user_id, delivery, payload, created_at, queued_at)
                 VALUES (?, 'WEEKLY', '{"isoWeek": "2026-W44", "periodText": "19–26 октября", "items": [
                   {"editionId": 1, "title": "Шантарам", "author": "Грегори Дэвид Робертс", "storeName": "Flip.kz",
                    "price": 4000, "previousPrice": 5000, "dropPercent": 20}]}'::jsonb,
-                        NOW() - INTERVAL '2 minutes')
+                        NOW() - INTERVAL '2 minutes', NOW() - INTERVAL '2 minutes')
                 RETURNING id""", Long.class, recipient.getId());
 
         assertThat(relay.run().republished()).isEqualTo(1);

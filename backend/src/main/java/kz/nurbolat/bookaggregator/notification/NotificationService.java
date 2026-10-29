@@ -30,6 +30,7 @@ public class NotificationService {
         notification.setBeacon(beacon);
         notification.setPayload(payload);
         notification.setDelivery(delivery);
+        notification.setQueuedAt(clock.instant());
         return repository.save(notification);
     }
 

@@ -60,6 +60,10 @@ public class Notification {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    /** When the notification was queued, or queued again by an admin; the relay window counts from it. */
+    @Column(name = "queued_at", nullable = false)
+    private Instant queuedAt = Instant.now();
+
     @Column(name = "sent_at")
     private Instant sentAt;
 }
