@@ -1610,6 +1610,60 @@
         "tags" : [ "Editions" ]
       }
     },
+    "/api/v1/editions/{id}/similar" : {
+      "get" : {
+        "description" : "Сначала другие книги того же автора, затем книги на том же языке; учитываются только цены в наличии.",
+        "operationId" : "getSimilar",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "description" : "Сколько книг вернуть, 1–12",
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "maximum" : 12,
+            "minimum" : 1,
+            "type" : "string",
+            "default" : "4"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SimilarEdition"
+                  }
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Издание не найдено"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Похожие книги",
+        "tags" : [ "Editions" ]
+      }
+    },
     "/api/v1/favorites" : {
       "get" : {
         "description" : "Избранные книги текущего пользователя.",
@@ -3444,6 +3498,33 @@
             "format" : "int64"
           }
         }
+      },
+      "SimilarEdition" : {
+        "type" : "object",
+        "properties" : {
+          "author" : {
+            "type" : "string"
+          },
+          "bestPrice" : {
+            "type" : "number",
+            "description" : "Минимальная цена в наличии, ₸"
+          },
+          "bookId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "coverUrl" : {
+            "type" : "string"
+          },
+          "editionId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Похожая книга: показывается издание с самой низкой ценой"
       },
       "StoreFacet" : {
         "type" : "object",

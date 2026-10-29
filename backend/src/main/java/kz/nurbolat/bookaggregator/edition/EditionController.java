@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse;
 import kz.nurbolat.bookaggregator.edition.dto.PriceHistoryResponse;
+import kz.nurbolat.bookaggregator.edition.dto.SimilarEdition;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import kz.nurbolat.bookaggregator.scheduler.RefreshOnDemandService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,6 +32,7 @@ public class EditionController {
     private final EditionService editionService;
     private final PriceHistoryService priceHistoryService;
     private final RefreshOnDemandService refreshOnDemandService;
+    private final SimilarEditionsService similarEditionsService;
 
     /** Answers from stored prices; stale ones are refreshed in the background. */
     @Operation(summary = "Карточка издания", description = "Отдаёт сохранённые цены; устаревшие обновляются в фоне.")
@@ -47,5 +51,16 @@ public class EditionController {
             @Parameter(description = "1M, 3M или 6M", schema = @Schema(defaultValue = "3M"))
             @RequestParam(defaultValue = "3M") PricePeriod period) {
         return ResponseEntity.ok(priceHistoryService.getHistory(id, period));
+    }
+
+    @Operation(summary = "Похожие книги",
+            description = "Сначала другие книги того же автора, затем книги на том же языке; учитываются только цены в наличии.")
+    @ApiResponse(responseCode = "404", description = "Издание не найдено")
+    @GetMapping("/{id}/similar")
+    ResponseEntity<List<SimilarEdition>> getSimilar(
+            @PathVariable Long id,
+            @Parameter(description = "Сколько книг вернуть, 1–12", schema = @Schema(defaultValue = "4"))
+            @RequestParam(defaultValue = "4") @Min(1) @Max(12) int limit) {
+        return ResponseEntity.ok(similarEditionsService.getSimilar(id, limit));
     }
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import kz.nurbolat.bookaggregator.admin.dto.AdminStatsResponse;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse;
+import kz.nurbolat.bookaggregator.edition.dto.SimilarEdition;
 import kz.nurbolat.bookaggregator.home.dto.DropItem;
 import kz.nurbolat.bookaggregator.search.dto.SearchFacets;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem;
@@ -39,6 +40,7 @@ public class RedisConfig implements CachingConfigurer {
     public static final String EDITION = "edition";
     public static final String DROPS = "drops";
     public static final String POPULAR = "popular";
+    public static final String SIMILAR = "similar";
     public static final String ADMIN_STATS = "admin-stats";
 
     /** Defaults for caches without their own configuration. */
@@ -66,6 +68,8 @@ public class RedisConfig implements CachingConfigurer {
                         types.constructCollectionType(List.class, DropItem.class)))
                 .withCacheConfiguration(POPULAR, cache(defaults, objectMapper, "popular:v1:", Duration.ofHours(1),
                         types.constructCollectionType(List.class, String.class)))
+                .withCacheConfiguration(SIMILAR, cache(defaults, objectMapper, "similar:v1:", Duration.ofHours(1),
+                        types.constructCollectionType(List.class, SimilarEdition.class)))
                 .withCacheConfiguration(ADMIN_STATS, cache(defaults, objectMapper, "admin:v1:stats:", Duration.ofMinutes(1),
                         types.constructType(AdminStatsResponse.class)));
     }
