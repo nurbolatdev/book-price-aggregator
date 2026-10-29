@@ -114,7 +114,7 @@ erDiagram
     }
 ```
 
-Не на диаграмме (служебные): `email_tokens`, `refresh_tokens`, `search_log`, `system_events`, `shedlock`, `favorites` (устаревшая, удаляется в F3).
+Не на диаграмме (служебные): `email_tokens`, `refresh_tokens`, `search_log`, `system_events`, `shedlock`. Таблица `favorites` удалена в M22 (V20).
 
 ## 2. Таблицы подробно
 
@@ -157,10 +157,11 @@ erDiagram
 - `baseline_price` — лучшая цена в момент создания (для `ANY_DROP` и `DISCOUNT_PERCENT`).
 - `last_notified_price` — защита от повторных писем на ту же цену.
 - Индекс `(edition_id) WHERE status IN ('ACTIVE', 'TRIGGERED')` (с V16: сработавший маячок продолжает следить за новыми снижениями).
+- С V19: `status_changed_at TIMESTAMPTZ NOT NULL` — когда маячок последний раз менял статус (пауза, возобновление, срабатывание); существующие заполнены из `updated_at`.
 - Миграция данных: `price_alerts` → `beacons` (BELOW_PRICE, издание = единственное издание книги), затем `DROP TABLE price_alerts`.
 
 ### notifications (новая)
-История писем: что, кому, статус, ошибка. `payload JSONB` — данные письма (издание, цены, магазин, другие предложения); из него собирается ежедневная сводка. `beacon_id` → `ON DELETE SET NULL` (история остаётся). Статусы: `QUEUED` (ждёт отправки или сводки), `SENT` (`sent_at`: почтовый сервер **принял** письмо — не «доставлено во входящие»), `FAILED` (`error`: текст SMTP-ошибки — временная причина, следующая попытка отправит письмо; `EMAIL_NOT_VERIFIED`, `BEACON_INACTIVE`, `NOT_PUBLISHED` — окончательные, письмо уже не уйдёт). С V18: `delivery` (`INSTANT` | `DIGEST`) — способ доставки, фиксируется при создании; `published_at` — когда RabbitMQ подтвердил сообщение письма (пусто — до брокера не дошло, такие письма публикует повторно `BeaconEmailRelay`). Таблица работает как упрощённый transactional outbox. Индекс `(user_id, created_at DESC)`, `(status)`.
+История писем: что, кому, статус, ошибка. `payload JSONB` — данные письма (издание, цены, магазин, другие предложения); из него собирается ежедневная сводка. `beacon_id` → `ON DELETE SET NULL` (история остаётся). Статусы: `QUEUED` (ждёт отправки или сводки), `SENT` (`sent_at`: почтовый сервер **принял** письмо — не «доставлено во входящие»), `FAILED` (`error`: текст SMTP-ошибки — временная причина, следующая попытка отправит письмо; `EMAIL_NOT_VERIFIED`, `BEACON_INACTIVE`, `NOT_PUBLISHED` — окончательные, письмо уже не уйдёт). С V18: `delivery` (`INSTANT` | `DIGEST`; с V19 ещё `WEEKLY` — еженедельная подборка без маячка, не больше одной на пользователя и ISO-неделю: уникальный индекс по `user_id` и `payload->>'isoWeek'`) — способ доставки, фиксируется при создании; `published_at` — когда RabbitMQ подтвердил сообщение письма (пусто — до брокера не дошло, такие письма публикует повторно `BeaconEmailRelay`). С V19: `queued_at` — когда запись поставлена в очередь или поставлена снова администратором; повторная публикация писем отсчитывает окно от него, а не от `created_at`. Таблица работает как упрощённый transactional outbox. Индекс `(user_id, created_at DESC)`, `(status)`.
 
 ### email_tokens (новая)
 `id, user_id FK, beacon_id FK NULL, token_hash VARCHAR(64) UNIQUE, purpose VARCHAR(20) ('VERIFY_EMAIL' | 'RESET_PASSWORD' | 'UNSUBSCRIBE'), expires_at, used_at`. `beacon_id` обязателен для `UNSUBSCRIBE` (какой маячок ставить на паузу); такая ссылка многоразовая до истечения срока (90 дней). В БД хранится **SHA-256 хеш** токена, сам токен — только в письме.
@@ -206,5 +207,7 @@ CREATE INDEX idx_books_author_trgm ON books USING GIN (author_norm gin_trgm_ops)
 | V16__notifications.sql | M19 | `notifications`, индекс маячков ACTIVE + TRIGGERED |
 | V17__unsubscribe_tokens.sql | M19 | `email_tokens.beacon_id` для ссылок отписки |
 | V18__notification_delivery.sql | M19 | `notifications.delivery`, `notifications.published_at` (надёжная доставка писем) |
+| V19__beacon_status_time_and_weekly_notifications.sql | M22 | `beacons.status_changed_at`, `delivery = WEEKLY`, уникальный индекс недельной подборки, `notifications.queued_at` |
+| V20__drop_favorites.sql | M22 | `DROP TABLE favorites` |
 
 Номера могут сдвинуться, если понадобится промежуточная миграция — главное, по порядку и без правки старых.

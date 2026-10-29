@@ -71,7 +71,6 @@ backend/src/main/java/kz/nurbolat/bookaggregator/
 ├── store/                   # Store, StoreCode, StoreController
 ├── offer/                   # Offer, PriceHistory, OfferIngestionService (upsert + событие)
 ├── search/                  # SearchService (pg_trgm), подсказки, SearchLogWriter, CatalogSeeder
-├── favorite/                # избранное: Favorite, FavoriteService, FavoriteController
 ├── home/                    # «подешевели»: DropsService, DropsRefreshJob, HomeController
 ├── metadata/                # GoogleBooksClient — только метаданные
 ├── parser/
