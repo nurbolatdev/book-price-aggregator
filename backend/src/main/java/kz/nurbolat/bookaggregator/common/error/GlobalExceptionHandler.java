@@ -37,7 +37,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AppException.class)
     ResponseEntity<ErrorResponse> handleApp(AppException ex, HttpServletRequest request) {
-        return build(ex.getCode(), ex.getMessage(), request.getRequestURI(), List.of());
+        return build(ex.getCode(), ex.getMessage(), request.getRequestURI(), ex.getFieldErrors());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

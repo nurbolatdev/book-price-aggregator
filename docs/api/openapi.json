@@ -960,6 +960,32 @@
         "tags" : [ "Auth" ]
       }
     },
+    "/api/v1/auth/logout-all" : {
+      "post" : {
+        "description" : "Завершает все сессии пользователя, включая текущую.",
+        "operationId" : "logoutAll",
+        "responses" : {
+          "204" : {
+            "description" : "Все сессии завершены"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Требуется авторизация"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Выход на всех устройствах",
+        "tags" : [ "Auth" ]
+      }
+    },
     "/api/v1/auth/refresh" : {
       "post" : {
         "description" : "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать.",
@@ -1383,7 +1409,7 @@
     },
     "/api/v1/beacons/{id}" : {
       "delete" : {
-        "operationId" : "delete",
+        "operationId" : "delete_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "id",
@@ -1875,6 +1901,67 @@
       }
     },
     "/api/v1/me" : {
+      "delete" : {
+        "description" : "Удаляет аккаунт со всеми маячками, письмами и сессиями после проверки пароля. Администратор удалить аккаунт не может.",
+        "operationId" : "delete",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeleteAccountRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Аккаунт удалён"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Требуется авторизация"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Аккаунт администратора удалить нельзя"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Неверный пароль"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "summary" : "Удаление аккаунта",
+        "tags" : [ "Profile" ]
+      },
       "get" : {
         "description" : "Данные текущего пользователя.",
         "operationId" : "get",
@@ -1949,6 +2036,59 @@
           }
         },
         "summary" : "Изменение профиля",
+        "tags" : [ "Profile" ]
+      }
+    },
+    "/api/v1/me/password" : {
+      "post" : {
+        "description" : "Проверяет текущий пароль и ставит новый. Сессия переданного refresh-токена остаётся, остальные завершаются; без токена завершаются все.",
+        "operationId" : "changePassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Пароль изменён"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Требуется авторизация"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Неверный текущий пароль или новый пароль не подходит"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "summary" : "Смена пароля",
         "tags" : [ "Profile" ]
       }
     },
@@ -2725,6 +2865,29 @@
           }
         }
       },
+      "ChangePasswordRequest" : {
+        "required" : [ "currentPassword", "newPassword" ],
+        "type" : "object",
+        "properties" : {
+          "currentPassword" : {
+            "type" : "string",
+            "description" : "Текущий пароль",
+            "example" : "secret123"
+          },
+          "newPassword" : {
+            "type" : "string",
+            "description" : "Новый пароль, от 8 до 100 символов",
+            "example" : "newSecret123"
+          },
+          "refreshToken" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "Refresh-токен этого устройства: его сессия остаётся, остальные завершаются. Без него завершаются все сессии",
+            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0"
+          }
+        }
+      },
       "ComponentHealth" : {
         "type" : "object",
         "properties" : {
@@ -2767,6 +2930,17 @@
             "type" : "number",
             "description" : "Целевая цена в тенге для BELOW_PRICE",
             "example" : 4500
+          }
+        }
+      },
+      "DeleteAccountRequest" : {
+        "required" : [ "password" ],
+        "type" : "object",
+        "properties" : {
+          "password" : {
+            "type" : "string",
+            "description" : "Текущий пароль для подтверждения",
+            "example" : "secret123"
           }
         }
       },

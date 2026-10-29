@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -94,6 +95,22 @@ public class RefreshTokenService {
     @Transactional
     public void revokeAll(Long userId) {
         repository.revokeAllOfUser(userId, clock.instant());
+    }
+
+    /** Family of the token if it is an active token of this user; empty otherwise. */
+    @Transactional
+    public Optional<UUID> activeFamilyOf(String token, Long userId) {
+        Instant now = clock.instant();
+        return repository.findByTokenHash(TokenHasher.hash(token))
+                .filter(t -> t.getRevokedAt() == null && t.getExpiresAt().isAfter(now))
+                .filter(t -> t.getUser().getId().equals(userId))
+                .map(RefreshToken::getFamilyId);
+    }
+
+    /** Signs the user out everywhere except the session of the given family (password changed on this device). */
+    @Transactional
+    public void revokeAllExcept(Long userId, UUID familyId) {
+        repository.revokeAllExceptFamily(userId, familyId, clock.instant());
     }
 
     // A family has at most one active token, so active tokens are the user's sessions. The user's row is locked

@@ -14,7 +14,9 @@ import kz.nurbolat.bookaggregator.user.dto.TokenRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import kz.nurbolat.bookaggregator.config.OpenApiConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final AccountService accountService;
     private final EmailVerificationService emailVerificationService;
     private final PasswordResetService passwordResetService;
 
@@ -72,6 +75,16 @@ public class AuthController {
     @PostMapping("/logout")
     ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
         authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Выход на всех устройствах", description = "Завершает все сессии пользователя, включая текущую.")
+    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+    @ApiResponse(responseCode = "204", description = "Все сессии завершены")
+    @ApiResponse(responseCode = "401", description = "Требуется авторизация")
+    @PostMapping("/logout-all")
+    ResponseEntity<Void> logoutAll() {
+        accountService.logoutAll();
         return ResponseEntity.noContent().build();
     }
 
