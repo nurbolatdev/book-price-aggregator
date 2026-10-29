@@ -29,6 +29,12 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Query("UPDATE RefreshToken t SET t.revokedAt = :now WHERE t.familyId = :familyId AND t.revokedAt IS NULL")
     int revokeFamily(UUID familyId, Instant now);
 
+    /** The one token of the family that can still be refreshed. */
+    @Query("""
+            SELECT t FROM RefreshToken t
+            WHERE t.familyId = :familyId AND t.revokedAt IS NULL AND t.expiresAt > :now""")
+    Optional<RefreshToken> findActiveOfFamily(UUID familyId, Instant now);
+
     /** Sessions of the user that can still be refreshed, least recently refreshed first. */
     @Query("""
             SELECT t FROM RefreshToken t

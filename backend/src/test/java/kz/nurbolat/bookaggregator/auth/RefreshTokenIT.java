@@ -77,6 +77,9 @@ class RefreshTokenIT extends AbstractIntegrationTest {
         String stolen = refreshTokenOf(signIn(email));
         String otherDevice = refreshTokenOf(signIn(email));
         String rotated = JsonPath.read(refresh(stolen).andReturn().getResponse().getContentAsString(), "$.refreshToken");
+        // Outside the grace window a replay is a copy
+        jdbc.update("UPDATE refresh_tokens SET revoked_at = revoked_at - INTERVAL '11 seconds' WHERE token_hash = ?",
+                TokenHasher.hash(stolen));
 
         mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.USER_AGENT, "X".repeat(1000))

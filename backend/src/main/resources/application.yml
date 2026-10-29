@@ -108,6 +108,8 @@ app:
     max-sessions: ${JWT_MAX_SESSIONS:10}
     # Secure flag of the refresh cookie; the local profile turns it off
     refresh-cookie-secure: ${REFRESH_COOKIE_SECURE:true}
+    # A rotated refresh token is still answered with the current one this long (two tabs refreshing at once)
+    refresh-reuse-grace: ${JWT_REFRESH_REUSE_GRACE:10s}
   mail:
     from: ${MAIL_FROM:KitapRadar <no-reply@kitapradar.kz>}
   cors:

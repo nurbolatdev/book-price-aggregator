@@ -2,6 +2,7 @@ package kz.nurbolat.bookaggregator.auth;
 
 import com.jayway.jsonpath.JsonPath;
 import jakarta.servlet.http.Cookie;
+import kz.nurbolat.bookaggregator.security.TokenHasher;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
 import kz.nurbolat.bookaggregator.user.User;
 import kz.nurbolat.bookaggregator.user.UserRepository;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -35,6 +37,9 @@ class RefreshCookieIT extends AbstractIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     @Autowired
     private UserRepository userRepository;
@@ -95,7 +100,9 @@ class RefreshCookieIT extends AbstractIntegrationTest {
                         .content("{\"refreshToken\": \"" + bodyToken + "\"}"))
                 .andExpect(status().isOk());
 
-        // The cookie token was used up, the body token was not touched
+        // The cookie token was used up (outside the grace window it is dead), the body token was not touched
+        jdbc.update("UPDATE refresh_tokens SET revoked_at = revoked_at - INTERVAL '11 seconds' WHERE token_hash = ?",
+                TokenHasher.hash(cookieToken));
         refreshWithBody(cookieToken, null).andExpect(status().isUnauthorized());
         refreshWithBody(bodyToken, null).andExpect(status().isOk());
     }

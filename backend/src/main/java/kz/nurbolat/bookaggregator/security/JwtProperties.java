@@ -17,6 +17,7 @@ import java.time.Duration;
  * @param refreshTtl life of a refresh token; each refresh issues a new one
  * @param maxSessions signed-in devices per user; a new sign-in over the limit ends the least recently used one
  * @param refreshCookieSecure whether the refresh cookie carries {@code Secure}; off only on a developer machine without TLS
+ * @param refreshReuseGrace how long after a rotation the replaced token is still answered with the current one (parallel tabs)
  */
 @Validated
 @ConfigurationProperties("app.jwt")
@@ -25,6 +26,7 @@ public record JwtProperties(
         @DefaultValue("15m") @NotNull Duration accessTtl,
         @DefaultValue("30d") @NotNull Duration refreshTtl,
         @DefaultValue("10") @Min(1) int maxSessions,
-        @DefaultValue("true") boolean refreshCookieSecure
+        @DefaultValue("true") boolean refreshCookieSecure,
+        @DefaultValue("10s") @NotNull Duration refreshReuseGrace
 ) {
 }
