@@ -5,5 +5,5 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record EmailRequest(
-        @Schema(description = "Email пользователя", example = "reader@example.com") @NotBlank @Email String email) {
+        @Schema(description = "Email пользователя", example = "reader@example.com") @NotBlank(message = "Обязательное поле") @Email(message = "Некорректный email") String email) {
 }

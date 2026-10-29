@@ -22,12 +22,12 @@ class BeaconListRepository {
     private static final String SELECT = """
             SELECT b.id, b.edition_id, bk.title, bk.author, e.cover_url, b.condition_type, b.target_price,
                    b.target_percent, b.status, best.price AS best_price, best.code AS best_store,
-                   b.baseline_price, b.last_triggered_at
+                   b.baseline_price, b.last_triggered_at, best.url AS best_url, b.created_at, b.status_changed_at
             FROM beacons b
             JOIN editions e ON e.id = b.edition_id
             JOIN books bk ON bk.id = e.book_id
             LEFT JOIN LATERAL (
-                SELECT o.price, s.code
+                SELECT o.price, o.url, s.code
                 FROM offers o
                 JOIN stores s ON s.id = o.store_id
                 WHERE o.edition_id = b.edition_id
@@ -55,21 +55,31 @@ class BeaconListRepository {
                 BeaconStatus.valueOf(rs.getString("status")),
                 rs.getBigDecimal("best_price"),
                 store == null ? null : StoreCode.valueOf(store),
+                rs.getString("best_url"),
                 rs.getBigDecimal("baseline_price"),
-                triggered == null ? null : triggered.toInstant());
+                triggered == null ? null : triggered.toInstant(),
+                rs.getTimestamp("created_at").toInstant(),
+                rs.getTimestamp("status_changed_at").toInstant());
     };
 
     private final NamedParameterJdbcTemplate jdbc;
 
     /**
-     * @param status {@code null} for all; triggered first (latest first), then the rest newest first
+     * Triggered first (latest first), then the rest newest first.
+     *
+     * @param status    {@code null} for all
+     * @param editionId {@code null} for all editions
      */
-    List<BeaconResponse> findOfUser(Long userId, BeaconStatus status) {
+    List<BeaconResponse> findOfUser(Long userId, BeaconStatus status, Long editionId) {
         MapSqlParameterSource params = new MapSqlParameterSource("userId", userId);
         String sql = SELECT;
         if (status != null) {
             sql += " AND b.status = :status";
             params.addValue("status", status.name());
+        }
+        if (editionId != null) {
+            sql += " AND b.edition_id = :editionId";
+            params.addValue("editionId", editionId);
         }
         sql += " ORDER BY (b.status = 'TRIGGERED') DESC, COALESCE(b.last_triggered_at, b.created_at) DESC, b.id DESC";
         return jdbc.query(sql, params, MAPPER);

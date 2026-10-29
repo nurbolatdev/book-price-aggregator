@@ -77,7 +77,7 @@ class SearchRepositoryIT extends AbstractIntegrationTest {
 
     @Test
     void shouldFilterByBindingAndLanguage() {
-        SearchRequest request = new SearchRequest("абай", null, null, null, false, Binding.HARDCOVER, "kk",
+        SearchRequest request = new SearchRequest("абай", null, null, null, false, List.of(Binding.HARDCOVER), List.of("kk"),
                 null, null, null);
 
         assertThat(find(request)).isNotEmpty().extracting(SearchRow::title).containsOnly("Абай жолы");

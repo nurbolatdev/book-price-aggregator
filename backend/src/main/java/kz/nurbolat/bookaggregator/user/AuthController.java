@@ -1,6 +1,10 @@
 package kz.nurbolat.bookaggregator.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import kz.nurbolat.bookaggregator.auth.RefreshCookies;
+import kz.nurbolat.bookaggregator.common.error.AppException;
+import kz.nurbolat.bookaggregator.common.error.ErrorCode;
 import kz.nurbolat.bookaggregator.auth.EmailVerificationService;
 import kz.nurbolat.bookaggregator.auth.PasswordResetService;
 import kz.nurbolat.bookaggregator.user.dto.AuthResponse;
@@ -14,7 +18,9 @@ import kz.nurbolat.bookaggregator.user.dto.TokenRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import kz.nurbolat.bookaggregator.config.OpenApiConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
 @Tag(name = "Auth", description = "Регистрация, вход, обновление токенов, подтверждение email и сброс пароля")
 @SecurityRequirements
@@ -33,8 +41,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final AccountService accountService;
     private final EmailVerificationService emailVerificationService;
     private final PasswordResetService passwordResetService;
+    private final RefreshCookies refreshCookies;
 
     @Operation(summary = "Регистрация", description = "Создаёт аккаунт и отправляет письмо для подтверждения email.")
     @ApiResponse(responseCode = "201", description = "Аккаунт создан")
@@ -54,25 +64,54 @@ public class AuthController {
     @PostMapping("/login")
     ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request,
                                        @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
-        return ResponseEntity.ok(authService.login(request, userAgent));
+        return withCookie(authService.login(request, userAgent));
     }
 
-    @Operation(summary = "Обновление пары токенов", description = "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать.")
-    @ApiResponse(responseCode = "401", description = "Сессия недействительна или истекла")
+    @Operation(summary = "Обновление пары токенов",
+            description = "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. "
+                    + "Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). "
+                    + "Запрос с cookie обязан прийти с разрешённым заголовком Origin.")
+    @ApiResponse(responseCode = "401", description = "Токена нет, сессия недействительна или истекла")
+    @ApiResponse(responseCode = "403", description = "Origin не разрешён или не указан при токене из cookie")
     @ApiResponse(responseCode = "422", description = "Ошибка валидации")
     @PostMapping("/refresh")
-    ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request,
+    ResponseEntity<AuthResponse> refresh(@Valid @RequestBody(required = false) RefreshRequest body,
+                                         HttpServletRequest request,
                                          @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
-        return ResponseEntity.ok(authService.refresh(request.refreshToken(), userAgent));
+        Optional<String> fromCookie = refreshCookies.read(request);
+        String token = fromCookie.orElseGet(() -> bodyToken(body));
+        if (token == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "Сессия недействительна, войдите снова");
+        }
+        refreshCookies.checkOrigin(request, fromCookie.isPresent());
+        return withCookie(authService.refresh(token, userAgent));
     }
 
-    @Operation(summary = "Выход", description = "Завершает сессию, к которой относится refresh-токен.")
+    @Operation(summary = "Выход",
+            description = "Завершает сессию, к которой относится refresh-токен (cookie kr_refresh или тело запроса), "
+                    + "и удаляет cookie. Без токена тоже отвечает 204.")
     @ApiResponse(responseCode = "204", description = "Сессия завершена")
+    @ApiResponse(responseCode = "403", description = "Origin не разрешён или не указан при токене из cookie")
     @ApiResponse(responseCode = "422", description = "Ошибка валидации")
     @PostMapping("/logout")
-    ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
-        authService.logout(request.refreshToken());
-        return ResponseEntity.noContent().build();
+    ResponseEntity<Void> logout(@Valid @RequestBody(required = false) RefreshRequest body, HttpServletRequest request) {
+        Optional<String> fromCookie = refreshCookies.read(request);
+        String token = fromCookie.orElseGet(() -> bodyToken(body));
+        refreshCookies.checkOrigin(request, fromCookie.isPresent());
+        if (token != null) {
+            authService.logout(token);
+        }
+        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshCookies.clear()).build();
+    }
+
+    @Operation(summary = "Выход на всех устройствах", description = "Завершает все сессии пользователя, включая текущую.")
+    @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
+    @ApiResponse(responseCode = "204", description = "Все сессии завершены")
+    @ApiResponse(responseCode = "401", description = "Требуется авторизация")
+    @PostMapping("/logout-all")
+    ResponseEntity<Void> logoutAll() {
+        accountService.logoutAll();
+        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshCookies.clear()).build();
     }
 
     @Operation(summary = "Подтверждение email", description = "Подтверждает адрес по токену из письма.")
@@ -113,6 +152,15 @@ public class AuthController {
     @PostMapping("/reset-password")
     ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         passwordResetService.reset(request.token(), request.newPassword());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshCookies.clear()).build();
+    }
+
+    private ResponseEntity<AuthResponse> withCookie(AuthResponse response) {
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshCookies.issue(response.refreshToken()))
+                .body(response);
+    }
+
+    private static String bodyToken(RefreshRequest body) {
+        return body == null || body.refreshToken() == null || body.refreshToken().isBlank() ? null : body.refreshToken();
     }
 }

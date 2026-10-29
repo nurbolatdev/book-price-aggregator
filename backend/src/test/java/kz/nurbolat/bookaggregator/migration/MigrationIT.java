@@ -138,6 +138,30 @@ class MigrationIT extends AbstractIntegrationTest {
         assertThat(families.get("c")).isNotNull().isNotEqualTo(families.get("a"));
     }
 
+    @Test
+    void shouldBackfillBeaconStatusTimeAndNotificationQueueTimeWhenUpgradingFromV18() throws SQLException {
+        DataSource dataSource = createDatabase();
+        flyway(dataSource, MigrationVersion.fromVersion("18")).migrate();
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        long reader = insertId(jdbc, "INSERT INTO users (email, password) VALUES ('reader@example.com', 'x') RETURNING id");
+        long book = insertId(jdbc, "INSERT INTO books (title, author, title_norm) VALUES ('Дюна', 'Герберт', 'дюна') RETURNING id");
+        long edition = insertId(jdbc, "INSERT INTO editions (book_id) VALUES (?) RETURNING id", book);
+        long beacon = insertId(jdbc, """
+                INSERT INTO beacons (user_id, edition_id, condition_type, created_at, updated_at)
+                VALUES (?, ?, 'ANY_DROP', NOW() - INTERVAL '5 days', NOW() - INTERVAL '2 days') RETURNING id""",
+                reader, edition);
+        long notification = insertId(jdbc, """
+                INSERT INTO notifications (user_id, beacon_id, payload, delivery, created_at)
+                VALUES (?, ?, '{}'::jsonb, 'INSTANT', NOW() - INTERVAL '3 hours') RETURNING id""", reader, beacon);
+
+        flyway(dataSource, MigrationVersion.LATEST).migrate();
+
+        assertThat(jdbc.queryForObject(
+                "SELECT status_changed_at = updated_at FROM beacons WHERE id = ?", Boolean.class, beacon)).isTrue();
+        assertThat(jdbc.queryForObject(
+                "SELECT queued_at = created_at FROM notifications WHERE id = ?", Boolean.class, notification)).isTrue();
+    }
+
     private static Flyway flyway(DataSource dataSource, MigrationVersion target) {
         return Flyway.configure()
                 .dataSource(dataSource)

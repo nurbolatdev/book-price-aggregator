@@ -11,11 +11,11 @@ import lombok.Setter;
 public class LoginRequest {
 
     @Schema(description = "Email", example = "reader@example.com")
-    @NotBlank
-    @Email
+    @NotBlank(message = "Обязательное поле")
+    @Email(message = "Некорректный email")
     private String email;
 
     @Schema(description = "Пароль", example = "secret123")
-    @NotBlank
+    @NotBlank(message = "Обязательное поле")
     private String password;
 }

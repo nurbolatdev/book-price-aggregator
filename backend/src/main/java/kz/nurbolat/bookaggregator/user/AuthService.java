@@ -62,7 +62,7 @@ public class AuthService {
         }
 
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        return tokens(user, refreshTokenService.issue(user, userAgent));
+        return tokens(refreshTokenService.issue(user, userAgent));
     }
 
     /**
@@ -70,16 +70,16 @@ public class AuthService {
      */
     @Transactional(noRollbackFor = AppException.class)
     public AuthResponse refresh(String refreshToken, String userAgent) {
-        RefreshTokenService.Rotated rotated = refreshTokenService.rotate(refreshToken, userAgent);
-        return tokens(rotated.user(), rotated.token());
+        return tokens(refreshTokenService.rotate(refreshToken, userAgent));
     }
 
     public void logout(String refreshToken) {
         refreshTokenService.revoke(refreshToken);
     }
 
-    private AuthResponse tokens(User user, String refreshToken) {
-        return new AuthResponse(jwtService.generateAccessToken(user), refreshToken, jwtService.accessTtlSeconds(),
-                UserResponse.from(user));
+    private AuthResponse tokens(RefreshTokenService.IssuedToken issued) {
+        User user = issued.user();
+        return new AuthResponse(jwtService.generateAccessToken(user, issued.familyId()), issued.token(),
+                jwtService.accessTtlSeconds(), UserResponse.from(user));
     }
 }

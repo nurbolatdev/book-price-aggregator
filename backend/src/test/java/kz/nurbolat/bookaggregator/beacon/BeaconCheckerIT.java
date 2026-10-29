@@ -42,6 +42,7 @@ class BeaconCheckerIT extends AbstractMailIT {
         User user = user(true);
         long edition = editionWithHistory(jdbc, "Мастер и Маргарита", true, daysAgo(3, 3610));
         long beacon = beacon(user, edition, "ANY_DROP", null, "3610");
+        jdbc.update("UPDATE beacons SET status_changed_at = NOW() - INTERVAL '1 hour' WHERE id = ?", beacon);
 
         priceChanged(edition, "3150");
         List<MimeMessage> mail = awaitMail(user.getEmail(), 1);
@@ -55,6 +56,8 @@ class BeaconCheckerIT extends AbstractMailIT {
         assertThat(state.get("status")).isEqualTo("TRIGGERED");
         assertThat((BigDecimal) state.get("last_notified_price")).isEqualByComparingTo("3150");
         assertThat(state.get("last_triggered_at")).isNotNull();
+        assertThat(jdbc.queryForObject(
+                "SELECT status_changed_at > NOW() - INTERVAL '30 minutes' FROM beacons WHERE id = ?", Boolean.class, beacon)).isTrue();
         await(() -> "SENT".equals(notificationStatus(beacon)));
 
         // The same price again: nothing new to report

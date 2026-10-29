@@ -83,8 +83,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
             rule = "forgot-password";
             key = ip;
             limit = properties.forgotPassword();
+        } else if ((post && path.equals("/api/v1/me/password"))
+                || (HttpMethod.DELETE.matches(request.getMethod()) && path.equals("/api/v1/me"))) {
+            rule = "account";
+            key = securityUtils.currentUser().map(user -> "user:" + user.id()).orElse("ip:" + ip);
+            limit = properties.login();
         } else if (HttpMethod.GET.matches(request.getMethod()) && path.equals("/api/v1/search")) {
             rule = "search";
+            key = ip;
+            limit = properties.search();
+        } else if (HttpMethod.GET.matches(request.getMethod()) && path.equals("/api/v1/search/facets")) {
+            // The UI asks for search and facets together; separate buckets keep the search budget intact
+            rule = "facets";
             key = ip;
             limit = properties.search();
         } else {

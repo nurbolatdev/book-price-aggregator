@@ -221,16 +221,16 @@ class BeaconEmailDeliveryIT extends AbstractMailIT {
     private long notification(User user, String status, String delivery, boolean published, String error, Duration age) {
         long edition = editionWithHistory(jdbc, "Шантарам", true, daysAgo(1, 4000));
         return jdbc.queryForObject("""
-                INSERT INTO notifications (user_id, beacon_id, status, delivery, payload, error, created_at, published_at)
+                INSERT INTO notifications (user_id, beacon_id, status, delivery, payload, error, created_at, queued_at, published_at)
                 VALUES (?, ?, ?, ?, '{"title": "Шантарам", "newPrice": 4000, "editionId": 1}'::jsonb, ?,
-                        NOW() - CAST(? AS INTERVAL), CASE WHEN ? THEN NOW() END)
+                        NOW() - CAST(? AS INTERVAL), NOW() - CAST(? AS INTERVAL), CASE WHEN ? THEN NOW() END)
                 RETURNING id""", Long.class, user.getId(), beacon(user, edition), status, delivery, error,
-                age.toMinutes() + " minutes", published);
+                age.toMinutes() + " minutes", age.toMinutes() + " minutes", published);
     }
 
     private void age(long notification, Duration age) {
-        jdbc.update("UPDATE notifications SET created_at = NOW() - CAST(? AS INTERVAL) WHERE id = ?",
-                age.toMinutes() + " minutes", notification);
+        jdbc.update("UPDATE notifications SET created_at = NOW() - CAST(? AS INTERVAL), queued_at = NOW() - CAST(? AS INTERVAL) WHERE id = ?",
+                age.toMinutes() + " minutes", age.toMinutes() + " minutes", notification);
     }
 
     private String status(long notification) {

@@ -63,6 +63,26 @@ class SearchServiceTest {
     }
 
     @Test
+    void shouldBuildSameCacheKeyWhenLanguagesAndBindingsAreListedInAnotherOrder() {
+        String first = SearchService.cacheKey(SearchQuery.from(new SearchRequest("война", null, null, null, null,
+                List.of(Binding.HARDCOVER, Binding.PAPERBACK), List.of("ru", "kk"), null, null, null)));
+        String second = SearchService.cacheKey(SearchQuery.from(new SearchRequest("война", null, null, null, null,
+                List.of(Binding.PAPERBACK, Binding.HARDCOVER), List.of("kk", "ru"), null, null, null)));
+
+        assertThat(first).isEqualTo(second);
+    }
+
+    @Test
+    void shouldBuildDifferentCacheKeysWhenCatalogModeDiffersFromTextQuery() {
+        String catalog = SearchService.cacheKey(SearchQuery.from(new SearchRequest(null, null, null, null, null,
+                null, null, SearchSort.PRICE_ASC, null, null)));
+        String text = SearchService.cacheKey(SearchQuery.from(new SearchRequest("война", null, null, null, null,
+                null, null, SearchSort.PRICE_ASC, null, null)));
+
+        assertThat(catalog).isNotEqualTo(text);
+    }
+
+    @Test
     void shouldBuildDifferentCacheKeysWhenFiltersOrPageDiffer() {
         String base = SearchService.cacheKey(SearchQuery.from(request("война")));
         String otherPage = SearchService.cacheKey(SearchQuery.from(

@@ -53,6 +53,11 @@ class SearchRepository {
             WHERE e.isbn13 = :isbn
             """;
 
+    private static final String CATALOG_CANDIDATES = """
+            SELECT e.id AS edition_id, 0::real AS relevance
+            FROM editions e
+            """;
+
     private final NamedParameterJdbcTemplate jdbc;
 
     List<SearchRow> findPage(SearchQuery query) {
@@ -140,9 +145,11 @@ class SearchRepository {
      * Common CTE chain ending in {@code results}: candidates, counted offers, best offer and
      * per-edition stats, with edition and price filters applied.
      */
-    private static String resultsSql(SearchQuery query, MapSqlParameterSource params) {
+    static String resultsSql(SearchQuery query, MapSqlParameterSource params) {
         StringBuilder sql = new StringBuilder("WITH candidates AS (");
-        if (query.isIsbn()) {
+        if (query.catalog()) {
+            sql.append(CATALOG_CANDIDATES);
+        } else if (query.isIsbn()) {
             sql.append(ISBN_CANDIDATES);
             params.addValue("isbn", query.isbn13());
         } else {
@@ -172,7 +179,7 @@ class SearchRepository {
                     GROUP BY edition_id
                 ), results AS (
                     SELECT c.edition_id, c.relevance, e.book_id, b.title, b.author, e.publisher, e.year,
-                           e.binding, e.cover_url,
+                           e.binding, e.language, e.cover_url,
                            bo.store_code AS best_store, bo.price AS best_price, bo.old_price AS best_old_price,
                            bo.in_stock AS best_in_stock,
                            COALESCE(st.stores_count, 0) AS stores_count, st.updated_at,
@@ -187,13 +194,13 @@ class SearchRepository {
         if (query.requiresOffer()) {
             sql.append(" AND bo.edition_id IS NOT NULL");
         }
-        if (query.binding() != null) {
-            sql.append(" AND e.binding = :binding");
-            params.addValue("binding", query.binding().name());
+        if (!query.bindings().isEmpty()) {
+            sql.append(" AND e.binding IN (:bindings)");
+            params.addValue("bindings", query.bindings().stream().map(Enum::name).toList());
         }
-        if (query.language() != null) {
-            sql.append(" AND e.language = :language");
-            params.addValue("language", query.language());
+        if (!query.languages().isEmpty()) {
+            sql.append(" AND e.language IN (:languages)");
+            params.addValue("languages", query.languages());
         }
         if (query.minPrice() != null) {
             sql.append(" AND bo.price >= :minPrice");

@@ -100,7 +100,7 @@ class AdminJournalServiceIT extends AbstractIntegrationTest {
         long edition = edition();
         beacon(first, edition);
 
-        PageResponse<AdminUserResponse> page = service.users(0, 2);
+        PageResponse<AdminUserResponse> page = service.users(null, null, 0, 2);
 
         assertThat(page.content()).extracting(AdminUserResponse::email)
                 .containsExactly("journal-2@example.com", "journal-1@example.com");
@@ -113,6 +113,45 @@ class AdminJournalServiceIT extends AbstractIntegrationTest {
         assertThat(page.content().get(0).verified()).isFalse();
         assertThat(page.content().get(0).beacons()).isZero();
         assertThat(page.totalElements()).isGreaterThanOrEqualTo(2);
+    }
+
+    @Test
+    void shouldSearchUsersByEmailOrNameIgnoringCase() {
+        long byEmail = user("zq-needle-1@example.com", "Ann", true, "1 day");
+        long byName = user("zq-other@example.com", "Mr NEEDLE", true, "2 days");
+        user("zq-hay@example.com", "Bob", true, "3 days");
+
+        PageResponse<AdminUserResponse> page = service.users("Needle", null, 0, 10);
+
+        assertThat(page.content()).extracting(AdminUserResponse::id).containsExactly(byName, byEmail);
+        assertThat(page.totalElements()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldTreatLikeWildcardsInQueryAsLiterals() {
+        long literal = user("zw-50%off@example.com", "Ann", true, "1 day");
+        user("zw-50xoff@example.com", "Bob", true, "2 days");
+        long underscore = user("zw_a@example.com", "Cid", true, "3 days");
+        user("zwxa@example.com", "Dan", true, "4 days");
+
+        assertThat(service.users("50%off", null, 0, 10).content()).extracting(AdminUserResponse::id)
+                .containsExactly(literal);
+        assertThat(service.users("%", null, 0, 10).content()).extracting(AdminUserResponse::id)
+                .containsExactly(literal);
+        assertThat(service.users("zw_a", null, 0, 10).content()).extracting(AdminUserResponse::id)
+                .containsExactly(underscore);
+    }
+
+    @Test
+    void shouldFilterUsersByVerification() {
+        long verified = user("zv-yes@example.com", "Ann", true, "1 day");
+        long unverified = user("zv-no@example.com", "Bob", false, "2 days");
+
+        assertThat(service.users("zv-", false, 0, 10).content()).extracting(AdminUserResponse::id)
+                .containsExactly(unverified);
+        assertThat(service.users("zv-", true, 0, 10).content()).extracting(AdminUserResponse::id)
+                .containsExactly(verified);
+        assertThat(service.users("zv-", null, 0, 10).content()).hasSize(2);
     }
 
     private static Long count(List<SearchQueryStat> stats, String query) {

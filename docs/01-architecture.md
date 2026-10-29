@@ -120,7 +120,7 @@ flowchart LR
 |---|---|---|---|
 | `search:v1:{queryHash}:{filtersHash}:{page}` | страница поиска | 10 мин | по TTL |
 | `edition:v1:{id}` | карточка издания с предложениями | 30 мин | событие `price.changed` для этого издания |
-| `home:v1:drops-week` | «подешевели за неделю» | 15 мин | пересчёт планировщиком |
+| `home:v2:drops-week` | «подешевели за неделю» | 15 мин | пересчёт планировщиком |
 | `admin:v1:stats` | KPI админки | 1 мин | по TTL |
 | `ratelimit:v1:{ip}:{route}` | лимит запросов (Bucket4j) | окно лимита | — |
 | `parser:v1:html:{urlHash}` | сырой HTML страницы магазина | 1 ч | по TTL (меньше запросов к магазинам) |
@@ -138,15 +138,14 @@ backend/src/main/java/kz/nurbolat/bookaggregator/
 │   └── web/                 # PageResponse, TraceIdFilter
 ├── config/                  # AppProperties, SecurityConfig, RedisConfig, OpenApiConfig, SchedulingConfig, TimeConfig
 ├── security/                # JwtService, JwtAuthFilter, ratelimit/ (Bucket4j)
-├── user/                    # регистрация, вход, профиль, AdminBootstrap
-├── auth/                    # email verification, refresh tokens, сброс пароля, очистка токенов
+├── user/                    # регистрация, вход, профиль, AccountService (смена пароля, удаление аккаунта), AdminBootstrap
+├── auth/                    # email verification, refresh tokens (cookie kr_refresh, окно повтора), RefreshCookies, сброс пароля, очистка токенов
 ├── book/                    # Book, BookService, CatalogService, BookController
-├── edition/                 # Edition, EditionService, история цен, EditionController
+├── edition/                 # Edition, EditionService, история цен, SimilarEditionsService, EditionController
 ├── store/                   # Store, StoreCode, StoreController
 ├── offer/                   # Offer, PriceHistory, OfferIngestionService (upsert + событие)
-├── search/                  # SearchService (pg_trgm), подсказки, SearchLogWriter, CatalogSeeder
-├── favorite/                # избранное: Favorite, FavoriteService, FavoriteController
-├── home/                    # «подешевели»: DropsService, DropsRefreshJob, HomeController
+├── search/                  # SearchService (pg_trgm, режим каталога), SearchFacetsService, PopularQueriesService, подсказки, SearchLogWriter, CatalogSeeder
+├── home/                    # «подешевели»: DropsService, DropsRefreshJob, WeeklyDigestService, HomeController
 ├── metadata/                # GoogleBooksClient — только метаданные
 ├── parser/
 │   ├── core/                # StoreParser, HtmlFetcher, BrowserFetcher, ParserRunService, StoreResilience
@@ -174,4 +173,4 @@ backend/src/main/java/kz/nurbolat/bookaggregator/
 | Нагрузка на магазин | ≤ 1 запрос в 2 с на магазин (настраивается) |
 | Падение одного магазина | не влияет на остальные (circuit breaker) |
 | Потеря сообщений | нет: durable очереди, persistent сообщения, manual ack |
-| Безопасность | роли USER/ADMIN, BCrypt, JWT 15 мин + refresh 30 дней, лимиты на auth и поиск |
+| Безопасность | роли USER/ADMIN, BCrypt, JWT 15 мин + refresh 30 дней в HttpOnly-cookie (ADR-005), лимиты на auth и поиск |

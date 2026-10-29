@@ -10,7 +10,7 @@ import kz.nurbolat.bookaggregator.user.NotifyFrequency;
  */
 public record UpdateProfileRequest(
         @Schema(description = "Новое имя; не пустое", example = "Айгерим")
-        @Size(max = 100) @Pattern(regexp = ".*\\S.*", message = "не должно быть пустым") String name,
+        @Size(max = 100, message = "Не больше 100 символов") @Pattern(regexp = ".*\\S.*", message = "Не должно быть пустым") String name,
         @Schema(description = "Как часто присылать письма о ценах") NotifyFrequency notifyFrequency,
         @Schema(description = "Присылать еженедельную сводку снижений цен") Boolean weeklyDigest
 ) {

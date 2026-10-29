@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
@@ -24,29 +25,41 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             ORDER BY n.createdAt, n.id""")
     List<Notification> findDigestOfUser(Long userId);
 
+    /** Whether the user already has the weekly digest of this ISO week ({@code 2026-W44}). */
+    @Query(value = """
+            SELECT EXISTS (SELECT 1 FROM notifications
+                           WHERE user_id = :userId AND delivery = 'WEEKLY' AND payload ->> 'isoWeek' = :isoWeek)""",
+            nativeQuery = true)
+    boolean existsWeekly(Long userId, String isoWeek);
+
     /**
-     * Instant notifications whose email never reached the broker, created in [from, to). Rows are locked and
-     * rows locked by another relay are skipped.
+     * Instant and weekly notifications whose email never reached the broker, queued in [from, to). Rows are
+     * locked and rows locked by another relay are skipped.
      */
     @Query(value = """
             SELECT * FROM notifications
-            WHERE status = 'QUEUED' AND delivery = 'INSTANT' AND published_at IS NULL
-              AND created_at >= :from AND created_at < :to
-            ORDER BY created_at
+            WHERE status = 'QUEUED' AND delivery IN ('INSTANT', 'WEEKLY') AND published_at IS NULL
+              AND queued_at >= :from AND queued_at < :to
+            ORDER BY queued_at
             LIMIT :limit
             FOR UPDATE SKIP LOCKED""", nativeQuery = true)
-    List<Notification> lockUnpublishedInstant(Instant from, Instant to, int limit);
+    List<Notification> lockUnpublished(Instant from, Instant to, int limit);
+
+    /** One notification with its user, locked against a concurrent retry or the relay. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT n FROM Notification n JOIN FETCH n.user WHERE n.id = :id")
+    Optional<Notification> lockWithUser(Long id);
 
     @Modifying
     @Query("UPDATE Notification n SET n.publishedAt = :at WHERE n.id IN :ids AND n.publishedAt IS NULL")
     int markPublished(Collection<Long> ids, Instant at);
 
-    /** Gives up on instant notifications that did not reach the broker in time; finished ones are not touched. */
+    /** Gives up on instant and weekly notifications that did not reach the broker in time; finished ones are not touched. */
     @Modifying
     @Query("""
             UPDATE Notification n SET n.status = 'FAILED', n.error = :error
-            WHERE n.status = 'QUEUED' AND n.delivery = 'INSTANT' AND n.publishedAt IS NULL AND n.createdAt < :before""")
-    int failUnpublishedInstant(Instant before, String error);
+            WHERE n.status = 'QUEUED' AND n.delivery IN ('INSTANT', 'WEEKLY') AND n.publishedAt IS NULL AND n.queuedAt < :before""")
+    int failUnpublished(Instant before, String error);
 
     /**
      * Locks the notifications of an email, in id order (no deadlock between emails sharing rows), waiting for

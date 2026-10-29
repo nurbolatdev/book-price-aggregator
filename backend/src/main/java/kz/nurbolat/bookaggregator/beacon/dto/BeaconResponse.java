@@ -24,7 +24,10 @@ public record BeaconResponse(
         BeaconStatus status,
         BigDecimal currentBestPrice,
         StoreCode currentBestStore,
+        String currentBestUrl,
         BigDecimal baselinePrice,
-        Instant lastTriggeredAt
+        Instant lastTriggeredAt,
+        Instant createdAt,
+        Instant statusChangedAt
 ) {
 }

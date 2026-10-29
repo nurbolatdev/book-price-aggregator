@@ -13,9 +13,6 @@
     "bearerAuth" : [ ]
   } ],
   "tags" : [ {
-    "description" : "Избранные книги пользователя",
-    "name" : "Favorites"
-  }, {
     "description" : "Поиск изданий и подсказки",
     "name" : "Search"
   }, {
@@ -42,6 +39,9 @@
   }, {
     "description" : "Здоровье системы",
     "name" : "Admin: Health"
+  }, {
+    "description" : "Журнал писем и повторная отправка",
+    "name" : "Admin: Notifications"
   }, {
     "description" : "Статистика и активность",
     "name" : "Admin: Stats"
@@ -203,6 +203,143 @@
         },
         "summary" : "Здоровье системы",
         "tags" : [ "Admin: Health" ]
+      }
+    },
+    "/api/v1/admin/notifications" : {
+      "get" : {
+        "description" : "Письма пользователям, новые сверху; фильтры по статусу и типу доставки.",
+        "operationId" : "list_1",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "QUEUED", "SENT", "FAILED" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "delivery",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "INSTANT", "DIGEST", "WEEKLY" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseAdminNotificationResponse"
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Нужна роль ADMIN"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Ошибка валидации"
+          }
+        },
+        "summary" : "Журнал уведомлений",
+        "tags" : [ "Admin: Notifications" ]
+      }
+    },
+    "/api/v1/admin/notifications/{id}/retry" : {
+      "post" : {
+        "description" : "Возвращает неудачное (FAILED) уведомление в очередь; доставка подхватит его сама.",
+        "operationId" : "retry",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminNotificationResponse"
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Нужна роль ADMIN"
+          },
+          "404" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Уведомление не найдено"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Уведомление не в статусе FAILED или email пользователя не подтверждён"
+          }
+        },
+        "summary" : "Повторить отправку",
+        "tags" : [ "Admin: Notifications" ]
       }
     },
     "/api/v1/admin/offers/pending-review" : {
@@ -763,9 +900,25 @@
     },
     "/api/v1/admin/users" : {
       "get" : {
-        "description" : "Дата регистрации, подтверждение email и число маячков.",
+        "description" : "Дата регистрации, подтверждение email и число маячков. Поиск q — по части email или имени, verified — по подтверждению email.",
         "operationId" : "users",
         "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "verified",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
           "in" : "query",
           "name" : "page",
           "required" : false,
@@ -928,7 +1081,7 @@
     },
     "/api/v1/auth/logout" : {
       "post" : {
-        "description" : "Завершает сессию, к которой относится refresh-токен.",
+        "description" : "Завершает сессию, к которой относится refresh-токен (cookie kr_refresh или тело запроса), и удаляет cookie. Без токена тоже отвечает 204.",
         "operationId" : "logout",
         "requestBody" : {
           "content" : {
@@ -937,12 +1090,21 @@
                 "$ref" : "#/components/schemas/RefreshRequest"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "204" : {
             "description" : "Сессия завершена"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Origin не разрешён или не указан при токене из cookie"
           },
           "422" : {
             "content" : {
@@ -960,9 +1122,35 @@
         "tags" : [ "Auth" ]
       }
     },
+    "/api/v1/auth/logout-all" : {
+      "post" : {
+        "description" : "Завершает все сессии пользователя, включая текущую.",
+        "operationId" : "logoutAll",
+        "responses" : {
+          "204" : {
+            "description" : "Все сессии завершены"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Требуется авторизация"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ],
+        "summary" : "Выход на всех устройствах",
+        "tags" : [ "Auth" ]
+      }
+    },
     "/api/v1/auth/refresh" : {
       "post" : {
-        "description" : "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать.",
+        "description" : "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Запрос с cookie обязан прийти с разрешённым заголовком Origin.",
         "operationId" : "refresh",
         "parameters" : [ {
           "in" : "header",
@@ -979,8 +1167,7 @@
                 "$ref" : "#/components/schemas/RefreshRequest"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "200" : {
@@ -1001,7 +1188,17 @@
                 }
               }
             },
-            "description" : "Сессия недействительна или истекла"
+            "description" : "Токена нет, сессия недействительна или истекла"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Origin не разрешён или не указан при токене из cookie"
           },
           "422" : {
             "content" : {
@@ -1214,7 +1411,7 @@
     },
     "/api/v1/beacons" : {
       "get" : {
-        "description" : "Маячки текущего пользователя, можно отфильтровать по статусу.",
+        "description" : "Маячки текущего пользователя, можно отфильтровать по статусу и изданию (0 или 1 маячок).",
         "operationId" : "list",
         "parameters" : [ {
           "in" : "query",
@@ -1223,6 +1420,14 @@
           "schema" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "TRIGGERED", "PAUSED" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "editionId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         } ],
         "responses" : {
@@ -1375,7 +1580,7 @@
     },
     "/api/v1/beacons/{id}" : {
       "delete" : {
-        "operationId" : "delete",
+        "operationId" : "delete_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "id",
@@ -1610,10 +1815,30 @@
         "tags" : [ "Editions" ]
       }
     },
-    "/api/v1/favorites" : {
+    "/api/v1/editions/{id}/similar" : {
       "get" : {
-        "description" : "Избранные книги текущего пользователя.",
-        "operationId" : "getFavorites",
+        "description" : "Сначала другие книги того же автора, затем книги на том же языке; учитываются только цены в наличии.",
+        "operationId" : "getSimilar",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "description" : "Сколько книг вернуть, 1–12",
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "maximum" : 12,
+            "minimum" : 1,
+            "type" : "string",
+            "default" : "4"
+          }
+        } ],
         "responses" : {
           "200" : {
             "content" : {
@@ -1621,93 +1846,12 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/BookResponse"
+                    "$ref" : "#/components/schemas/SimilarEdition"
                   }
                 }
               }
             },
             "description" : "Успешный ответ"
-          },
-          "401" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description" : "Требуется авторизация"
-          }
-        },
-        "summary" : "Список избранного",
-        "tags" : [ "Favorites" ]
-      }
-    },
-    "/api/v1/favorites/{bookId}" : {
-      "delete" : {
-        "operationId" : "removeFavorite",
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "bookId",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "Книга убрана"
-          },
-          "401" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description" : "Требуется авторизация"
-          }
-        },
-        "summary" : "Убрать из избранного",
-        "tags" : [ "Favorites" ]
-      },
-      "post" : {
-        "description" : "Повторное добавление не создаёт дубликат.",
-        "operationId" : "addFavorite",
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "bookId",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "type" : "string"
-                  }
-                }
-              }
-            },
-            "description" : "Успешный ответ"
-          },
-          "401" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description" : "Требуется авторизация"
           },
           "404" : {
             "content" : {
@@ -1717,53 +1861,12 @@
                 }
               }
             },
-            "description" : "Книга не найдена"
+            "description" : "Издание не найдено"
           }
         },
-        "summary" : "Добавить в избранное",
-        "tags" : [ "Favorites" ]
-      }
-    },
-    "/api/v1/favorites/{bookId}/status" : {
-      "get" : {
-        "description" : "Показывает, есть ли книга в избранном.",
-        "operationId" : "isFavorite",
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "bookId",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "type" : "boolean"
-                  }
-                }
-              }
-            },
-            "description" : "Успешный ответ"
-          },
-          "401" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description" : "Требуется авторизация"
-          }
-        },
-        "summary" : "Статус избранного",
-        "tags" : [ "Favorites" ]
+        "security" : [ ],
+        "summary" : "Похожие книги",
+        "tags" : [ "Editions" ]
       }
     },
     "/api/v1/home/drops" : {
@@ -1813,6 +1916,67 @@
       }
     },
     "/api/v1/me" : {
+      "delete" : {
+        "description" : "Удаляет аккаунт со всеми маячками, письмами и сессиями после проверки пароля. Администратор удалить аккаунт не может.",
+        "operationId" : "delete",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeleteAccountRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Аккаунт удалён"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Требуется авторизация"
+          },
+          "409" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Аккаунт администратора удалить нельзя"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Неверный пароль"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "summary" : "Удаление аккаунта",
+        "tags" : [ "Profile" ]
+      },
       "get" : {
         "description" : "Данные текущего пользователя.",
         "operationId" : "get",
@@ -1890,21 +2054,74 @@
         "tags" : [ "Profile" ]
       }
     },
+    "/api/v1/me/password" : {
+      "post" : {
+        "description" : "Проверяет текущий пароль и ставит новый. Текущая сессия (по access-токену) остаётся, остальные завершаются; cookie не меняется.",
+        "operationId" : "changePassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Пароль изменён"
+          },
+          "401" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Требуется авторизация"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Неверный текущий пароль или новый пароль не подходит"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "summary" : "Смена пароля",
+        "tags" : [ "Profile" ]
+      }
+    },
     "/api/v1/search" : {
       "get" : {
-        "description" : "Ищет по названию, автору или ISBN; фильтры по магазинам, цене, переплёту и языку.",
+        "description" : "Ищет по названию, автору или ISBN; без q — каталог. Фильтры по магазинам, цене, переплёту и языку (списки через запятую).",
         "operationId" : "search",
         "parameters" : [ {
-          "description" : "Название, автор или ISBN",
+          "description" : "Название, автор или ISBN; необязателен: без него — каталог",
           "example" : "мастер маргарита",
           "in" : "query",
           "name" : "q",
-          "required" : true,
+          "required" : false,
           "schema" : {
             "maxLength" : 200,
             "minLength" : 2,
             "type" : "string",
-            "description" : "Название, автор или ISBN",
+            "description" : "Название, автор или ISBN; необязателен: без него — каталог",
             "example" : "мастер маргарита"
           }
         }, {
@@ -1953,35 +2170,35 @@
             "default" : "true"
           }
         }, {
-          "description" : "Переплёт",
+          "description" : "Переплёты через запятую",
+          "example" : "HARDCOVER,PAPERBACK",
           "in" : "query",
           "name" : "binding",
           "required" : false,
           "schema" : {
             "type" : "string",
-            "description" : "Переплёт"
+            "description" : "Переплёты через запятую",
+            "example" : "HARDCOVER,PAPERBACK"
           }
         }, {
-          "description" : "Язык: ru, kk или en",
-          "example" : "ru",
+          "description" : "Языки через запятую: ru, kk, en",
+          "example" : "ru,kk",
           "in" : "query",
           "name" : "language",
           "required" : false,
           "schema" : {
-            "pattern" : "ru|kk|en",
             "type" : "string",
-            "description" : "Язык: ru, kk или en",
-            "example" : "ru"
+            "description" : "Языки через запятую: ru, kk, en",
+            "example" : "ru,kk"
           }
         }, {
-          "description" : "Сортировка",
+          "description" : "Сортировка; по умолчанию RELEVANCE с запросом q и STORES_DESC без него",
           "in" : "query",
           "name" : "sort",
           "required" : false,
           "schema" : {
             "type" : "string",
-            "description" : "Сортировка",
-            "default" : "RELEVANCE"
+            "description" : "Сортировка; по умолчанию RELEVANCE с запросом q и STORES_DESC без него"
           }
         }, {
           "description" : "Номер страницы с нуля",
@@ -2041,6 +2258,184 @@
         },
         "security" : [ ],
         "summary" : "Поиск изданий",
+        "tags" : [ "Search" ]
+      }
+    },
+    "/api/v1/search/facets" : {
+      "get" : {
+        "description" : "Для каждого магазина, переплёта и языка — сколько изданий вернул бы поиск с теми же фильтрами и только этим значением.",
+        "operationId" : "facets",
+        "parameters" : [ {
+          "description" : "Название, автор или ISBN; необязателен: без него — каталог",
+          "example" : "мастер маргарита",
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "maxLength" : 200,
+            "minLength" : 2,
+            "type" : "string",
+            "description" : "Название, автор или ISBN; необязателен: без него — каталог",
+            "example" : "мастер маргарита"
+          }
+        }, {
+          "description" : "Коды магазинов через запятую",
+          "example" : "FLIP,KASPI",
+          "in" : "query",
+          "name" : "stores",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Коды магазинов через запятую",
+            "example" : "FLIP,KASPI"
+          }
+        }, {
+          "description" : "Минимальная цена в тенге",
+          "example" : 1000,
+          "in" : "query",
+          "name" : "minPrice",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "string",
+            "description" : "Минимальная цена в тенге",
+            "example" : 1000
+          }
+        }, {
+          "description" : "Максимальная цена в тенге",
+          "example" : 10000,
+          "in" : "query",
+          "name" : "maxPrice",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "string",
+            "description" : "Максимальная цена в тенге",
+            "example" : 10000
+          }
+        }, {
+          "description" : "Только издания в наличии",
+          "in" : "query",
+          "name" : "inStock",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Только издания в наличии",
+            "default" : "true"
+          }
+        }, {
+          "description" : "Переплёты через запятую",
+          "example" : "HARDCOVER,PAPERBACK",
+          "in" : "query",
+          "name" : "binding",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Переплёты через запятую",
+            "example" : "HARDCOVER,PAPERBACK"
+          }
+        }, {
+          "description" : "Языки через запятую: ru, kk, en",
+          "example" : "ru,kk",
+          "in" : "query",
+          "name" : "language",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Языки через запятую: ru, kk, en",
+            "example" : "ru,kk"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SearchFacets"
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Ошибка валидации"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Счётчики фильтров поиска",
+        "tags" : [ "Search" ]
+      }
+    },
+    "/api/v1/search/popular" : {
+      "get" : {
+        "description" : "Топ запросов за 7 дней с результатами; если их мало — дополняется списком из настроек.",
+        "operationId" : "popular",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "maximum" : 12,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 6
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Ошибка валидации"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Популярные запросы",
         "tags" : [ "Search" ]
       }
     },
@@ -2196,6 +2591,44 @@
           }
         }
       },
+      "AdminNotificationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "delivery" : {
+            "type" : "string",
+            "description" : "INSTANT, DIGEST или WEEKLY"
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "Причина неудачи; null, если ошибки нет"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sentAt" : {
+            "type" : "string",
+            "description" : "Когда письмо отправлено; null — ещё нет",
+            "format" : "date-time"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "QUEUED, SENT или FAILED"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "Тема содержимого: книга для маячка, «Сводка за день» или «Подборка недели»"
+          },
+          "userEmail" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Письмо из журнала уведомлений"
+      },
       "AdminParserResponse" : {
         "type" : "object",
         "properties" : {
@@ -2301,7 +2734,9 @@
             "format" : "int64"
           },
           "refreshToken" : {
-            "type" : "string"
+            "type" : "string",
+            "description" : "Refresh-токен; дублируется в cookie kr_refresh. Устарело: убрать в F4",
+            "deprecated" : true
           },
           "user" : {
             "$ref" : "#/components/schemas/UserResponse"
@@ -2324,12 +2759,19 @@
           "coverUrl" : {
             "type" : "string"
           },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "currentBestPrice" : {
             "type" : "number"
           },
           "currentBestStore" : {
             "type" : "string",
             "enum" : [ "KASPI", "FLIP", "MELOMAN", "WILDBERRIES", "OZON" ]
+          },
+          "currentBestUrl" : {
+            "type" : "string"
           },
           "editionId" : {
             "type" : "integer",
@@ -2346,6 +2788,10 @@
           "status" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "TRIGGERED", "PAUSED" ]
+          },
+          "statusChangedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "targetPercent" : {
             "type" : "integer",
@@ -2474,6 +2920,30 @@
           }
         }
       },
+      "ChangePasswordRequest" : {
+        "required" : [ "currentPassword", "newPassword" ],
+        "type" : "object",
+        "properties" : {
+          "currentPassword" : {
+            "type" : "string",
+            "description" : "Текущий пароль",
+            "example" : "secret123"
+          },
+          "newPassword" : {
+            "type" : "string",
+            "description" : "Новый пароль, от 8 до 100 символов",
+            "example" : "newSecret123"
+          },
+          "refreshToken" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "Refresh-токен этого устройства: его сессия остаётся, остальные завершаются. Без него завершаются все сессии. Устарело: текущая сессия определяется по access-токену, убрать в F4",
+            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0",
+            "deprecated" : true
+          }
+        }
+      },
       "ComponentHealth" : {
         "type" : "object",
         "properties" : {
@@ -2491,7 +2961,7 @@
         "properties" : {
           "conditionType" : {
             "type" : "string",
-            "description" : "Тип условия: BELOW_PRICE или DISCOUNT_PERCENT",
+            "description" : "Тип условия: ANY_DROP, BELOW_PRICE или DISCOUNT_PERCENT",
             "enum" : [ "ANY_DROP", "BELOW_PRICE", "DISCOUNT_PERCENT" ]
           },
           "editionId" : {
@@ -2516,6 +2986,17 @@
             "type" : "number",
             "description" : "Целевая цена в тенге для BELOW_PRICE",
             "example" : 4500
+          }
+        }
+      },
+      "DeleteAccountRequest" : {
+        "required" : [ "password" ],
+        "type" : "object",
+        "properties" : {
+          "password" : {
+            "type" : "string",
+            "description" : "Текущий пароль для подтверждения",
+            "example" : "secret123"
           }
         }
       },
@@ -2549,6 +3030,10 @@
           "store" : {
             "type" : "string",
             "enum" : [ "KASPI", "FLIP", "MELOMAN", "WILDBERRIES", "OZON" ]
+          },
+          "storesCount" : {
+            "type" : "integer",
+            "format" : "int32"
           },
           "title" : {
             "type" : "string"
@@ -2864,6 +3349,33 @@
           }
         }
       },
+      "PageResponseAdminNotificationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AdminNotificationResponse"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "PageResponseAdminUserResponse" : {
         "type" : "object",
         "properties" : {
@@ -3051,15 +3563,15 @@
         }
       },
       "RefreshRequest" : {
-        "required" : [ "refreshToken" ],
         "type" : "object",
         "properties" : {
           "refreshToken" : {
             "maxLength" : 100,
             "minLength" : 0,
             "type" : "string",
-            "description" : "Refresh-токен, полученный при входе",
-            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0"
+            "description" : "Refresh-токен, полученный при входе. Не нужен, если браузер шлёт cookie kr_refresh; поле нужно только до перехода frontend на cookie (F4)",
+            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0",
+            "deprecated" : true
           }
         }
       },
@@ -3078,10 +3590,8 @@
             "example" : "Айгерим"
           },
           "password" : {
-            "maxLength" : 2147483647,
-            "minLength" : 6,
             "type" : "string",
-            "description" : "Пароль, не короче 6 символов",
+            "description" : "Пароль, 8–100 символов",
             "example" : "secret123"
           }
         }
@@ -3116,10 +3626,8 @@
         "type" : "object",
         "properties" : {
           "newPassword" : {
-            "maxLength" : 2147483647,
-            "minLength" : 6,
             "type" : "string",
-            "description" : "Новый пароль, не короче 6 символов",
+            "description" : "Новый пароль, 8–100 символов",
             "example" : "newSecret123"
           },
           "token" : {
@@ -3175,6 +3683,29 @@
           },
           "url" : {
             "type" : "string"
+          }
+        }
+      },
+      "SearchFacets" : {
+        "type" : "object",
+        "properties" : {
+          "bindings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ValueFacet"
+            }
+          },
+          "languages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ValueFacet"
+            }
+          },
+          "stores" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StoreFacet"
+            }
           }
         }
       },
@@ -3235,6 +3766,46 @@
             "type" : "string"
           },
           "searches" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "SimilarEdition" : {
+        "type" : "object",
+        "properties" : {
+          "author" : {
+            "type" : "string"
+          },
+          "bestPrice" : {
+            "type" : "number",
+            "description" : "Минимальная цена в наличии, ₸"
+          },
+          "bookId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "coverUrl" : {
+            "type" : "string"
+          },
+          "editionId" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Похожая книга: показывается издание с самой низкой ценой"
+      },
+      "StoreFacet" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "enum" : [ "KASPI", "FLIP", "MELOMAN", "WILDBERRIES", "OZON" ]
+          },
+          "count" : {
             "type" : "integer",
             "format" : "int64"
           }
@@ -3428,6 +3999,19 @@
             "format" : "int64"
           }
         }
+      },
+      "ValueFacet" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Переплёт (HARDCOVER, PAPERBACK) или язык (ru, kk, en)"
       }
     },
     "securitySchemes" : {

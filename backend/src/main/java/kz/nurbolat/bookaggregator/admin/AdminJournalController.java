@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import kz.nurbolat.bookaggregator.admin.dto.AdminEventResponse;
 import kz.nurbolat.bookaggregator.admin.dto.AdminUserResponse;
 import kz.nurbolat.bookaggregator.admin.dto.SearchQueryStat;
@@ -54,12 +55,14 @@ public class AdminJournalController {
         return journalService.zeroResultQueries(StatsPeriod.parse(period));
     }
 
-    @Operation(summary = "Пользователи", description = "Дата регистрации, подтверждение email и число маячков.")
+    @Operation(summary = "Пользователи", description = "Дата регистрации, подтверждение email и число маячков. Поиск q — по части email или имени, verified — по подтверждению email.")
     @ApiResponse(responseCode = "403", description = "Нужна роль ADMIN")
     @GetMapping("/users")
     PageResponse<AdminUserResponse> users(
+            @RequestParam(required = false) @Size(max = 100, message = "Не больше 100 символов") String q,
+            @RequestParam(required = false) Boolean verified,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return journalService.users(page, size);
+        return journalService.users(q, verified, page, size);
     }
 }

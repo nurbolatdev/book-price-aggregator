@@ -56,6 +56,9 @@ public class SearchService {
                 ? PageResponse.of(List.of(), query.page(), query.size(), 0)
                 : cachedPage(query);
 
+        if (query.catalog()) {
+            return page;
+        }
         searchLogWriter.write(request.q(), query.isIsbn() ? query.isbn13() : query.text(),
                 page.totalElements(), securityUtils.currentUserEmail().orElse(null));
         if (page.totalElements() < SEED_THRESHOLD && !query.isIsbn() && !query.isBlank()) {
@@ -69,19 +72,24 @@ public class SearchService {
      * "мастер и маргарита".
      */
     static String cacheKey(SearchQuery query) {
-        String canonical = String.join("|",
+        return Hashing.sha1Hex(String.join("|", filterKey(query),
+                query.sort().name(),
+                String.valueOf(query.page()),
+                String.valueOf(query.size())));
+    }
+
+    /** Everything that decides which editions match, without sort and paging; shared with facets. */
+    static String filterKey(SearchQuery query) {
+        return String.join("|",
+                query.catalog() ? "catalog" : "text",
                 Objects.toString(query.text(), ""),
                 Objects.toString(query.isbn13(), ""),
                 query.stores().stream().map(Enum::name).sorted().collect(Collectors.joining(",")),
                 plain(query.minPrice()),
                 plain(query.maxPrice()),
                 String.valueOf(query.inStock()),
-                Objects.toString(query.binding(), ""),
-                Objects.toString(query.language(), ""),
-                query.sort().name(),
-                String.valueOf(query.page()),
-                String.valueOf(query.size()));
-        return Hashing.sha1Hex(canonical);
+                query.bindings().stream().map(Enum::name).sorted().collect(Collectors.joining(",")),
+                query.languages().stream().sorted().collect(Collectors.joining(",")));
     }
 
     private PageResponse<SearchItem> cachedPage(SearchQuery query) {

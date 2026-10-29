@@ -6,5 +6,5 @@ import jakarta.validation.constraints.NotNull;
 /**
  * @param editionId edition the offer belongs to
  */
-public record OfferMatchRequest(@Schema(description = "Идентификатор издания", example = "42") @NotNull Long editionId) {
+public record OfferMatchRequest(@Schema(description = "Идентификатор издания", example = "42") @NotNull(message = "Обязательное поле") Long editionId) {
 }

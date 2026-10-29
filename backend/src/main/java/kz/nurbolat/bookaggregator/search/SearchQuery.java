@@ -22,19 +22,21 @@ record SearchQuery(
         BigDecimal minPrice,
         BigDecimal maxPrice,
         boolean inStock,
-        Binding binding,
-        String language,
+        List<Binding> bindings,
+        List<String> languages,
         SearchSort sort,
         int page,
-        int size
+        int size,
+        boolean catalog
 ) {
 
     static SearchQuery from(SearchRequest request) {
-        String isbn13 = IsbnUtils.normalize(request.q());
-        String text = isbn13 == null ? TextNormalizer.normalize(request.q()) : null;
+        boolean catalog = request.q() == null;
+        String isbn13 = catalog ? null : IsbnUtils.normalize(request.q());
+        String text = catalog || isbn13 != null ? null : TextNormalizer.normalize(request.q());
         return new SearchQuery(text, isbn13, request.stores(), request.minPrice(), request.maxPrice(),
                 request.inStock(), request.binding(), request.language(), request.sort(),
-                request.page(), request.size());
+                request.page(), request.size(), catalog);
     }
 
     boolean isIsbn() {
@@ -43,12 +45,27 @@ record SearchQuery(
 
     /** Nothing left to search for, e.g. the query consisted of punctuation only. */
     boolean isBlank() {
-        return isbn13 == null && (text == null || text.isEmpty());
+        return !catalog && isbn13 == null && (text == null || text.isEmpty());
     }
 
     /** Filters that only an edition with a matching offer can satisfy. */
     boolean requiresOffer() {
         return inStock || !stores.isEmpty() || minPrice != null || maxPrice != null;
+    }
+
+    SearchQuery withStores(List<StoreCode> value) {
+        return new SearchQuery(text, isbn13, value, minPrice, maxPrice, inStock, bindings, languages, sort,
+                page, size, catalog);
+    }
+
+    SearchQuery withBindings(List<Binding> value) {
+        return new SearchQuery(text, isbn13, stores, minPrice, maxPrice, inStock, value, languages, sort,
+                page, size, catalog);
+    }
+
+    SearchQuery withLanguages(List<String> value) {
+        return new SearchQuery(text, isbn13, stores, minPrice, maxPrice, inStock, bindings, value, sort,
+                page, size, catalog);
     }
 
     int offset() {

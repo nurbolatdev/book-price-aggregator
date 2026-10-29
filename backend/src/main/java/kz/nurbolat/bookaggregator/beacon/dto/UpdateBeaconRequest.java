@@ -21,10 +21,10 @@ import java.math.BigDecimal;
 public record UpdateBeaconRequest(
         @Schema(description = "Новый тип условия; передаётся вместе с его значением") BeaconCondition conditionType,
         @Schema(description = "Целевая цена в тенге для BELOW_PRICE", example = "4500")
-        @DecimalMin(value = "0.01", message = "должно быть больше 0") @DecimalMax("10000000")
-        @Digits(integer = 8, fraction = 2) BigDecimal targetPrice,
+        @DecimalMin(value = "0.01", message = "должно быть больше 0") @DecimalMax(value = "10000000", message = "Не больше 10000000")
+        @Digits(integer = 8, fraction = 2, message = "Не больше 8 цифр до запятой и 2 после") BigDecimal targetPrice,
         @Schema(description = "Падение цены в процентах для DISCOUNT_PERCENT", example = "20")
-        @Min(1) @Max(90) Integer targetPercent,
+        @Min(value = 1, message = "Не меньше 1") @Max(value = 90, message = "Не больше 90") Integer targetPercent,
         @Schema(description = "Новый статус: ACTIVE или PAUSED") BeaconStatus status
 ) implements BeaconConditionFields {
 

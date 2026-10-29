@@ -1,0 +1,15 @@
+[# th:if="${name} != null"]Здравствуйте, [(${name})]![/][# th:unless="${name} != null"]Здравствуйте![/]
+
+Подборка недели · [(${periodText})] — книги, которые сильнее всего подешевели:
+[# th:each="item : ${items}"]
+«[(${item.title})]»[# th:if="${item.author}"], [(${item.author})][/]
+[(${item.storeName})]: [(${item.priceText})] (−[(${item.dropPercent})]%)
+[(${item.editionUrl})]
+[/]
+Все скидки недели: [(${dealsUrl})]
+
+Вы получили это письмо, потому что включили еженедельную подборку. [# th:if="${collectedAtText}"]Цены собраны [(${collectedAtText})]. [/]
+Отключить подборку и настройки уведомлений: [(${settingsUrl})]
+
+—
+KitapRadar · [(${baseUrl})]

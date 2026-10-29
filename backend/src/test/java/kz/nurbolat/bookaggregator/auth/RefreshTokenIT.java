@@ -77,6 +77,9 @@ class RefreshTokenIT extends AbstractIntegrationTest {
         String stolen = refreshTokenOf(signIn(email));
         String otherDevice = refreshTokenOf(signIn(email));
         String rotated = JsonPath.read(refresh(stolen).andReturn().getResponse().getContentAsString(), "$.refreshToken");
+        // Outside the grace window a replay is a copy
+        jdbc.update("UPDATE refresh_tokens SET revoked_at = revoked_at - INTERVAL '11 seconds' WHERE token_hash = ?",
+                TokenHasher.hash(stolen));
 
         mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.USER_AGENT, "X".repeat(1000))
@@ -130,7 +133,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
             CountDownLatch start = new CountDownLatch(1);
             ExecutorService pool = Executors.newFixedThreadPool(2);
             try {
-                List<Future<String>> signIns = List.of(
+                List<Future<RefreshTokenService.IssuedToken>> signIns = List.of(
                         pool.submit(() -> {
                             start.await();
                             return refreshTokenService.issue(user, "phone");
@@ -140,7 +143,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
                             return refreshTokenService.issue(user, "laptop");
                         }));
                 start.countDown();
-                for (Future<String> signIn : signIns) {
+                for (Future<RefreshTokenService.IssuedToken> signIn : signIns) {
                     signIn.get(10, TimeUnit.SECONDS);
                 }
             } finally {

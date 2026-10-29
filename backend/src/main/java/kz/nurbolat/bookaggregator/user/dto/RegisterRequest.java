@@ -12,13 +12,14 @@ import lombok.Setter;
 public class RegisterRequest {
 
     @Schema(description = "Email; на него придёт письмо подтверждения", example = "reader@example.com")
-    @NotBlank
-    @Email
+    @NotBlank(message = "Обязательное поле")
+    @Email(message = "Некорректный email")
     private String email;
 
-    @Schema(description = "Пароль, не короче 6 символов", example = "secret123")
-    @NotBlank
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @Schema(description = "Пароль, 8–100 символов", example = "secret123")
+    @NotBlank(message = "Обязательное поле")
+    @Size(min = 8, message = "Минимум 8 символов")
+    @Size(max = 100, message = "Не больше 100 символов")
     private String password;
 
     @Schema(description = "Отображаемое имя, необязательно", example = "Айгерим")

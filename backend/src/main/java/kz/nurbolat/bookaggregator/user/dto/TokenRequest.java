@@ -8,5 +8,5 @@ import jakarta.validation.constraints.Size;
  * Token from a link in an email.
  */
 public record TokenRequest(
-        @Schema(description = "Токен из ссылки в письме", example = "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0") @NotBlank @Size(max = 100) String token) {
+        @Schema(description = "Токен из ссылки в письме", example = "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0") @NotBlank(message = "Обязательное поле") @Size(max = 100, message = "Не больше 100 символов") String token) {
 }

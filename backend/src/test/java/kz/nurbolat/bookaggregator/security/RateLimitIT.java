@@ -1,5 +1,6 @@
 package kz.nurbolat.bookaggregator.security;
 
+import com.jayway.jsonpath.JsonPath;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,6 +54,67 @@ class RateLimitIT extends AbstractIntegrationTest {
 
         register(ip).andExpect(status().isTooManyRequests());
         register(randomIp()).andExpect(status().isCreated());
+    }
+
+    @Test
+    void shouldLimitFacetsSeparatelyFromSearch() throws Exception {
+        String ip = randomIp();
+        for (int i = 1; i <= 60; i++) {
+            facets(ip).andExpect(status().isOk());
+        }
+
+        facets(ip)
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, matchesPattern("[1-9]|[1-5][0-9]|60")));
+        mockMvc.perform(get("/api/v1/search").with(request -> {
+            request.setRemoteAddr(ip);
+            return request;
+        })).andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldAnswer429WhenSixthPasswordChangeComesWithinAMinute() throws Exception {
+        String email = "user-" + UUID.randomUUID() + "@example.com";
+        register(randomIp(), email).andExpect(status().isCreated());
+        String access = JsonPath.read(mockMvc.perform(post("/api/v1/auth/login")
+                        .with(request -> {
+                            request.setRemoteAddr(randomIp());
+                            return request;
+                        })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\": \"" + email + "\", \"password\": \"secret123\"}"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(), "$.accessToken");
+        for (int i = 1; i <= 5; i++) {
+            changePassword(access).andExpect(status().isUnprocessableEntity());
+        }
+
+        changePassword(access)
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, matchesPattern("[1-9]|[1-5][0-9]|60")));
+    }
+
+    private ResultActions changePassword(String access) throws Exception {
+        return mockMvc.perform(post("/api/v1/me/password")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + access)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"currentPassword\": \"wrong-password\", \"newPassword\": \"newSecret123\"}"));
+    }
+
+    private ResultActions register(String ip, String email) throws Exception {
+        return mockMvc.perform(post("/api/v1/auth/register")
+                .with(request -> {
+                    request.setRemoteAddr(ip);
+                    return request;
+                })
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\": \"" + email + "\", \"password\": \"secret123\"}"));
+    }
+
+    private ResultActions facets(String ip) throws Exception {
+        return mockMvc.perform(get("/api/v1/search/facets").with(request -> {
+            request.setRemoteAddr(ip);
+            return request;
+        }));
     }
 
     private ResultActions login(String ip, String email) throws Exception {

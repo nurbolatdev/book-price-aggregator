@@ -27,7 +27,7 @@ class SchedulerHealthIndicatorTest {
 
     private final JdbcTemplate jdbc = mock(JdbcTemplate.class);
     private final SchedulerHealthIndicator indicator = new SchedulerHealthIndicator(jdbc,
-            new SchedulerProperties("0 0 */6 * * *", "0 30 3 * * *", "0 0 9 * * *", Duration.ofDays(7),
+            new SchedulerProperties("0 0 */6 * * *", "0 30 3 * * *", "0 0 9 * * *", "0 0 10 * * MON", Duration.ofDays(7),
                     Duration.ofDays(90), Duration.ofHours(6), Duration.ofMinutes(30)),
             Clock.fixed(NOW, ZoneOffset.UTC));
 

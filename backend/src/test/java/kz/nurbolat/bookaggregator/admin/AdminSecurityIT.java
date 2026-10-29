@@ -42,7 +42,7 @@ class AdminSecurityIT extends AbstractIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/stats", "/activity", "/health", "/parsers", "/queues", "/events",
-            "/search/top", "/search/zero-results", "/users", "/offers/pending-review"})
+            "/search/top", "/search/zero-results", "/users", "/notifications", "/offers/pending-review"})
     void shouldForbidUsersAndAllowAdminsOnReads(String path) throws Exception {
         String url = "/api/v1/admin" + path;
 

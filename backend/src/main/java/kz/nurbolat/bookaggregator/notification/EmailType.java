@@ -14,7 +14,8 @@ public enum EmailType {
     RESET_PASSWORD("reset-password", "Сброс пароля — KitapRadar"),
     // Templates arrive with beacons (M19)
     PRICE_DROP("price-drop", "Цена снизилась — KitapRadar"),
-    DIGEST("digest", "Сводка цен — KitapRadar");
+    DIGEST("digest", "Сводка цен — KitapRadar"),
+    WEEKLY_DIGEST("weekly-digest", "Подборка недели — KitapRadar");
 
     private final String template;
     private final String subject;
