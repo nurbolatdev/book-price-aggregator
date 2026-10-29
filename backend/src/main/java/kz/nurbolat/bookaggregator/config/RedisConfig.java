@@ -7,6 +7,7 @@ import kz.nurbolat.bookaggregator.admin.dto.AdminStatsResponse;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
 import kz.nurbolat.bookaggregator.edition.dto.EditionDetailResponse;
 import kz.nurbolat.bookaggregator.home.dto.DropItem;
+import kz.nurbolat.bookaggregator.search.dto.SearchFacets;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem;
 import kz.nurbolat.bookaggregator.search.dto.Suggestion;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
@@ -33,6 +34,7 @@ import java.util.List;
 public class RedisConfig implements CachingConfigurer {
 
     public static final String SEARCH = "search";
+    public static final String SEARCH_FACETS = "search-facets";
     public static final String SUGGEST = "suggest";
     public static final String EDITION = "edition";
     public static final String DROPS = "drops";
@@ -53,6 +55,8 @@ public class RedisConfig implements CachingConfigurer {
         return builder -> builder
                 .withCacheConfiguration(SEARCH, cache(defaults, objectMapper, "search:v1:", Duration.ofMinutes(10),
                         types.constructParametricType(PageResponse.class, SearchItem.class)))
+                .withCacheConfiguration(SEARCH_FACETS, cache(defaults, objectMapper, "search-facets:v1:",
+                        Duration.ofSeconds(60), types.constructType(SearchFacets.class)))
                 .withCacheConfiguration(SUGGEST, cache(defaults, objectMapper, "suggest:v1:", Duration.ofMinutes(10),
                         types.constructCollectionType(List.class, Suggestion.class)))
                 .withCacheConfiguration(EDITION, cache(defaults, objectMapper, "edition:v1:", Duration.ofMinutes(30),

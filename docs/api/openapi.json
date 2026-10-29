@@ -2044,6 +2044,128 @@
         "tags" : [ "Search" ]
       }
     },
+    "/api/v1/search/facets" : {
+      "get" : {
+        "description" : "Для каждого магазина, переплёта и языка — сколько изданий вернул бы поиск с теми же фильтрами и только этим значением.",
+        "operationId" : "facets",
+        "parameters" : [ {
+          "description" : "Название, автор или ISBN; необязателен: без него — каталог",
+          "example" : "мастер маргарита",
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "maxLength" : 200,
+            "minLength" : 2,
+            "type" : "string",
+            "description" : "Название, автор или ISBN; необязателен: без него — каталог",
+            "example" : "мастер маргарита"
+          }
+        }, {
+          "description" : "Коды магазинов через запятую",
+          "example" : "FLIP,KASPI",
+          "in" : "query",
+          "name" : "stores",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Коды магазинов через запятую",
+            "example" : "FLIP,KASPI"
+          }
+        }, {
+          "description" : "Минимальная цена в тенге",
+          "example" : 1000,
+          "in" : "query",
+          "name" : "minPrice",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "string",
+            "description" : "Минимальная цена в тенге",
+            "example" : 1000
+          }
+        }, {
+          "description" : "Максимальная цена в тенге",
+          "example" : 10000,
+          "in" : "query",
+          "name" : "maxPrice",
+          "required" : false,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "string",
+            "description" : "Максимальная цена в тенге",
+            "example" : 10000
+          }
+        }, {
+          "description" : "Только издания в наличии",
+          "in" : "query",
+          "name" : "inStock",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Только издания в наличии",
+            "default" : "true"
+          }
+        }, {
+          "description" : "Переплёты через запятую",
+          "example" : "HARDCOVER,PAPERBACK",
+          "in" : "query",
+          "name" : "binding",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Переплёты через запятую",
+            "example" : "HARDCOVER,PAPERBACK"
+          }
+        }, {
+          "description" : "Языки через запятую: ru, kk, en",
+          "example" : "ru,kk",
+          "in" : "query",
+          "name" : "language",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "description" : "Языки через запятую: ru, kk, en",
+            "example" : "ru,kk"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SearchFacets"
+                }
+              }
+            },
+            "description" : "Успешный ответ"
+          },
+          "422" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Ошибка валидации"
+          },
+          "429" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Слишком много запросов"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Счётчики фильтров поиска",
+        "tags" : [ "Search" ]
+      }
+    },
     "/api/v1/search/suggest" : {
       "get" : {
         "description" : "Варианты для строки ввода от 2 символов.",
@@ -3178,6 +3300,29 @@
           }
         }
       },
+      "SearchFacets" : {
+        "type" : "object",
+        "properties" : {
+          "bindings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ValueFacet"
+            }
+          },
+          "languages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ValueFacet"
+            }
+          },
+          "stores" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StoreFacet"
+            }
+          }
+        }
+      },
       "SearchItem" : {
         "type" : "object",
         "properties" : {
@@ -3235,6 +3380,19 @@
             "type" : "string"
           },
           "searches" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StoreFacet" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "enum" : [ "KASPI", "FLIP", "MELOMAN", "WILDBERRIES", "OZON" ]
+          },
+          "count" : {
             "type" : "integer",
             "format" : "int64"
           }
@@ -3428,6 +3586,19 @@
             "format" : "int64"
           }
         }
+      },
+      "ValueFacet" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Переплёт (HARDCOVER, PAPERBACK) или язык (ru, kk, en)"
       }
     },
     "securitySchemes" : {

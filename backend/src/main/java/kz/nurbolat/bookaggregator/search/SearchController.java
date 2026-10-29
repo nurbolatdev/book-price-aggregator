@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import kz.nurbolat.bookaggregator.common.web.PageResponse;
 import kz.nurbolat.bookaggregator.scheduler.RefreshOnDemandService;
+import kz.nurbolat.bookaggregator.search.dto.FacetsRequest;
+import kz.nurbolat.bookaggregator.search.dto.SearchFacets;
 import kz.nurbolat.bookaggregator.search.dto.SearchItem;
 import kz.nurbolat.bookaggregator.search.dto.SearchRequest;
 import kz.nurbolat.bookaggregator.search.dto.Suggestion;
@@ -31,6 +33,7 @@ public class SearchController {
 
     private final SearchService searchService;
     private final SuggestionService suggestionService;
+    private final SearchFacetsService facetsService;
     private final RefreshOnDemandService refreshOnDemandService;
 
     /** The first page also refreshes stale prices of its editions in the background. */
@@ -44,6 +47,15 @@ public class SearchController {
             refreshOnDemandService.requestIfStale(page.content().stream().map(SearchItem::editionId).toList());
         }
         return ResponseEntity.ok(page);
+    }
+
+    @Operation(summary = "Счётчики фильтров поиска",
+            description = "Для каждого магазина, переплёта и языка — сколько изданий вернул бы поиск с теми же фильтрами и только этим значением.")
+    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
+    @ApiResponse(responseCode = "429", description = "Слишком много запросов")
+    @GetMapping("/facets")
+    ResponseEntity<SearchFacets> facets(@Valid @ParameterObject FacetsRequest request) {
+        return ResponseEntity.ok(facetsService.facets(request));
     }
 
     @Operation(summary = "Подсказки поиска", description = "Варианты для строки ввода от 2 символов.")

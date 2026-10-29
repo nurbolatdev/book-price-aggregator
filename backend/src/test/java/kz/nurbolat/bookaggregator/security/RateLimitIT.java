@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,6 +53,29 @@ class RateLimitIT extends AbstractIntegrationTest {
 
         register(ip).andExpect(status().isTooManyRequests());
         register(randomIp()).andExpect(status().isCreated());
+    }
+
+    @Test
+    void shouldLimitFacetsSeparatelyFromSearch() throws Exception {
+        String ip = randomIp();
+        for (int i = 1; i <= 60; i++) {
+            facets(ip).andExpect(status().isOk());
+        }
+
+        facets(ip)
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, matchesPattern("[1-9]|[1-5][0-9]|60")));
+        mockMvc.perform(get("/api/v1/search").with(request -> {
+            request.setRemoteAddr(ip);
+            return request;
+        })).andExpect(status().isOk());
+    }
+
+    private ResultActions facets(String ip) throws Exception {
+        return mockMvc.perform(get("/api/v1/search/facets").with(request -> {
+            request.setRemoteAddr(ip);
+            return request;
+        }));
     }
 
     private ResultActions login(String ip, String email) throws Exception {
