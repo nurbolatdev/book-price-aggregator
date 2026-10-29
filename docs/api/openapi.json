@@ -1214,7 +1214,7 @@
     },
     "/api/v1/beacons" : {
       "get" : {
-        "description" : "Маячки текущего пользователя, можно отфильтровать по статусу.",
+        "description" : "Маячки текущего пользователя, можно отфильтровать по статусу и изданию (0 или 1 маячок).",
         "operationId" : "list",
         "parameters" : [ {
           "in" : "query",
@@ -1223,6 +1223,14 @@
           "schema" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "TRIGGERED", "PAUSED" ]
+          }
+        }, {
+          "in" : "query",
+          "name" : "editionId",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         } ],
         "responses" : {
@@ -2556,12 +2564,19 @@
           "coverUrl" : {
             "type" : "string"
           },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "currentBestPrice" : {
             "type" : "number"
           },
           "currentBestStore" : {
             "type" : "string",
             "enum" : [ "KASPI", "FLIP", "MELOMAN", "WILDBERRIES", "OZON" ]
+          },
+          "currentBestUrl" : {
+            "type" : "string"
           },
           "editionId" : {
             "type" : "integer",
@@ -2578,6 +2593,10 @@
           "status" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "TRIGGERED", "PAUSED" ]
+          },
+          "statusChangedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "targetPercent" : {
             "type" : "integer",

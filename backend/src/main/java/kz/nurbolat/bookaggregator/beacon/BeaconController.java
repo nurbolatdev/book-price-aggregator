@@ -35,11 +35,12 @@ public class BeaconController {
     private final BeaconService beaconService;
     private final RefreshOnDemandService refreshOnDemandService;
 
-    @Operation(summary = "Список маячков", description = "Маячки текущего пользователя, можно отфильтровать по статусу.")
+    @Operation(summary = "Список маячков", description = "Маячки текущего пользователя, можно отфильтровать по статусу и изданию (0 или 1 маячок).")
     @ApiResponse(responseCode = "401", description = "Требуется авторизация")
     @GetMapping
-    List<BeaconResponse> list(@RequestParam(required = false) BeaconStatus status) {
-        return beaconService.list(status);
+    List<BeaconResponse> list(@RequestParam(required = false) BeaconStatus status,
+                              @RequestParam(required = false) Long editionId) {
+        return beaconService.list(status, editionId);
     }
 
     /** The edition's prices are refreshed in the background if they are stale, so the beacon starts from fresh data. */

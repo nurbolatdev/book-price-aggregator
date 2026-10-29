@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.util.List;
 
 /**
@@ -35,10 +36,11 @@ public class BeaconService {
     private final OfferService offerService;
     private final SecurityUtils securityUtils;
     private final EmailTokenService emailTokenService;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
-    public List<BeaconResponse> list(BeaconStatus status) {
-        return beaconListRepository.findOfUser(currentUserId(), status);
+    public List<BeaconResponse> list(BeaconStatus status, Long editionId) {
+        return beaconListRepository.findOfUser(currentUserId(), status, editionId);
     }
 
     /**
@@ -80,7 +82,7 @@ public class BeaconService {
             rearm = beacon.getStatus() != BeaconStatus.PAUSED;
         }
         if (request.status() == BeaconStatus.PAUSED) {
-            beacon.setStatus(BeaconStatus.PAUSED);
+            beacon.changeStatus(BeaconStatus.PAUSED, clock.instant());
             rearm = false;
         } else if (request.status() == BeaconStatus.ACTIVE && beacon.getStatus() != BeaconStatus.ACTIVE) {
             rearm = true;
@@ -105,7 +107,7 @@ public class BeaconService {
     @Transactional
     public UnsubscribeResponse unsubscribe(String token) {
         Beacon beacon = emailTokenService.unsubscribeBeacon(token);
-        beacon.setStatus(BeaconStatus.PAUSED);
+        beacon.changeStatus(BeaconStatus.PAUSED, clock.instant());
         return new UnsubscribeResponse(beacon.getId(), beacon.getEdition().getId(),
                 beacon.getEdition().getBook().getTitle(), beacon.getStatus());
     }
@@ -118,7 +120,7 @@ public class BeaconService {
     }
 
     private void arm(Beacon beacon) {
-        beacon.setStatus(BeaconStatus.ACTIVE);
+        beacon.changeStatus(BeaconStatus.ACTIVE, clock.instant());
         beacon.setBaselinePrice(offerService.findBestOffer(beacon.getEdition().getId()).map(Offer::getPrice).orElse(null));
         beacon.setLastNotifiedPrice(null);
     }

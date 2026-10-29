@@ -55,6 +55,8 @@ class BeaconCheckerIT extends AbstractMailIT {
         assertThat(state.get("status")).isEqualTo("TRIGGERED");
         assertThat((BigDecimal) state.get("last_notified_price")).isEqualByComparingTo("3150");
         assertThat(state.get("last_triggered_at")).isNotNull();
+        assertThat(jdbc.queryForObject(
+                "SELECT status_changed_at > created_at FROM beacons WHERE id = ?", Boolean.class, beacon)).isTrue();
         await(() -> "SENT".equals(notificationStatus(beacon)));
 
         // The same price again: nothing new to report

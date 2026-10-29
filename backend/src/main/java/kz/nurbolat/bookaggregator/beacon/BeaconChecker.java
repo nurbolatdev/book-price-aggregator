@@ -111,7 +111,7 @@ public class BeaconChecker {
                 continue;
             }
             BigDecimal was = beacon.getLastNotifiedPrice() != null ? beacon.getLastNotifiedPrice() : beacon.getBaselinePrice();
-            beacon.setStatus(BeaconStatus.TRIGGERED);
+            beacon.changeStatus(BeaconStatus.TRIGGERED, clock.instant());
             beacon.setLastTriggeredAt(clock.instant());
             beacon.setLastNotifiedPrice(best);
             alerts.fired(beacon, was, offers);

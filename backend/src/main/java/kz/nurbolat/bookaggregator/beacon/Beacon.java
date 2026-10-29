@@ -3,6 +3,7 @@ package kz.nurbolat.bookaggregator.beacon;
 import jakarta.persistence.*;
 import kz.nurbolat.bookaggregator.edition.Edition;
 import kz.nurbolat.bookaggregator.user.User;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -49,9 +50,14 @@ public class Beacon {
     @Column(name = "baseline_price", precision = 10, scale = 2)
     private BigDecimal baselinePrice;
 
+    @Setter(AccessLevel.NONE)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private BeaconStatus status = BeaconStatus.ACTIVE;
+
+    /** When the status last changed: pause, resume or trigger. */
+    @Column(name = "status_changed_at", nullable = false)
+    private Instant statusChangedAt;
 
     /** Guards against sending another email for the same price. */
     @Column(name = "last_notified_price", precision = 10, scale = 2)
@@ -67,4 +73,22 @@ public class Beacon {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    /**
+     * Sets the status; the change time moves only when the status differs (or was never set),
+     * so a repeated trigger of a triggered beacon keeps it.
+     */
+    @PrePersist
+    void initStatusChangedAt() {
+        if (statusChangedAt == null) {
+            statusChangedAt = Instant.now();
+        }
+    }
+
+    public void changeStatus(BeaconStatus newStatus, Instant now) {
+        if (statusChangedAt == null || status != newStatus) {
+            statusChangedAt = now;
+        }
+        status = newStatus;
+    }
 }
