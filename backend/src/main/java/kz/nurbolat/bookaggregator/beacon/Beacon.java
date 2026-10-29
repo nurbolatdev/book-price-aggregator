@@ -74,10 +74,7 @@ public class Beacon {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    /**
-     * Sets the status; the change time moves only when the status differs (or was never set),
-     * so a repeated trigger of a triggered beacon keeps it.
-     */
+    /** Safety net for paths that bypass {@link #changeStatus}. */
     @PrePersist
     void initStatusChangedAt() {
         if (statusChangedAt == null) {
@@ -85,6 +82,10 @@ public class Beacon {
         }
     }
 
+    /**
+     * Sets the status; the change time moves only when the status differs (or was never set),
+     * so a repeated trigger of a triggered beacon keeps it.
+     */
     public void changeStatus(BeaconStatus newStatus, Instant now) {
         if (statusChangedAt == null || status != newStatus) {
             statusChangedAt = now;

@@ -71,6 +71,14 @@ class SearchFacetsIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldTreatBlankQueryAsCatalogMode() throws Exception {
+        String catalog = facets(get("/api/v1/search/facets"));
+
+        assertThat(facets(get("/api/v1/search/facets").param("q", ""))).isEqualTo(catalog);
+        assertThat(facets(get("/api/v1/search/facets").param("q", " "))).isEqualTo(catalog);
+    }
+
+    @Test
     void shouldCountEditionsNotOffers() throws Exception {
         String before = facets(get("/api/v1/search/facets"));
         jdbc.update("""

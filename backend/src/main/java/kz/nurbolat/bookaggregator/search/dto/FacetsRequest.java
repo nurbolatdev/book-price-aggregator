@@ -26,6 +26,10 @@ public record FacetsRequest(
         List<@Pattern(regexp = "ru|kk|en", message = "Допустимо ru, kk или en") String> language
 ) {
 
+    public FacetsRequest {
+        q = q == null || q.isBlank() ? null : q;
+    }
+
     public SearchRequest toSearchRequest() {
         return new SearchRequest(q, stores, minPrice, maxPrice, inStock, binding, language, null, 0, 1);
     }
