@@ -1,6 +1,7 @@
 package kz.nurbolat.bookaggregator.user;
 
 import jakarta.validation.Valid;
+import kz.nurbolat.bookaggregator.auth.RefreshCookies;
 import kz.nurbolat.bookaggregator.user.dto.ChangePasswordRequest;
 import kz.nurbolat.bookaggregator.user.dto.DeleteAccountRequest;
 import kz.nurbolat.bookaggregator.user.dto.UpdateProfileRequest;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,7 @@ public class ProfileController {
 
     private final ProfileService profileService;
     private final AccountService accountService;
+    private final RefreshCookies refreshCookies;
 
     @Operation(summary = "Профиль", description = "Данные текущего пользователя.")
     @ApiResponse(responseCode = "401", description = "Требуется авторизация")
@@ -35,8 +38,8 @@ public class ProfileController {
     }
 
     @Operation(summary = "Смена пароля",
-            description = "Проверяет текущий пароль и ставит новый. Сессия переданного refresh-токена остаётся, "
-                    + "остальные завершаются; без токена завершаются все.")
+            description = "Проверяет текущий пароль и ставит новый. Текущая сессия (по access-токену) остаётся, "
+                    + "остальные завершаются; cookie не меняется.")
     @ApiResponse(responseCode = "204", description = "Пароль изменён")
     @ApiResponse(responseCode = "401", description = "Требуется авторизация")
     @ApiResponse(responseCode = "422", description = "Неверный текущий пароль или новый пароль не подходит")
@@ -58,7 +61,7 @@ public class ProfileController {
     @DeleteMapping
     ResponseEntity<Void> delete(@Valid @RequestBody DeleteAccountRequest request) {
         accountService.delete(request);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshCookies.clear()).build();
     }
 
     @Operation(summary = "Изменение профиля", description = "Меняет только переданные поля.")

@@ -130,7 +130,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
             CountDownLatch start = new CountDownLatch(1);
             ExecutorService pool = Executors.newFixedThreadPool(2);
             try {
-                List<Future<String>> signIns = List.of(
+                List<Future<RefreshTokenService.IssuedToken>> signIns = List.of(
                         pool.submit(() -> {
                             start.await();
                             return refreshTokenService.issue(user, "phone");
@@ -140,7 +140,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
                             return refreshTokenService.issue(user, "laptop");
                         }));
                 start.countDown();
-                for (Future<String> signIn : signIns) {
+                for (Future<RefreshTokenService.IssuedToken> signIn : signIns) {
                     signIn.get(10, TimeUnit.SECONDS);
                 }
             } finally {

@@ -78,12 +78,14 @@ public class SecurityConfig {
     }
 
     /**
-     * The token travels in the {@code Authorization} header, not in cookies, so credentials stay off.
+     * Credentials are on for the refresh cookie ({@code kr_refresh}, sent to {@code /api/v1/auth} only).
+     * Origins are listed explicitly, never {@code *}.
      */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(corsProperties.allowedOrigins());
+        cors.setAllowCredentials(true);
         cors.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE"));
         cors.setAllowedHeaders(List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, "X-Request-Id"));
         cors.setExposedHeaders(List.of(HttpHeaders.RETRY_AFTER, "X-Request-Id"));

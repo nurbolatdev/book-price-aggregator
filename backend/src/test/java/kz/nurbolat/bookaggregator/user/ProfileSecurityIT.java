@@ -1,6 +1,7 @@
 package kz.nurbolat.bookaggregator.user;
 
 import com.jayway.jsonpath.JsonPath;
+import kz.nurbolat.bookaggregator.security.JwtService;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,12 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Test
     void shouldKeepCurrentDeviceAndEndOthersWhenPasswordChanges() throws Exception {
         String email = registered();
@@ -52,11 +59,13 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldEndEverySessionWhenPasswordChangesWithoutRefreshToken() throws Exception {
+    void shouldEndEverySessionWhenPasswordChangesWithoutSessionInfo() throws Exception {
         String email = registered();
         String deviceA = signIn(email);
+        // An access token issued before the session claim existed and no refresh token in the body
+        String legacyBearer = "Bearer " + jwtService.generateAccessToken(userRepository.findByEmail(email).orElseThrow());
 
-        mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, bearerOf(deviceA))
+        mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, legacyBearer)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(passwordBody(PASSWORD, "newSecret123", null)))
                 .andExpect(status().isNoContent());

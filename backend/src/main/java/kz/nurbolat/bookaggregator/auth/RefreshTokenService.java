@@ -44,10 +44,10 @@ public class RefreshTokenService {
     /**
      * Starts a new session (family) of the user.
      *
-     * @return the new token itself; only its hash is stored
+     * @return the new token itself (only its hash is stored) and the family of the session
      */
     @Transactional
-    public String issue(User user, String userAgent) {
+    public IssuedToken issue(User user, String userAgent) {
         endSessionsOverLimit(user);
         return save(user, UUID.randomUUID(), userAgent);
     }
@@ -59,7 +59,7 @@ public class RefreshTokenService {
      */
     // The revocation after a reuse must stay although the call fails
     @Transactional(noRollbackFor = AppException.class)
-    public Rotated rotate(String token, String userAgent) {
+    public IssuedToken rotate(String token, String userAgent) {
         RefreshToken current = repository.findByTokenHash(TokenHasher.hash(token))
                 .orElseThrow(RefreshTokenService::invalid);
         Instant now = clock.instant();
@@ -80,7 +80,7 @@ public class RefreshTokenService {
             throw new AppException(ErrorCode.TOKEN_EXPIRED, "Сессия истекла, войдите снова");
         }
         current.setRevokedAt(now);
-        return new Rotated(user, save(user, current.getFamilyId(), userAgent));
+        return save(user, current.getFamilyId(), userAgent);
     }
 
     /** Signs one session out; an unknown or already revoked token is ignored. */
@@ -128,7 +128,7 @@ public class RefreshTokenService {
         }
     }
 
-    private String save(User user, UUID familyId, String userAgent) {
+    private IssuedToken save(User user, UUID familyId, String userAgent) {
         String token = TokenHasher.newToken();
         RefreshToken entity = new RefreshToken();
         entity.setUser(user);
@@ -137,7 +137,7 @@ public class RefreshTokenService {
         entity.setExpiresAt(clock.instant().plus(properties.refreshTtl()));
         entity.setUserAgent(truncate(userAgent));
         repository.save(entity);
-        return token;
+        return new IssuedToken(user, token, familyId);
     }
 
     private static String truncate(String userAgent) {
@@ -149,8 +149,9 @@ public class RefreshTokenService {
     }
 
     /**
-     * @param token the next refresh token itself
+     * @param token    the refresh token itself
+     * @param familyId the session the token belongs to
      */
-    public record Rotated(User user, String token) {
+    public record IssuedToken(User user, String token, UUID familyId) {
     }
 }

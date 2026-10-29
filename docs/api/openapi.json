@@ -1081,7 +1081,7 @@
     },
     "/api/v1/auth/logout" : {
       "post" : {
-        "description" : "Завершает сессию, к которой относится refresh-токен.",
+        "description" : "Завершает сессию, к которой относится refresh-токен (cookie kr_refresh или тело запроса), и удаляет cookie. Без токена тоже отвечает 204.",
         "operationId" : "logout",
         "requestBody" : {
           "content" : {
@@ -1090,12 +1090,21 @@
                 "$ref" : "#/components/schemas/RefreshRequest"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "204" : {
             "description" : "Сессия завершена"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Origin не разрешён или не указан при токене из cookie"
           },
           "422" : {
             "content" : {
@@ -1141,7 +1150,7 @@
     },
     "/api/v1/auth/refresh" : {
       "post" : {
-        "description" : "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать.",
+        "description" : "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Запрос с cookie обязан прийти с разрешённым заголовком Origin.",
         "operationId" : "refresh",
         "parameters" : [ {
           "in" : "header",
@@ -1158,8 +1167,7 @@
                 "$ref" : "#/components/schemas/RefreshRequest"
               }
             }
-          },
-          "required" : true
+          }
         },
         "responses" : {
           "200" : {
@@ -1180,7 +1188,17 @@
                 }
               }
             },
-            "description" : "Сессия недействительна или истекла"
+            "description" : "Токена нет, сессия недействительна или истекла"
+          },
+          "403" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description" : "Origin не разрешён или не указан при токене из cookie"
           },
           "422" : {
             "content" : {
@@ -2038,7 +2056,7 @@
     },
     "/api/v1/me/password" : {
       "post" : {
-        "description" : "Проверяет текущий пароль и ставит новый. Сессия переданного refresh-токена остаётся, остальные завершаются; без токена завершаются все.",
+        "description" : "Проверяет текущий пароль и ставит новый. Текущая сессия (по access-токену) остаётся, остальные завершаются; cookie не меняется.",
         "operationId" : "changePassword",
         "requestBody" : {
           "content" : {
@@ -2716,7 +2734,9 @@
             "format" : "int64"
           },
           "refreshToken" : {
-            "type" : "string"
+            "type" : "string",
+            "description" : "Refresh-токен; дублируется в cookie kr_refresh. Устарело: убрать в F4",
+            "deprecated" : true
           },
           "user" : {
             "$ref" : "#/components/schemas/UserResponse"
@@ -2918,8 +2938,9 @@
             "maxLength" : 100,
             "minLength" : 0,
             "type" : "string",
-            "description" : "Refresh-токен этого устройства: его сессия остаётся, остальные завершаются. Без него завершаются все сессии",
-            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0"
+            "description" : "Refresh-токен этого устройства: его сессия остаётся, остальные завершаются. Без него завершаются все сессии. Устарело: текущая сессия определяется по access-токену, убрать в F4",
+            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0",
+            "deprecated" : true
           }
         }
       },
@@ -3542,15 +3563,15 @@
         }
       },
       "RefreshRequest" : {
-        "required" : [ "refreshToken" ],
         "type" : "object",
         "properties" : {
           "refreshToken" : {
             "maxLength" : 100,
             "minLength" : 0,
             "type" : "string",
-            "description" : "Refresh-токен, полученный при входе",
-            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0"
+            "description" : "Refresh-токен, полученный при входе. Не нужен, если браузер шлёт cookie kr_refresh; поле нужно только до перехода frontend на cookie (F4)",
+            "example" : "3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0",
+            "deprecated" : true
           }
         }
       },

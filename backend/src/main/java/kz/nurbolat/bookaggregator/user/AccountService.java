@@ -5,6 +5,7 @@ import kz.nurbolat.bookaggregator.auth.RefreshTokenService;
 import kz.nurbolat.bookaggregator.common.error.AppException;
 import kz.nurbolat.bookaggregator.common.error.ErrorCode;
 import kz.nurbolat.bookaggregator.common.error.ErrorResponse.FieldError;
+import kz.nurbolat.bookaggregator.security.AuthenticatedUser;
 import kz.nurbolat.bookaggregator.security.SecurityUtils;
 import kz.nurbolat.bookaggregator.user.dto.ChangePasswordRequest;
 import kz.nurbolat.bookaggregator.user.dto.DeleteAccountRequest;
@@ -35,16 +36,18 @@ public class AccountService {
     private final SystemEventService systemEventService;
 
     /**
-     * Sets the new password and ends the user's other sessions. The session of the given refresh token stays if it
-     * is an active token of this user; without it every session ends.
+     * Sets the new password and ends the user's other sessions. The current session is the one of the access token
+     * ({@code sid}); old clients may still send its refresh token instead. Without either every session ends.
      */
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
         User user = securityUtils.getCurrentUser();
         requirePassword(user, request.currentPassword(), "currentPassword");
         user.setPassword(passwordEncoder.encode(request.newPassword()));
-        UUID keptFamily = request.refreshToken() == null ? null
-                : refreshTokenService.activeFamilyOf(request.refreshToken(), user.getId()).orElse(null);
+        UUID keptFamily = securityUtils.currentUser().map(AuthenticatedUser::sessionId).orElse(null);
+        if (keptFamily == null && request.refreshToken() != null) {
+            keptFamily = refreshTokenService.activeFamilyOf(request.refreshToken(), user.getId()).orElse(null);
+        }
         if (keptFamily == null) {
             refreshTokenService.revokeAll(user.getId());
         } else {
