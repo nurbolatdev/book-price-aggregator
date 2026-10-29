@@ -45,7 +45,7 @@
 | [M19](backend/M19-beacons-notifications.md) | Маячки и email-уведомления | `feature/m19-beacons-notifications` | ✅ |
 | [M20](backend/M20-admin-observability.md) | Admin API и наблюдаемость | `feature/m20-admin-observability` | ✅ |
 | [M21](backend/M21-quality-release.md) | Качество, CI, README, релиз backend | `feature/m21-quality-release` | ✅ |
-| [M22](backend/M22-api-for-ui.md) | API под макеты frontend: каталог, счётчики фильтров, похожие, профиль, подборка недели, журнал писем | `feature/m22-api-for-ui` | 🟡 |
+| [M22](backend/M22-api-for-ui.md) | API под макеты frontend: каталог, счётчики фильтров, похожие, профиль, подборка недели, журнал писем | `feature/m22-api-for-ui` | ✅ |
 
 Фаза 3 — frontend ([план и токены](frontend/ROADMAP.md) · [экраны и кнопки → API](frontend/SCREENS.md) · [макеты](frontend/mockups/README.md)):
 
