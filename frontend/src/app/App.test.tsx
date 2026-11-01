@@ -17,7 +17,7 @@ describe('App', () => {
   it('renders the home page lazily', async () => {
     renderAt('/')
     expect(
-      await screen.findByRole('heading', { name: 'Цены на книги в магазинах Казахстана' }),
+      await screen.findByRole('heading', { name: 'Одна книга — все цены Казахстана' }),
     ).toBeInTheDocument()
   })
 
