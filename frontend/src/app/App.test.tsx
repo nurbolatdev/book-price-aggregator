@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useAuthStore } from '../stores/auth'
@@ -26,7 +26,15 @@ describe('App', () => {
 
   it('renders not found for unknown paths', async () => {
     renderAt('/nope')
-    expect(await screen.findByRole('heading', { name: 'Страница не найдена' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Такой страницы нет' })).toBeInTheDocument()
+  })
+
+  it('searches from the not found page', async () => {
+    renderAt('/nope')
+    const input = await screen.findByPlaceholderText('Название, автор или ISBN')
+    fireEvent.change(input, { target: { value: 'abc' } })
+    fireEvent.submit(input.closest('form')!)
+    expect(screen.queryByRole('heading', { name: 'Такой страницы нет' })).toBeNull()
   })
 
   it('shows the logo and login link for anonymous', async () => {
