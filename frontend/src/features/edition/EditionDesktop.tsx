@@ -37,7 +37,7 @@ export function EditionDesktop({ edition, editionId }: EditionDesktopProps) {
         <BestPriceCard
           edition={edition}
           editionId={editionId}
-          className="max-w-[360px] flex-[1_1_300px]"
+          className="max-w-[406px] flex-[1_1_346px]"
         />
       </section>
       <OffersTable edition={edition} />

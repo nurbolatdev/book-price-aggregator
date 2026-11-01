@@ -23,9 +23,9 @@ export function BestPriceCard({ edition, editionId, className }: BestPriceCardPr
   return (
     <aside
       aria-labelledby="best-price-title"
-      className={`flex flex-col gap-3 rounded-card border border-line bg-surface p-[22px] ${className ?? ''}`}
+      className={`flex flex-col gap-3.5 rounded-card border border-line bg-surface p-[22px] ${className ?? ''}`}
     >
-      <h2 id="best-price-title" className="text-sm font-normal text-muted">
+      <h2 id="best-price-title" className="font-sans text-sm font-normal text-muted">
         Лучшая цена сейчас
       </h2>
       {bestPrice?.price != null ? (

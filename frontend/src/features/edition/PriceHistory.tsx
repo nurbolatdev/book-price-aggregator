@@ -8,7 +8,7 @@ import { usePriceHistory } from './usePriceHistory'
 
 const PriceHistoryChart = lazy(() => import('./PriceHistoryChart'))
 
-const CHART_BOX = 'aspect-[10/3] min-h-[200px] w-full'
+export const CHART_BOX = 'aspect-[10/3] min-h-[200px] w-full'
 
 const PERIODS: { value: PricePeriod; label: string }[] = [
   { value: '1M', label: '1 мес' },
