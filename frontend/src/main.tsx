@@ -12,29 +12,37 @@ if (!root) {
   throw new Error('#root not found')
 }
 
-void restoreSession()
+async function enableMocking(): Promise<void> {
+  if (import.meta.env.MODE !== 'mock') return
+  const { worker } = await import('./mocks/browser')
+  await worker.start({ onUnhandledRequest: 'bypass' })
+}
 
-createRoot(root).render(
-  <StrictMode>
-    <ErrorBoundary
-      fallback={() => (
-        <div className="mx-auto max-w-6xl px-4 py-10">
-          <p className="mb-4">Что-то пошло не так</p>
-          <button
-            type="button"
-            onClick={() => location.reload()}
-            className="min-h-touch rounded-control border border-line bg-surface px-4"
-          >
-            Обновить страницу
-          </button>
-        </div>
-      )}
-    >
-      <AppProviders>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </AppProviders>
-    </ErrorBoundary>
-  </StrictMode>,
-)
+void enableMocking().then(() => {
+  void restoreSession()
+
+  createRoot(root).render(
+    <StrictMode>
+      <ErrorBoundary
+        fallback={() => (
+          <div className="mx-auto w-full max-w-page px-4 md:px-6 py-10">
+            <p className="mb-4">Что-то пошло не так</p>
+            <button
+              type="button"
+              onClick={() => location.reload()}
+              className="min-h-touch rounded-control border border-line bg-surface px-4"
+            >
+              Обновить страницу
+            </button>
+          </div>
+        )}
+      >
+        <AppProviders>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </AppProviders>
+      </ErrorBoundary>
+    </StrictMode>,
+  )
+})

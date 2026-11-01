@@ -27,3 +27,8 @@ application-local.yml
 *.log
 .DS_Store
 Thumbs.db
+
+# Frontend screenshots / e2e output
+frontend/screens/
+frontend/test-results/
+frontend/playwright-report/
