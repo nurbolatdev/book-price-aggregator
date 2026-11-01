@@ -6,6 +6,7 @@ import { EditionDescription } from './EditionDescription'
 import { EditionFacts } from './EditionFacts'
 import { EditionMobileHeader } from './EditionMobileHeader'
 import { EditionSwitcher } from './EditionSwitcher'
+import { MobileBuyBar } from './MobileBuyBar'
 import { OffersList } from './OffersList'
 import { PriceHistory } from './PriceHistory'
 import { PriceVerdict } from './PriceVerdict'
@@ -56,6 +57,7 @@ export function EditionMobile({ edition, editionId }: EditionMobileProps) {
         </section>
         <SimilarBooks editionId={editionId} />
       </div>
+      <MobileBuyBar edition={edition} editionId={editionId} />
     </div>
   )
 }

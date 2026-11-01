@@ -35,6 +35,24 @@ describe('Button', () => {
     expect(buttonClasses({ variant: 'light' })).not.toContain('border')
   })
 
+  it('outline-accent variant has an accent border and text', () => {
+    const cls = buttonClasses({ variant: 'outline-accent' })
+    expect(cls).toContain('border-accent')
+    expect(cls).toContain('text-accent')
+  })
+
+  it('bar size is 52px tall and bold; other sizes stay semibold', () => {
+    const bar = buttonClasses({ size: 'bar' })
+    expect(bar).toContain('h-[52px]')
+    expect(bar).toContain('font-bold')
+    expect(bar).not.toContain('font-semibold')
+    for (const size of ['sm', 'md', 'lg', 'xl'] as const) {
+      const cls = buttonClasses({ size })
+      expect(cls).toContain('font-semibold')
+      expect(cls).not.toContain('font-bold')
+    }
+  })
+
   it('buttonClasses matches the component classes', () => {
     render(
       <Button variant="dark" size="lg">
