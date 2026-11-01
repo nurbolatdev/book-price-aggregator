@@ -13,6 +13,7 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "dev:mock": "vite --mode mock",
+    "screens": "playwright test -c e2e/playwright.config.ts",
     "gen:api": "openapi-typescript ../docs/api/openapi.json -o src/api/schema.d.ts"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.64.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",

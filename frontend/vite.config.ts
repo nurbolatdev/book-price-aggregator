@@ -16,6 +16,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
     css: false,
     restoreMocks: true,
     // Newer Node versions expose an experimental global localStorage that shadows jsdom's; disable it in test workers.
