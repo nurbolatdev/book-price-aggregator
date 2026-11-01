@@ -1,9 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Bell, Menu, Search } from 'lucide-react'
-import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, NavLink, useLocation, useSearchParams } from 'react-router-dom'
 import logo from '../../assets/logo-full.svg'
 import { cn } from '../../lib/cn'
 import { useAuthStore } from '../../stores/auth'
+import { SearchBox } from '../../features/search/SearchBox'
 import { focusRing } from '../ui/focusRing'
 import { IconButton, iconButtonClasses } from '../ui/IconButton'
 import { getHeaderVariant } from './headerVariant'
@@ -18,39 +19,6 @@ const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
   )
 
 const BEACONS_LOGIN = '/login?next=%2Fbeacons'
-
-function HeaderSearch({ defaultValue }: { defaultValue: string }) {
-  const navigate = useNavigate()
-  const [value, setValue] = useState(defaultValue)
-
-  function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    const trimmed = value.trim()
-    if (trimmed.length < 2) return
-    navigate('/search?q=' + encodeURIComponent(trimmed))
-  }
-
-  return (
-    <form role="search" onSubmit={onSubmit} className="relative flex-[1_1_360px] max-md:order-last max-md:basis-full">
-      <Search
-        aria-hidden="true"
-        size={20}
-        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
-      />
-      <input
-        type="search"
-        aria-label="Поиск книги"
-        placeholder="Название, автор или ISBN"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        className={cn(
-          'h-[46px] w-full rounded-xl border border-line bg-canvas pl-11 pr-3.5 text-[15px] text-ink placeholder:text-muted',
-          focusRing,
-        )}
-      />
-    </form>
-  )
-}
 
 export function Header() {
   const status = useAuthStore((s) => s.status)
@@ -103,7 +71,7 @@ export function Header() {
             </NavLink>
           </nav>
         ) : (
-          <HeaderSearch key={q} defaultValue={q} />
+          <SearchBox key={q} variant="header" defaultValue={q} />
         )}
         <div className="ml-auto flex items-center gap-2 md:ml-0 md:gap-5">
           {variant === 'nav' && authenticated && (

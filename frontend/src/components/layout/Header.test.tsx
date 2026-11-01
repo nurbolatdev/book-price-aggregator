@@ -28,7 +28,7 @@ describe('Header', () => {
     expect(screen.getByRole('link', { name: 'Каталог' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Скидки недели' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Мои маячки' })).toBeInTheDocument()
-    expect(screen.queryByRole('searchbox')).toBeNull()
+    expect(screen.queryByRole('combobox')).toBeNull()
   })
 
   it('marks the current section', () => {
@@ -38,7 +38,7 @@ describe('Header', () => {
 
   it('shows the search field with the query and no catalog link on search pages', () => {
     renderWithProviders(<Header />, { route: '/search?q=abc' })
-    expect(screen.getByRole('searchbox', { name: 'Поиск книги' })).toHaveValue('abc')
+    expect(screen.getByRole('combobox', { name: 'Поиск книги' })).toHaveValue('abc')
     expect(screen.queryByRole('link', { name: 'Каталог' })).toBeNull()
   })
 
