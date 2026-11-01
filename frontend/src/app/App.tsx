@@ -3,11 +3,13 @@ import { Route, Routes } from 'react-router-dom'
 import { RequireAdmin } from '../components/auth/RequireAdmin'
 import { RequireAuth } from '../components/auth/RequireAuth'
 import { AppLayout } from '../components/layout/AppLayout'
+import { loadEditionPage } from '../features/edition/loadEditionPage'
 
 const HomePage = lazy(() => import('../pages/HomePage'))
 const SearchPage = lazy(() => import('../pages/SearchPage'))
 const DealsPage = lazy(() => import('../pages/DealsPage'))
-const EditionPage = lazy(() => import('../pages/EditionPage'))
+const EditionPage = lazy(loadEditionPage)
+const BookRedirectPage = lazy(() => import('../pages/BookRedirectPage'))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/RegisterPage'))
 const BeaconsPage = lazy(() => import('../pages/BeaconsPage'))
@@ -24,6 +26,7 @@ export default function App() {
         <Route path="catalog" element={<SearchPage />} />
         <Route path="deals" element={<DealsPage />} />
         <Route path="editions/:id" element={<EditionPage />} />
+        <Route path="books/:id" element={<BookRedirectPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route element={<RequireAuth />}>

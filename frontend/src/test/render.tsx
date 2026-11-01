@@ -18,15 +18,18 @@ export function getLocation(): string {
 interface RenderOptions {
   route?: string
   path?: string
+  queryClient?: QueryClient
 }
 
 export function renderWithProviders(
   ui: ReactElement,
-  { route = '/', path }: RenderOptions = {},
+  { route = '/', path, queryClient: provided }: RenderOptions = {},
 ): RenderResult & { queryClient: QueryClient } {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
-  })
+  const queryClient =
+    provided ??
+    new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+    })
   const result = render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={[route]}>
