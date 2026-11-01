@@ -64,6 +64,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Журнал уведомлений
+         * @description Письма пользователям, новые сверху; фильтры по статусу и типу доставки.
+         */
+        get: operations["list_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/notifications/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Повторить отправку
+         * @description Возвращает неудачное (FAILED) уведомление в очередь; доставка подхватит его сама.
+         */
+        post: operations["retry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/offers/pending-review": {
         parameters: {
             query?: never;
@@ -293,7 +333,7 @@ export interface paths {
         };
         /**
          * Пользователи
-         * @description Дата регистрации, подтверждение email и число маячков.
+         * @description Дата регистрации, подтверждение email и число маячков. Поиск q — по части email или имени, verified — по подтверждению email.
          */
         get: operations["users"];
         put?: never;
@@ -355,9 +395,29 @@ export interface paths {
         put?: never;
         /**
          * Выход
-         * @description Завершает сессию, к которой относится refresh-токен.
+         * @description Завершает сессию, к которой относится refresh-токен (cookie kr_refresh или тело запроса), и удаляет cookie. Без токена тоже отвечает 204.
          */
         post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Выход на всех устройствах
+         * @description Завершает все сессии пользователя, включая текущую.
+         */
+        post: operations["logoutAll"];
         delete?: never;
         options?: never;
         head?: never;
@@ -375,7 +435,7 @@ export interface paths {
         put?: never;
         /**
          * Обновление пары токенов
-         * @description Меняет refresh-токен на новую пару; использованный токен перестаёт действовать.
+         * @description Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Запрос с cookie обязан прийти с разрешённым заголовком Origin.
          */
         post: operations["refresh"];
         delete?: never;
@@ -473,7 +533,7 @@ export interface paths {
         };
         /**
          * Список маячков
-         * @description Маячки текущего пользователя, можно отфильтровать по статусу.
+         * @description Маячки текущего пользователя, можно отфильтровать по статусу и изданию (0 или 1 маячок).
          */
         get: operations["list"];
         put?: never;
@@ -519,7 +579,7 @@ export interface paths {
         put?: never;
         post?: never;
         /** Удалить маячок */
-        delete: operations["delete"];
+        delete: operations["delete_1"];
         options?: never;
         head?: never;
         /**
@@ -589,7 +649,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/favorites": {
+    "/api/v1/editions/{id}/similar": {
         parameters: {
             query?: never;
             header?: never;
@@ -597,51 +657,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Список избранного
-         * @description Избранные книги текущего пользователя.
+         * Похожие книги
+         * @description Сначала другие книги того же автора, затем книги на том же языке; учитываются только цены в наличии.
          */
-        get: operations["getFavorites"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/favorites/{bookId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Добавить в избранное
-         * @description Повторное добавление не создаёт дубликат.
-         */
-        post: operations["addFavorite"];
-        /** Убрать из избранного */
-        delete: operations["removeFavorite"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/favorites/{bookId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Статус избранного
-         * @description Показывает, есть ли книга в избранном.
-         */
-        get: operations["isFavorite"];
+        get: operations["getSimilar"];
         put?: never;
         post?: never;
         delete?: never;
@@ -684,7 +703,11 @@ export interface paths {
         get: operations["get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Удаление аккаунта
+         * @description Удаляет аккаунт со всеми маячками, письмами и сессиями после проверки пароля. Администратор удалить аккаунт не может.
+         */
+        delete: operations["delete"];
         options?: never;
         head?: never;
         /**
@@ -692,6 +715,26 @@ export interface paths {
          * @description Меняет только переданные поля.
          */
         patch: operations["update"];
+        trace?: never;
+    };
+    "/api/v1/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Смена пароля
+         * @description Проверяет текущий пароль и ставит новый. Текущая сессия (по access-токену) остаётся, остальные завершаются; cookie не меняется.
+         */
+        post: operations["changePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/search": {
@@ -703,9 +746,49 @@ export interface paths {
         };
         /**
          * Поиск изданий
-         * @description Ищет по названию, автору или ISBN; фильтры по магазинам, цене, переплёту и языку.
+         * @description Ищет по названию, автору или ISBN; без q — каталог. Фильтры по магазинам, цене, переплёту и языку (списки через запятую).
          */
         get: operations["search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Счётчики фильтров поиска
+         * @description Для каждого магазина, переплёта и языка — сколько изданий вернул бы поиск с теми же фильтрами и только этим значением.
+         */
+        get: operations["facets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/popular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Популярные запросы
+         * @description Топ запросов за 7 дней с результатами; если их мало — дополняется списком из настроек.
+         */
+        get: operations["popular"];
         put?: never;
         post?: never;
         delete?: never;
@@ -790,6 +873,27 @@ export interface components {
             metrics?: components["schemas"]["Metrics"];
             status?: string;
         };
+        /** @description Письмо из журнала уведомлений */
+        AdminNotificationResponse: {
+            /** Format: date-time */
+            createdAt?: string;
+            /** @description INSTANT, DIGEST или WEEKLY */
+            delivery?: string;
+            /** @description Причина неудачи; null, если ошибки нет */
+            error?: string;
+            /** Format: int64 */
+            id?: number;
+            /**
+             * Format: date-time
+             * @description Когда письмо отправлено; null — ещё нет
+             */
+            sentAt?: string;
+            /** @description QUEUED, SENT или FAILED */
+            status?: string;
+            /** @description Тема содержимого: книга для маячка, «Сводка за день» или «Подборка недели» */
+            title?: string;
+            userEmail?: string;
+        };
         AdminParserResponse: {
             /** Format: double */
             avgRunSeconds?: number;
@@ -833,6 +937,10 @@ export interface components {
             accessToken?: string;
             /** Format: int64 */
             expiresIn?: number;
+            /**
+             * @deprecated
+             * @description Refresh-токен; дублируется в cookie kr_refresh. Устарело: убрать в F4
+             */
             refreshToken?: string;
             user?: components["schemas"]["UserResponse"];
         };
@@ -842,9 +950,12 @@ export interface components {
             /** @enum {string} */
             conditionType?: "ANY_DROP" | "BELOW_PRICE" | "DISCOUNT_PERCENT";
             coverUrl?: string;
+            /** Format: date-time */
+            createdAt?: string;
             currentBestPrice?: number;
             /** @enum {string} */
             currentBestStore?: "KASPI" | "FLIP" | "MELOMAN" | "WILDBERRIES" | "OZON";
+            currentBestUrl?: string;
             /** Format: int64 */
             editionId?: number;
             /** Format: int64 */
@@ -853,6 +964,8 @@ export interface components {
             lastTriggeredAt?: string;
             /** @enum {string} */
             status?: "ACTIVE" | "TRIGGERED" | "PAUSED";
+            /** Format: date-time */
+            statusChangedAt?: string;
             /** Format: int32 */
             targetPercent?: number;
             targetPrice?: number;
@@ -904,13 +1017,31 @@ export interface components {
             /** Format: int64 */
             pendingReview?: number;
         };
+        ChangePasswordRequest: {
+            /**
+             * @description Текущий пароль
+             * @example secret123
+             */
+            currentPassword: string;
+            /**
+             * @description Новый пароль, от 8 до 100 символов
+             * @example newSecret123
+             */
+            newPassword: string;
+            /**
+             * @deprecated
+             * @description Refresh-токен этого устройства: его сессия остаётся, остальные завершаются. Без него завершаются все сессии. Устарело: текущая сессия определяется по access-токену, убрать в F4
+             * @example 3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0
+             */
+            refreshToken?: string;
+        };
         ComponentHealth: {
             details?: string;
             status?: string;
         };
         CreateBeaconRequest: {
             /**
-             * @description Тип условия: BELOW_PRICE или DISCOUNT_PERCENT
+             * @description Тип условия: ANY_DROP, BELOW_PRICE или DISCOUNT_PERCENT
              * @enum {string}
              */
             conditionType: "ANY_DROP" | "BELOW_PRICE" | "DISCOUNT_PERCENT";
@@ -932,6 +1063,13 @@ export interface components {
              */
             targetPrice?: number;
         };
+        DeleteAccountRequest: {
+            /**
+             * @description Текущий пароль для подтверждения
+             * @example secret123
+             */
+            password: string;
+        };
         DropItem: {
             author?: string;
             /** Format: int64 */
@@ -945,6 +1083,8 @@ export interface components {
             price?: number;
             /** @enum {string} */
             store?: "KASPI" | "FLIP" | "MELOMAN" | "WILDBERRIES" | "OZON";
+            /** Format: int32 */
+            storesCount?: number;
             title?: string;
         };
         EditionDetailResponse: {
@@ -1083,6 +1223,17 @@ export interface components {
             /** Format: int32 */
             totalPages?: number;
         };
+        PageResponseAdminNotificationResponse: {
+            content?: components["schemas"]["AdminNotificationResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
         PageResponseAdminUserResponse: {
             content?: components["schemas"]["AdminUserResponse"][];
             /** Format: int32 */
@@ -1165,10 +1316,11 @@ export interface components {
         };
         RefreshRequest: {
             /**
-             * @description Refresh-токен, полученный при входе
+             * @deprecated
+             * @description Refresh-токен, полученный при входе. Не нужен, если браузер шлёт cookie kr_refresh; поле нужно только до перехода frontend на cookie (F4)
              * @example 3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0
              */
-            refreshToken: string;
+            refreshToken?: string;
         };
         RegisterRequest: {
             /**
@@ -1182,7 +1334,7 @@ export interface components {
              */
             name?: string;
             /**
-             * @description Пароль, не короче 6 символов
+             * @description Пароль, 8–100 символов
              * @example secret123
              */
             password: string;
@@ -1200,7 +1352,7 @@ export interface components {
         };
         ResetPasswordRequest: {
             /**
-             * @description Новый пароль, не короче 6 символов
+             * @description Новый пароль, 8–100 символов
              * @example newSecret123
              */
             newPassword: string;
@@ -1230,6 +1382,11 @@ export interface components {
             title?: string;
             url?: string;
         };
+        SearchFacets: {
+            bindings?: components["schemas"]["ValueFacet"][];
+            languages?: components["schemas"]["ValueFacet"][];
+            stores?: components["schemas"]["StoreFacet"][];
+        };
         SearchItem: {
             author?: string;
             bestPrice?: components["schemas"]["BestPrice"];
@@ -1254,6 +1411,24 @@ export interface components {
             query?: string;
             /** Format: int64 */
             searches?: number;
+        };
+        /** @description Похожая книга: показывается издание с самой низкой ценой */
+        SimilarEdition: {
+            author?: string;
+            /** @description Минимальная цена в наличии, ₸ */
+            bestPrice?: number;
+            /** Format: int64 */
+            bookId?: number;
+            coverUrl?: string;
+            /** Format: int64 */
+            editionId?: number;
+            title?: string;
+        };
+        StoreFacet: {
+            /** @enum {string} */
+            code?: "KASPI" | "FLIP" | "MELOMAN" | "WILDBERRIES" | "OZON";
+            /** Format: int64 */
+            count?: number;
         };
         StoreResponse: {
             /** @enum {string} */
@@ -1352,6 +1527,12 @@ export interface components {
             total?: number;
             /** Format: int64 */
             verified?: number;
+        };
+        /** @description Переплёт (HARDCOVER, PAPERBACK) или язык (ru, kk, en) */
+        ValueFacet: {
+            /** Format: int64 */
+            count?: number;
+            value?: string;
         };
     };
     responses: never;
@@ -1455,6 +1636,98 @@ export interface operations {
             };
             /** @description Нужна роль ADMIN */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query?: {
+                status?: "QUEUED" | "SENT" | "FAILED";
+                delivery?: "INSTANT" | "DIGEST" | "WEEKLY";
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Успешный ответ */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseAdminNotificationResponse"];
+                };
+            };
+            /** @description Нужна роль ADMIN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Ошибка валидации */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    retry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Успешный ответ */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminNotificationResponse"];
+                };
+            };
+            /** @description Нужна роль ADMIN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Уведомление не найдено */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Уведомление не в статусе FAILED или email пользователя не подтверждён */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1905,6 +2178,8 @@ export interface operations {
     users: {
         parameters: {
             query?: {
+                q?: string;
+                verified?: boolean;
                 page?: number;
                 size?: number;
             };
@@ -2034,7 +2309,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["RefreshRequest"];
             };
@@ -2047,8 +2322,44 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Origin не разрешён или не указан при токене из cookie */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Ошибка валидации */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    logoutAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Все сессии завершены */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Требуется авторизация */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2067,7 +2378,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["RefreshRequest"];
             };
@@ -2082,8 +2393,17 @@ export interface operations {
                     "*/*": components["schemas"]["AuthResponse"];
                 };
             };
-            /** @description Сессия недействительна или истекла */
+            /** @description Токена нет, сессия недействительна или истекла */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Origin не разрешён или не указан при токене из cookie */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2277,6 +2597,7 @@ export interface operations {
         parameters: {
             query?: {
                 status?: "ACTIVE" | "TRIGGERED" | "PAUSED";
+                editionId?: number;
             };
             header?: never;
             path?: never;
@@ -2406,7 +2727,7 @@ export interface operations {
             };
         };
     };
-    delete: {
+    delete_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2593,41 +2914,15 @@ export interface operations {
             };
         };
     };
-    getFavorites: {
+    getSimilar: {
         parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Успешный ответ */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["BookResponse"][];
-                };
+            query?: {
+                /** @description Сколько книг вернуть, 1–12 */
+                limit?: string;
             };
-            /** @description Требуется авторизация */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    addFavorite: {
-        parameters: {
-            query?: never;
             header?: never;
             path: {
-                bookId: number;
+                id: number;
             };
             cookie?: never;
         };
@@ -2639,84 +2934,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": {
-                        [key: string]: string;
-                    };
+                    "*/*": components["schemas"]["SimilarEdition"][];
                 };
             };
-            /** @description Требуется авторизация */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Книга не найдена */
+            /** @description Издание не найдено */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    removeFavorite: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                bookId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Книга убрана */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Требуется авторизация */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    isFavorite: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                bookId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Успешный ответ */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": {
-                        [key: string]: boolean;
-                    };
-                };
-            };
-            /** @description Требуется авторизация */
-            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2786,6 +3008,64 @@ export interface operations {
             };
         };
     };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description Аккаунт удалён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Требуется авторизация */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Аккаунт администратора удалить нельзя */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Неверный пароль */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Слишком много запросов */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     update: {
         parameters: {
             query?: never;
@@ -2828,14 +3108,63 @@ export interface operations {
             };
         };
     };
+    changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Пароль изменён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Требуется авторизация */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Неверный текущий пароль или новый пароль не подходит */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Слишком много запросов */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     search: {
         parameters: {
-            query: {
+            query?: {
                 /**
-                 * @description Название, автор или ISBN
+                 * @description Название, автор или ISBN; необязателен: без него — каталог
                  * @example мастер маргарита
                  */
-                q: string;
+                q?: string;
                 /**
                  * @description Коды магазинов через запятую
                  * @example FLIP,KASPI
@@ -2853,14 +3182,17 @@ export interface operations {
                 maxPrice?: string;
                 /** @description Только издания в наличии */
                 inStock?: string;
-                /** @description Переплёт */
+                /**
+                 * @description Переплёты через запятую
+                 * @example HARDCOVER,PAPERBACK
+                 */
                 binding?: string;
                 /**
-                 * @description Язык: ru, kk или en
-                 * @example ru
+                 * @description Языки через запятую: ru, kk, en
+                 * @example ru,kk
                  */
                 language?: string;
-                /** @description Сортировка */
+                /** @description Сортировка; по умолчанию RELEVANCE с запросом q и STORES_DESC без него */
                 sort?: string;
                 /** @description Номер страницы с нуля */
                 page?: string;
@@ -2880,6 +3212,117 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseSearchItem"];
+                };
+            };
+            /** @description Ошибка валидации */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Слишком много запросов */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    facets: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Название, автор или ISBN; необязателен: без него — каталог
+                 * @example мастер маргарита
+                 */
+                q?: string;
+                /**
+                 * @description Коды магазинов через запятую
+                 * @example FLIP,KASPI
+                 */
+                stores?: string;
+                /**
+                 * @description Минимальная цена в тенге
+                 * @example 1000
+                 */
+                minPrice?: string;
+                /**
+                 * @description Максимальная цена в тенге
+                 * @example 10000
+                 */
+                maxPrice?: string;
+                /** @description Только издания в наличии */
+                inStock?: string;
+                /**
+                 * @description Переплёты через запятую
+                 * @example HARDCOVER,PAPERBACK
+                 */
+                binding?: string;
+                /**
+                 * @description Языки через запятую: ru, kk, en
+                 * @example ru,kk
+                 */
+                language?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Успешный ответ */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SearchFacets"];
+                };
+            };
+            /** @description Ошибка валидации */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Слишком много запросов */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    popular: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Успешный ответ */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string[];
                 };
             };
             /** @description Ошибка валидации */
