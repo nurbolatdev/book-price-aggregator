@@ -27,8 +27,12 @@ describe('Button', () => {
   })
 
   it('maps variants to distinct classes', () => {
-    const all = (['primary', 'secondary', 'dark', 'ghost'] as const).map((variant) => buttonClasses({ variant }))
-    expect(new Set(all).size).toBe(4)
+    const all = (['primary', 'secondary', 'light', 'dark', 'ghost'] as const).map((variant) => buttonClasses({ variant }))
+    expect(new Set(all).size).toBe(5)
+  })
+
+  it('light variant has no border', () => {
+    expect(buttonClasses({ variant: 'light' })).not.toContain('border')
   })
 
   it('buttonClasses matches the component classes', () => {

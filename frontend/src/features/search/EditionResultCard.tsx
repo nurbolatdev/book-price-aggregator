@@ -97,7 +97,7 @@ export function EditionResultCard({ item }: { item: SearchItem }) {
           <Link
             to={beaconHref}
             aria-label="Поставить маячок"
-            className={iconButtonClasses({ className: 'text-accent' })}
+            className={iconButtonClasses({ tone: 'accent' })}
           >
             <Bell aria-hidden="true" className="h-5 w-5" />
           </Link>

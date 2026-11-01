@@ -61,7 +61,7 @@ export default function HomePage() {
             </div>
             <Link
               to="/register"
-              className={buttonClasses({ variant: 'secondary', size: 'lg', className: 'border-0 max-md:w-full' })}
+              className={buttonClasses({ variant: 'light', size: 'lg', className: 'max-md:w-full' })}
             >
               Создать аккаунт
             </Link>

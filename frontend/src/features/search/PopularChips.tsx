@@ -43,7 +43,7 @@ export function PopularChips({ limit = 6, scrollOnPhone = false }: PopularChipsP
           <Link
             key={q}
             to={'/search?q=' + encodeURIComponent(q)}
-            className={chipClasses({ className: 'min-h-0 shrink-0 py-1.5 px-3' })}
+            className={chipClasses({ size: 'sm', className: 'shrink-0' })}
           >
             {q}
           </Link>
