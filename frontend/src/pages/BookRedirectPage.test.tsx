@@ -8,7 +8,7 @@ import { getLocation, renderWithProviders } from '../test/render'
 describe('BookRedirectPage', () => {
   it('redirects to the cheapest edition', async () => {
     renderWithProviders(<App />, { route: '/books/1' })
-    expect(await screen.findByRole('heading', { level: 1, name: 'Издание' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Мастер и Маргарита' })).toBeInTheDocument()
     expect(getLocation()).toBe('/editions/16')
   })
 
@@ -37,7 +37,7 @@ describe('BookRedirectPage', () => {
     renderWithProviders(<App />, { route: '/books/1' })
     expect(await screen.findByText('Не удалось загрузить книгу.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
-    expect(await screen.findByRole('heading', { level: 1, name: 'Издание' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Мастер и Маргарита' })).toBeInTheDocument()
     expect(getLocation()).toBe('/editions/16')
   })
 

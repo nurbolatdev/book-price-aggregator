@@ -1,0 +1,133 @@
+import { QueryClient } from '@tanstack/react-query'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { queryKeys } from '../api/queryKeys'
+import { formatPrice } from '../lib/format'
+import { editionDetail } from '../mocks/editionFixtures'
+import { server } from '../mocks/server'
+import { useAuthStore } from '../stores/auth'
+import { getLocation, renderWithProviders } from '../test/render'
+import { setViewport } from '../test/viewport'
+import EditionPage from './EditionPage'
+
+function renderEdition(route = '/editions/41', queryClient?: QueryClient) {
+  return renderWithProviders(<EditionPage />, {
+    route,
+    path: '/editions/:id',
+    queryClient,
+  })
+}
+
+describe('EditionPage (desktop)', () => {
+  beforeEach(() => {
+    setViewport(1280)
+    useAuthStore.setState({
+      status: 'anonymous',
+      user: null,
+      accessToken: null,
+    })
+  })
+
+  it('shows the title, author and highlights the best row', async () => {
+    renderEdition()
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Мастер и Маргарита',
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Михаил Булгаков')).toBeInTheDocument()
+    const rows = within(screen.getByRole('table')).getAllByRole('row').slice(1)
+    expect(rows).toHaveLength(3)
+    expect(rows[0]).toHaveAttribute('data-best', 'true')
+    expect(within(rows[0]!).getByText('Flip.kz')).toBeInTheDocument()
+    expect(within(rows[2]!).getByText('Нет в наличии')).toBeInTheDocument()
+  })
+
+  it('opens every store link in a new tab safely', async () => {
+    renderEdition()
+    await screen.findByRole('table')
+    const links = screen.getAllByRole('link', { name: /В магазин|Перейти в/ })
+    expect(links.length).toBeGreaterThanOrEqual(4)
+    for (const link of links) {
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    }
+  })
+
+  it('sets the document title and description', async () => {
+    renderEdition()
+    await screen.findByRole('heading', { level: 1 })
+    expect(document.title).toBe('Мастер и Маргарита — цены в магазинах Казахстана | KitapRadar')
+    const description = document.querySelector('meta[name="description"]')?.getAttribute('content')
+    expect(description).toContain(`от ${formatPrice(3150)}`)
+  })
+
+  it('shows the loading status', () => {
+    renderEdition()
+    expect(screen.getByRole('status', { name: 'Загружаем издание' })).toBeInTheDocument()
+  })
+
+  it('renders instantly from a prefetched edition', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+    })
+    queryClient.setQueryData(queryKeys.edition(41), editionDetail(41))
+    renderEdition('/editions/41', queryClient)
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Мастер и Маргарита' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('status', { name: 'Загружаем издание' })).not.toBeInTheDocument()
+  })
+
+  it('shows the 404 screen for an unknown edition', async () => {
+    renderEdition('/editions/100000')
+    expect(await screen.findByRole('heading', { name: 'Такой страницы нет' })).toBeInTheDocument()
+  })
+
+  it('shows the 404 screen for an invalid id without a request', () => {
+    let requests = 0
+    server.use(
+      http.get('*/api/v1/editions/:id', () => {
+        requests += 1
+        return HttpResponse.json({}, { status: 500 })
+      }),
+    )
+    renderEdition('/editions/abc')
+    expect(screen.getByRole('heading', { name: 'Такой страницы нет' })).toBeInTheDocument()
+    expect(requests).toBe(0)
+  })
+
+  it('offers a retry after a server error', async () => {
+    let fail = true
+    server.use(
+      http.get('*/api/v1/editions/:id', ({ params }) => {
+        if (fail) return HttpResponse.json({ code: 'INTERNAL_ERROR' }, { status: 500 })
+        return HttpResponse.json(editionDetail(Number(params.id)))
+      }),
+    )
+    renderEdition()
+    expect(await screen.findByText('Не удалось загрузить издание.')).toBeInTheDocument()
+    fail = false
+    fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Мастер и Маргарита',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('sends a guest from ?beacon=1 to login', async () => {
+    renderEdition('/editions/41?beacon=1')
+    await waitFor(() => expect(getLocation()).toBe('/login?next=%2Feditions%2F41%3Fbeacon%3D1'))
+  })
+
+  it('removes ?beacon=1 for a signed-in user', async () => {
+    useAuthStore.setState({ status: 'authenticated' })
+    renderEdition('/editions/41?beacon=1')
+    await waitFor(() => expect(getLocation()).toBe('/editions/41'))
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument()
+  })
+})
