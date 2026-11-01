@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { IconButton } from './IconButton'
 
 interface SheetProps {
   open: boolean
@@ -72,15 +74,20 @@ export function Sheet({ open, onClose, title, side = 'bottom', children }: Sheet
         tabIndex={-1}
         onKeyDown={onPanelKeyDown}
         className={cn(
-          'absolute flex flex-col overflow-y-auto bg-surface shadow-menu',
+          'absolute flex min-h-0 flex-col overflow-hidden bg-surface shadow-menu',
           side === 'bottom'
-            ? 'inset-x-0 bottom-0 max-h-[760px] rounded-t-block'
+            ? 'inset-x-0 bottom-0 max-h-[min(760px,calc(100dvh-48px))] rounded-t-block'
             : 'inset-y-0 right-0 h-full w-72',
         )}
       >
-        <h2 id={titleId} className="px-4 pb-2 pt-4 font-display text-lg font-medium text-ink">
-          {title}
-        </h2>
+        <div className="flex items-center justify-between gap-2 py-2 pl-4 pr-2">
+          <h2 id={titleId} className="font-display text-lg font-medium text-ink">
+            {title}
+          </h2>
+          <IconButton label="Закрыть" variant="plain" onClick={onClose}>
+            <X aria-hidden="true" className="h-5 w-5" />
+          </IconButton>
+        </div>
         {children}
       </div>
     </div>,

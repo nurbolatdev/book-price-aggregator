@@ -49,14 +49,14 @@ describe('FiltersForm', () => {
 
   it('applies the price only on blur or Enter', () => {
     const onChange = setup()
-    const min = screen.getByLabelText('Цена от')
+    const min = screen.getByLabelText('от')
     for (const v of ['1', '10', '100']) fireEvent.change(min, { target: { value: v } })
     expect(onChange).not.toHaveBeenCalled()
     fireEvent.blur(min)
     expect(onChange).toHaveBeenCalledTimes(1)
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ minPrice: 100 }))
-    fireEvent.change(screen.getByLabelText('Цена до'), { target: { value: '500' } })
-    fireEvent.keyDown(screen.getByLabelText('Цена до'), { key: 'Enter' })
+    fireEvent.change(screen.getByLabelText('до'), { target: { value: '500' } })
+    fireEvent.keyDown(screen.getByLabelText('до'), { key: 'Enter' })
     expect(onChange).toHaveBeenCalledTimes(2)
   })
 })

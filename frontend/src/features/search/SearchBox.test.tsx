@@ -45,6 +45,21 @@ describe('SearchBox', () => {
     expect(seen).toEqual(['маст'])
   })
 
+  it('does not request suggestions for a default value until the user types', () => {
+    let calls = 0
+    server.use(
+      http.get('*/api/v1/search/suggest', () => {
+        calls += 1
+        return HttpResponse.json([])
+      }),
+    )
+    renderWithProviders(<SearchBox variant="header" defaultValue="война" />)
+    act(() => {
+      vi.advanceTimersByTime(600)
+    })
+    expect(calls).toBe(0)
+  })
+
   it('does not request for one character and shows a hint on submit', () => {
     let calls = 0
     server.use(

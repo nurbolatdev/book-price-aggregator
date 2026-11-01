@@ -29,10 +29,10 @@ function SearchResults({ mode }: { mode: SearchMode }) {
   return (
     <div className="mx-auto flex w-full max-w-page items-start gap-7 px-4 pb-14 pt-7 md:px-6">
       <FiltersPanel mode={mode} filters={filters} onChange={setFilters} />
-      <main className="flex min-w-0 flex-[999_1_560px] flex-col gap-4">
+      <section aria-labelledby="search-heading" className="flex min-w-0 flex-[999_1_560px] flex-col gap-4">
         <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:justify-between">
           <div className="order-last flex flex-col gap-1 md:order-none">
-            <h1 className="font-display text-2xl font-medium max-md:sr-only">
+            <h1 id="search-heading" className="font-display text-2xl font-medium max-md:sr-only">
               {mode === 'catalog' ? 'Каталог' : `«${q}»`}
             </h1>
             {query.isSuccess && total > 0 && (
@@ -81,7 +81,7 @@ function SearchResults({ mode }: { mode: SearchMode }) {
             )}
           </>
         )}
-      </main>
+      </section>
     </div>
   )
 }

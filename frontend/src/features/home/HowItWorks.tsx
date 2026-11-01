@@ -24,10 +24,10 @@ export function HowItWorks() {
         {steps.map((s) => (
           <article
             key={s.n}
-            className="flex flex-col gap-2.5 max-md:p-4 md:rounded-2xl md:border md:border-line md:bg-surface md:p-6"
+            className="flex flex-col gap-2.5 max-md:grid max-md:grid-cols-[auto_1fr] max-md:gap-x-3.5 max-md:gap-y-1 max-md:p-4 md:rounded-2xl md:border md:border-line md:bg-surface md:p-6"
           >
-            <span className="font-display text-xl text-accent md:text-[28px]">{s.n}</span>
-            <h3 className="text-base font-bold md:text-[19px]">{s.title}</h3>
+            <span className="font-display text-xl text-accent max-md:row-span-2 md:text-[28px]">{s.n}</span>
+            <h3 className="font-sans text-base font-bold md:text-[19px]">{s.title}</h3>
             <p className="text-sm leading-normal text-muted md:text-base">{s.text}</p>
           </article>
         ))}

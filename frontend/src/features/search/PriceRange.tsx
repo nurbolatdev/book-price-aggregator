@@ -44,9 +44,11 @@ export function PriceRange({ minPrice, maxPrice, onCommit, idPrefix = 'price' }:
 
   return (
     <div className="flex items-center gap-2">
+      <label htmlFor={`${idPrefix}-min`} className="text-[13px] text-muted">
+        от
+      </label>
       <Input
         id={`${idPrefix}-min`}
-        aria-label="Цена от"
         inputMode="numeric"
         placeholder="0"
         value={min}
@@ -54,12 +56,11 @@ export function PriceRange({ minPrice, maxPrice, onCommit, idPrefix = 'price' }:
         onBlur={commit}
         onKeyDown={onKeyDown}
       />
-      <span aria-hidden="true" className="text-muted">
-        —
-      </span>
+      <label htmlFor={`${idPrefix}-max`} className="text-[13px] text-muted">
+        до
+      </label>
       <Input
         id={`${idPrefix}-max`}
-        aria-label="Цена до"
         inputMode="numeric"
         placeholder="10 000"
         value={max}

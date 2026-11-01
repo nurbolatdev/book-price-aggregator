@@ -37,19 +37,26 @@ describe('Sheet', () => {
     expect(opener).toHaveFocus()
   })
 
-  it('traps Tab from the last element to the first', () => {
+  it('traps Tab from the last element to the first (close button)', () => {
     render(<Harness />)
     fireEvent.click(screen.getByRole('button', { name: 'Открыть' }))
     const last = screen.getByRole('button', { name: 'Последняя' })
     last.focus()
     fireEvent.keyDown(last, { key: 'Tab' })
-    expect(screen.getByRole('button', { name: 'Первая' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Закрыть' })).toHaveFocus()
   })
 
   it('closes on overlay click', () => {
     render(<Harness />)
     fireEvent.click(screen.getByRole('button', { name: 'Открыть' }))
     fireEvent.click(screen.getByTestId('sheet-overlay'))
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('closes via the close button', () => {
+    render(<Harness />)
+    fireEvent.click(screen.getByRole('button', { name: 'Открыть' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Закрыть' }))
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 })

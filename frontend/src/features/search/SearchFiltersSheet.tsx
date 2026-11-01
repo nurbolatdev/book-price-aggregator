@@ -42,7 +42,7 @@ function FiltersSheetBody({ mode, filters, onApply, onClose }: BodyProps) {
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
         <FiltersForm
           layout="chips"
           idPrefix="sheet-filters"

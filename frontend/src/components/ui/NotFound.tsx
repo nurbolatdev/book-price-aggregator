@@ -29,6 +29,7 @@ export function NotFound() {
           aria-label="Поиск книги"
           placeholder="Название, автор или ISBN"
           minLength={2}
+          maxLength={200}
           required
           value={q}
           onChange={(e) => setQ(e.target.value)}

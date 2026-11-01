@@ -20,13 +20,15 @@ export function SearchBox({ variant, defaultValue = '' }: SearchBoxProps) {
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
   const [hint, setHint] = useState(false)
-  const suggestions = useSuggestions(value)
+  const [typed, setTyped] = useState(false)
+  const suggestions = useSuggestions(value, typed)
   const expanded = open && suggestions.length > 0
   const activeIndex = expanded && active < suggestions.length ? active : -1
   const hero = variant === 'hero'
 
   function onChange(event: ChangeEvent<HTMLInputElement>) {
     setValue(event.target.value)
+    setTyped(true)
     setOpen(true)
     setActive(-1)
     setHint(false)
@@ -105,6 +107,7 @@ export function SearchBox({ variant, defaultValue = '' }: SearchBoxProps) {
             aria-activedescendant={activeIndex >= 0 ? `${uid}-opt-${activeIndex}` : undefined}
             aria-describedby={hint ? hintId : undefined}
             autoComplete="off"
+            maxLength={200}
             placeholder="Название, автор или ISBN"
             value={value}
             onChange={onChange}
