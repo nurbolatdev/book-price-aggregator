@@ -5,6 +5,7 @@ import { emptySearchPage, facets, searchPage } from "../mocks/fixtures";
 import { server } from "../mocks/server";
 import { useAuthStore } from "../stores/auth";
 import { getLocation, renderWithProviders } from "../test/render";
+import { setViewport } from "../test/viewport";
 import { Route, Routes } from "react-router-dom";
 import EditionPage from "./EditionPage";
 import SearchPage from "./SearchPage";
@@ -231,6 +232,7 @@ describe("SearchPage", () => {
   });
 
   it("passes the search origin to the edition breadcrumbs", async () => {
+    setViewport(1280);
     renderWithProviders(
       <Routes>
         <Route path="/search" element={<SearchPage />} />

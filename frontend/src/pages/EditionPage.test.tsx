@@ -8,7 +8,7 @@ import { editionDetail } from '../mocks/editionFixtures'
 import { server } from '../mocks/server'
 import { useAuthStore } from '../stores/auth'
 import { getLocation, renderWithProviders } from '../test/render'
-import { setViewport } from '../test/viewport'
+import { resetViewport, setViewport } from '../test/viewport'
 import EditionPage from './EditionPage'
 
 function renderEdition(route: string | { pathname: string; state?: unknown } = '/editions/41', queryClient?: QueryClient) {
@@ -212,5 +212,59 @@ describe('EditionPage (desktop)', () => {
     fireEvent.click(other)
     await screen.findByRole('heading', { level: 1 })
     expect(requests).toBe(1)
+  })
+})
+
+describe('EditionPage (phone)', () => {
+  beforeEach(() => {
+    resetViewport()
+    useAuthStore.setState({ status: 'anonymous', user: null, accessToken: null })
+  })
+
+  it('shows price cards instead of a table', async () => {
+    renderEdition()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Мастер и Маргарита' })).toBeInTheDocument()
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    const section = screen.getByRole('region', { name: /Цены в 3 магазинах/ })
+    const cards = within(section).getAllByRole('link')
+    expect(cards.map((c) => within(c).getByRole('strong').textContent)).toEqual(['Flip.kz', 'Ozon', 'Meloman'])
+    expect(cards[0]).toHaveClass('border-2', 'border-deal', 'bg-best-row')
+    expect(cards[1]).not.toHaveClass('border-deal')
+    expect(cards[0]).toHaveTextContent('1–2 дня, Алматы · обновлено 2 ч назад')
+    expect(cards[2]).toHaveTextContent('Самовывоз · нет в наличии')
+    for (const card of cards) {
+      expect(card).toHaveAttribute('target', '_blank')
+      expect(card).toHaveAttribute('rel', 'noopener noreferrer')
+    }
+  })
+
+  it('shows the compact summary and the details section', async () => {
+    renderEdition()
+    await screen.findByRole('heading', { level: 1 })
+    expect(screen.getByText('АСТ 2023 · твёрдый', { selector: 'p' })).toBeInTheDocument()
+    expect(screen.getByText('Ниже средней на 12%')).toBeInTheDocument()
+    const details = screen.getByRole('region', { name: 'Подробности' })
+    expect(within(details).getByRole('button', { name: 'Азбука 2022 · мягкий' })).toBeInTheDocument()
+    expect(within(details).getByText('978-5-17-090630-4')).toBeInTheDocument()
+  })
+
+  it('has its own header and no site header', async () => {
+    renderEdition()
+    await screen.findByRole('heading', { level: 1 })
+    expect(screen.getByRole('button', { name: 'Назад' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Поделиться' })).toBeInTheDocument()
+  })
+
+  it('keeps the back button on the 404 screen', async () => {
+    renderEdition('/editions/100000')
+    expect(await screen.findByText('Такой страницы нет')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Назад' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Поделиться' })).not.toBeInTheDocument()
+  })
+
+  it('shows the phone skeleton while loading', () => {
+    renderEdition()
+    expect(screen.getByRole('status', { name: 'Загружаем издание' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Назад' })).toBeInTheDocument()
   })
 })

@@ -4,11 +4,14 @@ import type { EditionDetailResponse } from '../api/types'
 import { ErrorBlock } from '../components/ui/ErrorBlock'
 import { NotFound } from '../components/ui/NotFound'
 import { EditionDesktop } from '../features/edition/EditionDesktop'
+import { EditionMobile } from '../features/edition/EditionMobile'
+import { EditionMobileHeader } from '../features/edition/EditionMobileHeader'
 import { EditionSkeleton } from '../features/edition/EditionSkeleton'
 import { storeNameOf } from '../features/edition/offers'
 import { useBeaconParam } from '../features/edition/useBeaconParam'
 import { useEdition } from '../features/edition/useEdition'
 import { formatPrice, pluralRu } from '../lib/format'
+import { useMediaQuery } from '../lib/useMediaQuery'
 import { usePageMeta } from '../lib/usePageMeta'
 
 function parseId(raw: string | undefined): number {
@@ -39,38 +42,46 @@ function metaFor(edition: EditionDetailResponse) {
   }
 }
 
-function EditionContent({ edition, id }: { edition: EditionDetailResponse; id: number }) {
+function EditionContent({
+  edition,
+  id,
+  desktop,
+}: {
+  edition: EditionDetailResponse
+  id: number
+  desktop: boolean
+}) {
   usePageMeta(metaFor(edition))
-  return <EditionDesktop edition={edition} editionId={id} />
+  return desktop ? (
+    <EditionDesktop edition={edition} editionId={id} />
+  ) : (
+    <EditionMobile edition={edition} editionId={id} />
+  )
+}
+
+function PhoneShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col">
+      <EditionMobileHeader />
+      <div className="px-4 py-4">{children}</div>
+    </div>
+  )
 }
 
 export default function EditionPage() {
   const id = parseId(useParams().id)
+  const desktop = useMediaQuery('(min-width: 768px)')
   const { data, error, isPending, refetch } = useEdition(id)
   useBeaconParam(id)
 
-  if (id === 0 || isNotFound(error))
-    return (
-      <Container>
-        <NotFound />
-      </Container>
-    )
   if (data) {
-    return (
-      <Container>
-        <EditionContent key={id} edition={data} id={id} />
-      </Container>
-    )
+    const content = <EditionContent key={id} edition={data} id={id} desktop={desktop} />
+    return desktop ? <Container>{content}</Container> : content
   }
-  if (isPending)
-    return (
-      <Container>
-        <EditionSkeleton />
-      </Container>
-    )
-  return (
-    <Container>
-      <ErrorBlock message="Не удалось загрузить издание." onRetry={() => void refetch()} />
-    </Container>
-  )
+
+  let state: React.ReactNode
+  if (id === 0 || isNotFound(error)) state = <NotFound />
+  else if (isPending) state = <EditionSkeleton variant={desktop ? 'desktop' : 'mobile'} />
+  else state = <ErrorBlock message="Не удалось загрузить издание." onRetry={() => void refetch()} />
+  return desktop ? <Container>{state}</Container> : <PhoneShell>{state}</PhoneShell>
 }
