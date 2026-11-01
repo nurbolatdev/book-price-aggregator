@@ -1,5 +1,5 @@
 import { Bell } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import type { SearchItem } from '../../api/types'
 import { buttonClasses } from '../../components/ui/Button'
 import { Cover } from '../../components/ui/Cover'
@@ -40,6 +40,8 @@ function phoneMeta(item: SearchItem): string {
 
 export function EditionResultCard({ item }: { item: SearchItem }) {
   const prefetch = usePrefetchEdition()
+  const { pathname, search } = useLocation()
+  const linkState = { from: pathname + search }
   const { storeName } = useStores()
   const authed = useAuthStore((s) => s.status === 'authenticated')
   const id = item.editionId ?? 0
@@ -63,6 +65,7 @@ export function EditionResultCard({ item }: { item: SearchItem }) {
       <div className="flex min-w-0 flex-1 flex-col gap-2 max-md:contents">
         <Link
           to={detailPath}
+          state={linkState}
           onMouseEnter={() => prefetch(id)}
           onFocus={() => prefetch(id)}
           className={cn(
@@ -123,6 +126,7 @@ export function EditionResultCard({ item }: { item: SearchItem }) {
         <div className="flex justify-end gap-2 max-md:col-start-3 max-md:row-start-3 max-md:self-end md:mt-auto md:justify-start md:pt-3">
           <Link
             to={detailPath}
+            state={linkState}
             onMouseEnter={() => prefetch(id)}
             onFocus={() => prefetch(id)}
             className={buttonClasses({

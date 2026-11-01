@@ -17,6 +17,7 @@ export default {
         warn: { DEFAULT: '#8A4B00', soft: '#FFF4E0' },
         skeleton: '#E6EAEF',
         divider: '#EDF0F3',
+        'best-row': '#F1FAF5',
         mist: '#C9D1DC',
         cover: {
           0: '#FCE3D3',

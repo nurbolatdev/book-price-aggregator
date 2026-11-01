@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { useAuthStore } from '../../stores/auth'
 import { renderWithProviders } from '../../test/render'
 import { Header } from './Header'
-import { getHeaderVariant } from './headerVariant'
+import { getHeaderVariant, hasOwnPhoneHeader } from './headerVariant'
 
 describe('getHeaderVariant', () => {
   it.each([
@@ -15,6 +15,13 @@ describe('getHeaderVariant', () => {
     ['/editions/5', 'search'],
   ])('%s -> %s', (path, expected) => {
     expect(getHeaderVariant(path)).toBe(expected)
+  })
+})
+
+describe('hasOwnPhoneHeader', () => {
+  it('is true only for edition pages', () => {
+    expect(hasOwnPhoneHeader('/editions/41')).toBe(true)
+    expect(hasOwnPhoneHeader('/search')).toBe(false)
   })
 })
 
@@ -60,5 +67,13 @@ describe('Header', () => {
     for (const link of screen.getAllByRole('link', { name: 'Мои маячки' })) {
       expect(link).toHaveAttribute('href', '/beacons')
     }
+  })
+
+  it('hides the site header on phones for edition pages only', () => {
+    const edition = renderWithProviders(<Header />, { route: '/editions/41' })
+    expect(edition.container.querySelector('header')).toHaveClass('max-md:hidden')
+    edition.unmount()
+    const search = renderWithProviders(<Header />, { route: '/search' })
+    expect(search.container.querySelector('header')).not.toHaveClass('max-md:hidden')
   })
 })

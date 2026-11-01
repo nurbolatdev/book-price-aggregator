@@ -4,6 +4,7 @@ export interface ScreenEntry {
   name: string
   path: string
   widths?: (1280 | 390)[]
+  waitFor?: 'networkidle' | 'load'
   prepare?: (page: Page) => Promise<void>
 }
 
@@ -22,4 +23,14 @@ export const screens: ScreenEntry[] = [
     },
   },
   { name: 'not-found', path: '/nope' },
+  { name: 'edition', path: '/editions/41' },
+  {
+    name: 'edition-skeleton',
+    path: '/editions/999',
+    waitFor: 'load',
+    prepare: async (page) => {
+      await page.getByRole('status', { name: 'Загружаем издание' }).waitFor()
+    },
+  },
+  { name: 'edition-404', path: '/editions/100000' },
 ]

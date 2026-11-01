@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "analyze": "vite build --mode analyze && node scripts/check-chunks.mjs",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "dev:mock": "vite --mode mock",
@@ -23,6 +24,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
+    "recharts": "^3.10.1",
     "zustand": "^5.0.16"
   },
   "devDependencies": {

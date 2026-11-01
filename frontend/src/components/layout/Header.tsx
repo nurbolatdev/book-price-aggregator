@@ -7,7 +7,7 @@ import { useAuthStore } from '../../stores/auth'
 import { SearchBox } from '../../features/search/SearchBox'
 import { focusRing } from '../ui/focusRing'
 import { IconButton, iconButtonClasses } from '../ui/IconButton'
-import { getHeaderVariant } from './headerVariant'
+import { getHeaderVariant, hasOwnPhoneHeader } from './headerVariant'
 import { MobileMenu } from './MobileMenu'
 import { UserMenu } from './UserMenu'
 
@@ -48,7 +48,7 @@ export function Header() {
   )
 
   return (
-    <header className="border-b border-line bg-surface">
+    <header className={cn('border-b border-line bg-surface', hasOwnPhoneHeader(pathname) && 'max-md:hidden')}>
       <div
         className={cn(
           'mx-auto flex w-full max-w-page flex-wrap items-center gap-2 px-3 py-2.5 md:px-6',

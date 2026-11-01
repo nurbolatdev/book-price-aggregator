@@ -1,7 +1,17 @@
 const priceFormatter = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 })
 
+export function formatNumber(value: number): string {
+  return priceFormatter.format(value)
+}
+
 export function formatPrice(value: number): string {
-  return `${priceFormatter.format(value)} ₸`
+  return `${formatNumber(value)} ₸`
+}
+
+/** Fixed 3-1-2-6-1 grouping for readability; real registrant ranges need the ISBN range table. */
+export function formatIsbn13(isbn: string): string {
+  if (!/^\d{13}$/.test(isbn)) return isbn
+  return `${isbn.slice(0, 3)}-${isbn.slice(3, 4)}-${isbn.slice(4, 6)}-${isbn.slice(6, 12)}-${isbn.slice(12)}`
 }
 
 export function pluralRu(n: number, [one, few, many]: [string, string, string]): string {

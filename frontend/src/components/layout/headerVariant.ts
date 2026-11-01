@@ -5,3 +5,7 @@ export function getHeaderVariant(pathname: string): HeaderVariant {
   if (pathname === '/editions' || pathname.startsWith('/editions/')) return 'search'
   return 'nav'
 }
+
+export function hasOwnPhoneHeader(pathname: string): boolean {
+  return pathname.startsWith('/editions/')
+}

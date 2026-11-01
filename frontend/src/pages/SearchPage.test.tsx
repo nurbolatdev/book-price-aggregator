@@ -5,6 +5,9 @@ import { emptySearchPage, facets, searchPage } from "../mocks/fixtures";
 import { server } from "../mocks/server";
 import { useAuthStore } from "../stores/auth";
 import { getLocation, renderWithProviders } from "../test/render";
+import { setViewport } from "../test/viewport";
+import { Route, Routes } from "react-router-dom";
+import EditionPage from "./EditionPage";
 import SearchPage from "./SearchPage";
 
 const ROUTE = "/search?q=" + encodeURIComponent("Мастер и Маргарита");
@@ -226,5 +229,26 @@ describe("SearchPage", () => {
       await screen.findByRole("heading", { level: 1, name: "Каталог" }),
     ).toBeInTheDocument();
     expect(getLocation()).toBe("/catalog?stores=FLIP");
+  });
+
+  it("passes the search origin to the edition breadcrumbs", async () => {
+    setViewport(1280);
+    renderWithProviders(
+      <Routes>
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/editions/:id" element={<EditionPage />} />
+      </Routes>,
+      { route: ROUTE },
+    );
+    const links = await screen.findAllByRole("link", {
+      name: "Мастер и Маргарита",
+    });
+    fireEvent.click(links[0]!);
+    const nav = await screen.findByRole("navigation", {
+      name: "Хлебные крошки",
+    });
+    expect(
+      within(nav).getByRole("link", { name: "Поиск «Мастер и Маргарита»" }),
+    ).toBeInTheDocument();
   });
 });

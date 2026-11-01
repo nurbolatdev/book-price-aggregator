@@ -6,12 +6,14 @@ import { Alert } from '../ui/Alert'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { PageSkeleton } from './PageSkeleton'
+import { ScrollToTop } from './ScrollToTop'
 
 export function AppLayout() {
   const { pathname } = useLocation()
   const online = useOnline()
   return (
     <div className="flex min-h-screen flex-col">
+      <ScrollToTop />
       <Header />
       <main className="flex-1">
         {!online && (

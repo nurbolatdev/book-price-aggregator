@@ -67,3 +67,7 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof ApiError) return ERROR_MESSAGES[error.code]
   return ERROR_MESSAGES.UNKNOWN
 }
+
+export function isNotFound(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 404
+}

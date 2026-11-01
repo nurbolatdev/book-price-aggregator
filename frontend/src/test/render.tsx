@@ -3,6 +3,8 @@ import { render, type RenderResult } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 
+type Entry = string | { pathname: string; search?: string; state?: unknown }
+
 let currentLocation = '/'
 
 function LocationProbe() {
@@ -16,17 +18,20 @@ export function getLocation(): string {
 }
 
 interface RenderOptions {
-  route?: string
+  route?: Entry
   path?: string
+  queryClient?: QueryClient
 }
 
 export function renderWithProviders(
   ui: ReactElement,
-  { route = '/', path }: RenderOptions = {},
+  { route = '/', path, queryClient: provided }: RenderOptions = {},
 ): RenderResult & { queryClient: QueryClient } {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
-  })
+  const queryClient =
+    provided ??
+    new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+    })
   const result = render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={[route]}>

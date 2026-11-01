@@ -42,4 +42,15 @@ describe('Cover', () => {
     expect(screen.getByTestId('cover-plate')).toHaveClass('max-md:p-0', 'md:text-xs')
     expect(screen.getByText('T')).toHaveClass('max-md:hidden')
   })
+
+  it('detail preset hides the title on phone and sets md typography', () => {
+    render(<Cover editionId={1} title="Detail" size="detail" />)
+    expect(screen.getByTestId('cover-plate')).toHaveClass(
+      'max-md:p-0',
+      'md:p-6',
+      'md:font-display',
+      'md:text-2xl',
+    )
+    expect(screen.getByText('Detail')).toHaveClass('max-md:hidden')
+  })
 })

@@ -38,6 +38,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - run: npm run analyze
       - name: Check generated API types are up to date
         run: |
           npm run gen:api

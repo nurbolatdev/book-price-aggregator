@@ -93,7 +93,7 @@ backend/src/main/java/kz/nurbolat/bookaggregator/
 - Java 21, Spring Boot 3.3, Spring Security + JWT (access + refresh с ротацией)
 - PostgreSQL 16 (pg_trgm) + Flyway, Redis 7 (кэш, лимиты запросов), RabbitMQ 3.13
 - Jsoup и Playwright (Chromium) для парсеров, Resilience4j
-- Frontend: React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, Zustand, lucide-react, Vitest + Testing Library, MSW, Playwright
+- Frontend: React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, Zustand, lucide-react, Recharts, Vitest + Testing Library, MSW, Playwright
 - Тесты: JUnit 5, Mockito, Testcontainers, WireMock; покрытие — JaCoCo
 - Нагрузка — k6; сборка и запуск — Docker Compose; CI — GitHub Actions
 
@@ -159,7 +159,7 @@ docker compose up -d postgres redis rabbitmq mailpit
 
 Две последние команды запускаются в разных терминалах и друг от друга не зависят.
 
-- Frontend (`cd frontend`): `npm run lint`, `npm test`, `npm run build`, `npm run gen:api` (перегенерировать `src/api/schema.d.ts` после изменения `docs/api/openapi.json`), `npm run dev:mock` (приложение без backend, на фикстурах MSW), `npm run screens` (снимки экранов при 1280 и 390 px в `frontend/screens/`; один раз нужен `npx playwright install chromium`).
+- Frontend (`cd frontend`): `npm run lint`, `npm test`, `npm run build`, `npm run gen:api` (перегенерировать `src/api/schema.d.ts` после изменения `docs/api/openapi.json`), `npm run dev:mock` (приложение без backend, на фикстурах MSW), `npm run analyze` (production-сборка и проверка, что Recharts не попадает в начальные чанки), `npm run screens` (снимки экранов при 1280 и 390 px в `frontend/screens/`; один раз нужен `npx playwright install chromium`).
 - Тесты: `cd backend && ./mvnw verify` (нужен Docker для Testcontainers). Отчёт покрытия — `backend/target/site/jacoco/index.html`; порог для сервисов — 70% строк.
 - Нагрузочный тест k6 и результаты — [docs/performance.md](docs/performance.md).
 - Контракт OpenAPI экспортирован в [docs/api/openapi.json](docs/api/openapi.json); после изменения аннотаций обновить: `cd backend && ./mvnw -B verify -Dit.test=OpenApiSpecIT -Dopenapi.update=true`.
