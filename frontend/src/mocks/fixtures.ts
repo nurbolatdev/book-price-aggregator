@@ -1,6 +1,5 @@
 import type {
   DropItem,
-  EditionDetailResponse,
   SearchFacets,
   SearchItem,
   SearchPage,
@@ -193,27 +192,4 @@ export function suggestions(q: string): { bookId: number; title: string; author:
     if (result.length === 8) break
   }
   return result
-}
-
-export function editionDetail(id: number): EditionDetailResponse | undefined {
-  const item = searchItems.find((e) => e.editionId === id)
-  if (item) {
-    return {
-      editionId: id,
-      book: { id: item.bookId, title: item.title, author: item.author },
-      publisher: item.publisher,
-      year: item.year,
-      binding: item.binding,
-      language: 'ru',
-    }
-  }
-  const drop = drops.find((e) => e.editionId === id)
-  if (drop) {
-    return {
-      editionId: id,
-      book: { id: drop.bookId, title: drop.title, author: drop.author },
-      language: 'ru',
-    }
-  }
-  return undefined
 }
