@@ -5,21 +5,39 @@ import { Cover } from './Cover'
 
 describe('Cover', () => {
   it('renders a colour plate with the title when there is no url', () => {
-    const { container } = render(<Cover editionId={7} title="Чистый код" className="h-10 w-10" />)
+    const { container } = render(
+      <Cover editionId={7} title="Чистый код" className="h-10 w-10" />,
+    )
     expect(screen.getByText('Чистый код')).toBeInTheDocument()
     expect(container.querySelector('img')).toBeNull()
     expect(screen.getByTestId('cover-plate')).toHaveClass(coverColor(7))
   })
 
   it('renders a lazy image when a url is given', () => {
-    const { container } = render(<Cover editionId={1} title="T" coverUrl="http://x/c.jpg" />)
+    const { container } = render(
+      <Cover editionId={1} title="T" coverUrl="http://x/c.jpg" />,
+    )
     expect(container.querySelector('img')).toHaveAttribute('loading', 'lazy')
   })
 
   it('falls back to the plate on image error', () => {
-    const { container } = render(<Cover editionId={1} title="Fallback" coverUrl="http://x/c.jpg" />)
+    const { container } = render(
+      <Cover editionId={1} title="Fallback" coverUrl="http://x/c.jpg" />,
+    )
     fireEvent.error(container.querySelector('img')!)
     expect(container.querySelector('img')).toBeNull()
     expect(screen.getByText('Fallback')).toBeInTheDocument()
+  })
+
+  it('applies plate padding and text size per size prop', () => {
+    const { rerender } = render(<Cover editionId={1} title="T" size="lg" />)
+    expect(screen.getByTestId('cover-plate')).toHaveClass('p-4', 'text-lg')
+    rerender(<Cover editionId={1} title="T" size="sm" />)
+    expect(screen.getByTestId('cover-plate')).toHaveClass('p-1.5', 'text-[9px]')
+    rerender(<Cover editionId={1} title="T" />)
+    expect(screen.getByTestId('cover-plate')).toHaveClass(
+      'p-2.5',
+      'text-[13px]',
+    )
   })
 })

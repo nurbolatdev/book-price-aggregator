@@ -9,7 +9,13 @@ import { pluralRu } from '../../lib/format'
 import { usePrefetchEdition } from '../edition/usePrefetchEdition'
 import { useStores } from '../search/useStores'
 
-export function DropCard({ drop, className }: { drop: DropItem; className?: string }) {
+export function DropCard({
+  drop,
+  className,
+}: {
+  drop: DropItem
+  className?: string
+}) {
   const prefetch = usePrefetchEdition()
   const { storeName } = useStores()
   const id = drop.editionId ?? 0
@@ -32,16 +38,28 @@ export function DropCard({ drop, className }: { drop: DropItem; className?: stri
         className,
       )}
     >
-      <Cover editionId={id} title={title} coverUrl={drop.coverUrl} className="h-[150px] w-full md:h-[220px]" />
+      <Cover
+        editionId={id}
+        title={title}
+        coverUrl={drop.coverUrl}
+        size="lg"
+        className="h-[150px] w-full rounded-control md:h-[220px]"
+      />
       <div className="flex flex-col gap-1">
         <strong className="text-sm md:text-base">{title}</strong>
         <span className="text-xs text-muted md:text-sm">{drop.author}</span>
       </div>
       <div className="flex flex-col items-start gap-1 md:flex-row md:items-center md:justify-between">
-        <PriceTag price={drop.price ?? 0} prefix="от " className="text-base md:text-xl" />
+        <PriceTag
+          price={drop.price ?? 0}
+          prefix="от "
+          className="text-base md:text-xl"
+        />
         <Badge tone="good">−{drop.dropPercent}% за 7 дней</Badge>
       </div>
-      <span className="hidden text-[13px] text-muted md:block">{storeLine}</span>
+      <span className="hidden text-[13px] text-muted md:block">
+        {storeLine}
+      </span>
     </Link>
   )
 }

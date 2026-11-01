@@ -6,10 +6,23 @@ interface CoverProps {
   editionId: number
   title: string
   coverUrl?: string | null
+  size?: 'lg' | 'md' | 'sm'
   className?: string
 }
 
-export function Cover({ editionId, title, coverUrl, className }: CoverProps) {
+const PLATE_SIZE = {
+  lg: 'p-4 text-lg font-display',
+  md: 'p-2.5 text-[13px]',
+  sm: 'p-1.5 text-[9px]',
+} as const
+
+export function Cover({
+  editionId,
+  title,
+  coverUrl,
+  size = 'md',
+  className,
+}: CoverProps) {
   const [failed, setFailed] = useState(false)
   const box = cn('relative shrink-0 overflow-hidden', className)
   if (coverUrl && !failed) {
@@ -27,8 +40,18 @@ export function Cover({ editionId, title, coverUrl, className }: CoverProps) {
     )
   }
   return (
-    <div className={cn(box, 'flex items-end p-2', coverColor(editionId))} data-testid="cover-plate">
-      <span className="line-clamp-4 font-display text-[11px] font-medium leading-tight text-ink">{title}</span>
+    <div
+      className={cn(
+        box,
+        'flex items-end',
+        PLATE_SIZE[size],
+        coverColor(editionId),
+      )}
+      data-testid="cover-plate"
+    >
+      <span className="line-clamp-4 break-words font-display font-medium leading-tight text-ink hyphens-auto">
+        {title}
+      </span>
     </div>
   )
 }
