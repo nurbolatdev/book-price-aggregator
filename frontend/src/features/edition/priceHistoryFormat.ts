@@ -22,13 +22,16 @@ export function historyLabel(points: PricePoint[], period: PricePeriod): string 
 export function monthTicks(points: PricePoint[]): string[] {
   const seen = new Set<string>()
   const ticks: string[] = []
-  for (const p of points) {
-    if (!p.date) continue
+  let lastTickIndex = -2
+  points.forEach((p, i) => {
+    if (!p.date) return
     const month = p.date.slice(0, 7)
-    if (seen.has(month)) continue
+    if (seen.has(month)) return
     seen.add(month)
+    if (i - lastTickIndex < 2) return
+    lastTickIndex = i
     ticks.push(p.date)
-  }
+  })
   return ticks
 }
 

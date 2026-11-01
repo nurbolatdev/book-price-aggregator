@@ -1,5 +1,6 @@
 import type { EditionDetailResponse, OfferInfo } from '../../api/types'
 import { ExternalLink } from '../../components/ui/ExternalLink'
+import { focusRing } from '../../components/ui/focusRing'
 import { cn } from '../../lib/cn'
 import { formatPrice, formatRelative } from '../../lib/format'
 import { bestOfferId, sortOffers } from './offers'
@@ -12,6 +13,7 @@ function OfferCard({ offer, best }: { offer: OfferInfo; best: boolean }) {
   if (!inStock) parts.push('нет в наличии')
   const className = cn(
     'flex items-center justify-between rounded-xl px-3.5 py-3 text-ink',
+    focusRing,
     best ? 'border-2 border-deal bg-best-row' : 'border border-line bg-surface',
   )
   const content = (

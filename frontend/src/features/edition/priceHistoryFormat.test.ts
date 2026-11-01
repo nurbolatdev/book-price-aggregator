@@ -27,12 +27,19 @@ describe('priceHistoryFormat', () => {
 
   it('returns one tick per month', () => {
     const ticks = monthTicks([
+      pt('2026-07-21', 1),
       pt('2026-07-28', 1),
       pt('2026-08-04', 1),
       pt('2026-08-11', 1),
+      pt('2026-08-18', 1),
       pt('2026-09-01', 1),
     ])
-    expect(ticks).toEqual(['2026-07-28', '2026-08-04', '2026-09-01'])
+    expect(ticks).toEqual(['2026-07-21', '2026-08-04', '2026-09-01'])
+  })
+
+  it('skips a month tick right after the previous one', () => {
+    const ticks = monthTicks([pt('2026-07-30', 1), pt('2026-08-01', 1), pt('2026-08-05', 1), pt('2026-09-01', 1)])
+    expect(ticks).toEqual(['2026-07-30', '2026-09-01'])
   })
 
   it('formats month name and date', () => {

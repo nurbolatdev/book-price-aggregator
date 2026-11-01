@@ -1,5 +1,5 @@
 import { ChevronLeft, Share2 } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { IconButton } from '../../components/ui/IconButton'
 import { toast } from '../../stores/toast'
 
@@ -10,10 +10,10 @@ interface EditionMobileHeaderProps {
 
 export function EditionMobileHeader({ title, shareable = false }: EditionMobileHeaderProps) {
   const navigate = useNavigate()
-  const location = useLocation()
 
   const goBack = () => {
-    if (location.key !== 'default') navigate(-1)
+    const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
+    if (idx > 0) navigate(-1)
     else navigate('/')
   }
 

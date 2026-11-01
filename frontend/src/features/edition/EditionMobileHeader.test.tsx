@@ -22,6 +22,7 @@ function renderHeader(entries: string[], index?: number) {
 
 describe('EditionMobileHeader', () => {
   afterEach(() => {
+    window.history.replaceState(null, '')
     vi.unstubAllGlobals()
     Object.defineProperty(navigator, 'share', { value: undefined, configurable: true })
     Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true })
@@ -34,7 +35,15 @@ describe('EditionMobileHeader', () => {
     expect(screen.getByTestId('where').textContent).toBe('/')
   })
 
+  it('goes home when the entry was replaced (history index 0)', () => {
+    window.history.replaceState({ idx: 0 }, '')
+    renderHeader(['/search?q=x', '/editions/41'], 1)
+    fireEvent.click(screen.getByRole('button', { name: 'Назад' }))
+    expect(screen.getByTestId('where').textContent).toBe('/')
+  })
+
   it('goes back in history', () => {
+    window.history.replaceState({ idx: 1 }, '')
     renderHeader(['/search?q=x', '/editions/41'], 1)
     fireEvent.click(screen.getByRole('button', { name: 'Назад' }))
     expect(screen.getByTestId('where').textContent).toBe('/search?q=x')

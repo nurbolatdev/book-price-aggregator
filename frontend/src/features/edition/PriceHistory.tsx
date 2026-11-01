@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react'
 import type { PricePeriod } from '../../api/types'
 import { ErrorBlock } from '../../components/ui/ErrorBlock'
 import { Skeleton } from '../../components/ui/Skeleton'
+import { focusRing } from '../../components/ui/focusRing'
 import { cn } from '../../lib/cn'
 import { formatPrice } from '../../lib/format'
 import { usePriceHistory } from './usePriceHistory'
@@ -41,6 +42,7 @@ export function PriceHistory({ editionId }: { editionId: number }) {
               onClick={() => setPeriod(p.value)}
               className={cn(
                 'min-h-touch rounded-lg px-3 text-sm',
+                focusRing,
                 period === p.value ? 'bg-surface font-semibold' : 'text-muted',
               )}
             >

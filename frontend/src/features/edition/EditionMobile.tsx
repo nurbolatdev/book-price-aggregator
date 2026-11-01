@@ -41,14 +41,14 @@ export function EditionMobile({ edition, editionId }: EditionMobileProps) {
           </div>
         </section>
         <section aria-labelledby="offers-title" className="flex flex-col gap-3.5">
-          <h2 id="offers-title" className="mt-1 text-base font-bold">
+          <h2 id="offers-title" className="mt-1 font-sans text-base font-bold">
             Цены в {n} {pluralRu(n, ['магазине', 'магазинах', 'магазинах'])}
           </h2>
           <OffersList edition={edition} />
         </section>
         <PriceHistory editionId={editionId} />
         <section aria-labelledby="details-title" className="flex flex-col gap-3.5">
-          <h2 id="details-title" className="text-base font-bold">
+          <h2 id="details-title" className="font-sans text-base font-bold">
             Подробности
           </h2>
           <EditionSwitcher edition={edition} editionId={editionId} />

@@ -1,5 +1,6 @@
 import type { EditionDetailResponse } from '../../api/types'
 import { ExternalLink } from '../../components/ui/ExternalLink'
+import { focusRing } from '../../components/ui/focusRing'
 import { cn } from '../../lib/cn'
 import { formatPrice, formatRelative, pluralRu } from '../../lib/format'
 import { bestOfferId, sortOffers } from './offers'
@@ -59,7 +60,7 @@ export function OffersTable({ edition }: { edition: EditionDetailResponse }) {
                       <ExternalLink
                         href={o.url}
                         aria-label={`В магазин ${o.storeName ?? o.store}`}
-                        className="font-semibold text-link"
+                        className={cn('font-semibold text-link', focusRing)}
                       >
                         В магазин
                       </ExternalLink>
