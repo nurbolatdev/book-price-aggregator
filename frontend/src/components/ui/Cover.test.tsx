@@ -29,15 +29,17 @@ describe('Cover', () => {
     expect(screen.getByText('Fallback')).toBeInTheDocument()
   })
 
-  it('applies plate padding and text size per size prop', () => {
-    const { rerender } = render(<Cover editionId={1} title="T" size="lg" />)
-    expect(screen.getByTestId('cover-plate')).toHaveClass('p-4', 'text-lg')
-    rerender(<Cover editionId={1} title="T" size="sm" />)
-    expect(screen.getByTestId('cover-plate')).toHaveClass('p-1.5', 'text-[9px]')
-    rerender(<Cover editionId={1} title="T" />)
+  it('uses responsive presets per size prop', () => {
+    const { rerender } = render(<Cover editionId={1} title="T" size="drop" />)
     expect(screen.getByTestId('cover-plate')).toHaveClass(
       'p-2.5',
       'text-[13px]',
+      'font-bold',
+      'md:p-4',
+      'md:text-lg',
     )
+    rerender(<Cover editionId={1} title="T" size="result" />)
+    expect(screen.getByTestId('cover-plate')).toHaveClass('max-md:p-0', 'md:text-xs')
+    expect(screen.getByText('T')).toHaveClass('max-md:hidden')
   })
 })

@@ -43,31 +43,35 @@ export function PriceRange({ minPrice, maxPrice, onCommit, idPrefix = 'price' }:
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor={`${idPrefix}-min`} className="text-[13px] text-muted">
-        от
-      </label>
-      <Input
-        id={`${idPrefix}-min`}
-        inputMode="numeric"
-        placeholder="0"
-        value={min}
-        onChange={(e) => setMin(e.target.value)}
-        onBlur={commit}
-        onKeyDown={onKeyDown}
-      />
-      <label htmlFor={`${idPrefix}-max`} className="text-[13px] text-muted">
-        до
-      </label>
-      <Input
-        id={`${idPrefix}-max`}
-        inputMode="numeric"
-        placeholder="10 000"
-        value={max}
-        onChange={(e) => setMax(e.target.value)}
-        onBlur={commit}
-        onKeyDown={onKeyDown}
-      />
+    <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-col gap-1">
+        <label htmlFor={`${idPrefix}-min`} className="text-[13px] text-muted">
+          от
+        </label>
+        <Input
+          id={`${idPrefix}-min`}
+          inputMode="numeric"
+          placeholder="0"
+          value={min}
+          onChange={(e) => setMin(e.target.value)}
+          onBlur={commit}
+          onKeyDown={onKeyDown}
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor={`${idPrefix}-max`} className="text-[13px] text-muted">
+          до
+        </label>
+        <Input
+          id={`${idPrefix}-max`}
+          inputMode="numeric"
+          placeholder="10 000"
+          value={max}
+          onChange={(e) => setMax(e.target.value)}
+          onBlur={commit}
+          onKeyDown={onKeyDown}
+        />
+      </div>
     </div>
   )
 }

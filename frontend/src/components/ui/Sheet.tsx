@@ -81,7 +81,7 @@ export function Sheet({ open, onClose, title, side = 'bottom', children }: Sheet
         )}
       >
         <div className="flex items-center justify-between gap-2 py-2 pl-4 pr-2">
-          <h2 id={titleId} className="font-display text-lg font-medium text-ink">
+          <h2 id={titleId} className="font-sans text-[17px] font-bold text-ink">
             {title}
           </h2>
           <IconButton label="Закрыть" variant="plain" onClick={onClose}>

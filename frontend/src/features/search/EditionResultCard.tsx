@@ -57,7 +57,7 @@ export function EditionResultCard({ item }: { item: SearchItem }) {
         editionId={id}
         title={title}
         coverUrl={item.coverUrl}
-        size="md"
+        size="result"
         className="row-span-3 row-start-1 h-[92px] w-16 rounded-md md:h-40 md:w-[110px] md:rounded-lg"
       />
       <div className="flex min-w-0 flex-1 flex-col gap-2 max-md:contents">

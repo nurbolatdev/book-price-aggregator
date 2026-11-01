@@ -42,7 +42,7 @@ export function DropCard({
         editionId={id}
         title={title}
         coverUrl={drop.coverUrl}
-        size="lg"
+        size="drop"
         className="h-[150px] w-full rounded-control md:h-[220px]"
       />
       <div className="flex flex-col gap-1">

@@ -6,21 +6,20 @@ interface CoverProps {
   editionId: number
   title: string
   coverUrl?: string | null
-  size?: 'lg' | 'md' | 'sm'
+  size?: 'drop' | 'result'
   className?: string
 }
 
 const PLATE_SIZE = {
-  lg: 'p-4 text-lg font-display',
-  md: 'p-2.5 text-[13px]',
-  sm: 'p-1.5 text-[9px]',
+  drop: 'p-2.5 text-[13px] font-bold md:p-4 md:text-lg md:font-display md:font-medium',
+  result: 'max-md:p-0 md:p-2 md:text-xs',
 } as const
 
 export function Cover({
   editionId,
   title,
   coverUrl,
-  size = 'md',
+  size = 'drop',
   className,
 }: CoverProps) {
   const [failed, setFailed] = useState(false)
@@ -49,7 +48,12 @@ export function Cover({
       )}
       data-testid="cover-plate"
     >
-      <span className="line-clamp-4 break-words font-display font-medium leading-tight text-ink hyphens-auto">
+      <span
+        className={cn(
+          'line-clamp-4 break-words leading-tight text-ink hyphens-auto',
+          size === 'result' && 'max-md:hidden',
+        )}
+      >
         {title}
       </span>
     </div>

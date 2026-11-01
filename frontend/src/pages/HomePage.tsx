@@ -14,8 +14,8 @@ function WeeklyDrops() {
   const { data, isLoading, isError, refetch } = useDrops(8)
   return (
     <section className="mx-auto w-full max-w-page px-4 pb-10 md:px-6 md:pb-14">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3 md:mb-6">
-        <h2 className="font-display text-lg font-medium md:text-[26px]">Сильнее всего подешевели за неделю</h2>
+      <div className="mb-4 flex flex-nowrap items-start justify-between gap-3 md:mb-6">
+        <h2 className="min-w-0 font-display text-xl font-bold md:text-[26px] md:font-medium">Сильнее всего подешевели за неделю</h2>
         <Link to="/deals" className={'font-semibold text-link hover:text-link-hover ' + focusRing}>
           Все скидки
         </Link>
@@ -53,7 +53,7 @@ export default function HomePage() {
         <section className="mx-auto mb-10 w-full max-w-page px-4 md:mb-16 md:px-6">
           <div className="flex flex-wrap items-center justify-between gap-6 rounded-[20px] bg-ink p-6 text-white md:p-10">
             <div className="flex max-w-[640px] flex-col gap-2">
-              <h2 className="font-display text-lg font-medium md:text-[26px]">Есть список «хочу прочитать»?</h2>
+              <h2 className="font-display text-xl font-bold md:text-[26px] md:font-medium">Есть список «хочу прочитать»?</h2>
               <p className="text-[15px] leading-normal text-mist md:text-[17px]">
                 Создайте аккаунт и ставьте маячки на книги из своего списка. Письмо придёт только когда цена
                 действительно снизится.

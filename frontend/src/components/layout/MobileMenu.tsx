@@ -23,7 +23,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
   return (
     <Sheet open={open} onClose={onClose} side="right" title="Меню">
-      <nav aria-label="Мобильное меню" className="flex flex-col gap-1 p-2">
+      <nav aria-label="Мобильное меню" className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-2">
         <NavLink to="/catalog" className={linkClasses} onClick={onClose}>
           Каталог
         </NavLink>

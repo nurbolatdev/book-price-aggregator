@@ -19,7 +19,7 @@ const steps = [
 export function HowItWorks() {
   return (
     <section className="mx-auto w-full max-w-page px-4 pb-8 pt-2 md:px-6 md:pb-14 md:pt-6">
-      <h2 className="mb-4 font-display text-lg font-medium md:mb-6 md:text-[26px]">Как это работает</h2>
+      <h2 className="mb-4 font-display text-xl font-bold md:mb-6 md:text-[26px] md:font-medium">Как это работает</h2>
       <div className="grid gap-5 max-md:gap-0 max-md:divide-y max-md:divide-divider max-md:rounded-[14px] max-md:border max-md:border-line max-md:bg-surface md:grid-cols-2 lg:grid-cols-3">
         {steps.map((s) => (
           <article

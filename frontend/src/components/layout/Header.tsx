@@ -56,7 +56,7 @@ export function Header() {
         )}
       >
         <Link to="/" className={cn('inline-flex shrink-0 items-center rounded-control', focusRing)}>
-          <img src={logo} alt="KitapRadar" className={variant === 'nav' ? 'h-[26px] w-auto md:h-7' : 'h-[26px] w-auto'} />
+          <img src={logo} alt="KitapRadar" className={variant === 'nav' ? 'h-9 w-auto md:h-10' : 'h-9 w-auto md:h-10'} />
         </Link>
         {variant === 'nav' ? (
           <nav aria-label="Основная навигация" className="hidden flex-grow items-center gap-5 md:flex">

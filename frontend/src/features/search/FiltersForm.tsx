@@ -33,9 +33,9 @@ function toggle(list: string[], key: string): string[] {
   return list.includes(key) ? list.filter((v) => v !== key) : [...list, key]
 }
 
-function Group({ legend, children }: { legend: string; children: ReactNode }) {
+function Group({ legend, children, tight }: { legend: string; children: ReactNode; tight?: boolean }) {
   return (
-    <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0">
+    <fieldset className={cn('m-0 flex min-w-0 flex-col border-0 p-0', tight ? 'gap-0' : 'gap-2')}>
       <legend className="mb-1 p-0 text-[15px] font-bold text-ink">{legend}</legend>
       {children}
     </fieldset>
@@ -128,7 +128,7 @@ export function FiltersForm({ layout, value, onChange, facets, stores, idPrefix 
 
   return (
     <div className="flex flex-col gap-[22px]">
-      <Group legend="Магазины">
+      <Group legend="Магазины" tight={layout === 'list'}>
         <Options options={storeOptions} layout={layout} />
       </Group>
       <Group legend="Цена, ₸">
@@ -145,13 +145,13 @@ export function FiltersForm({ layout, value, onChange, facets, stores, idPrefix 
         checked={value.inStock}
         onChange={(e) => onChange({ inStock: e.target.checked })}
       />
-      <Group legend="Переплёт">
+      <Group legend="Переплёт" tight={layout === 'list'}>
         <Options
           layout={layout}
           options={valueOptions(BINDING_ORDER, facets?.bindings, value.binding, 'binding', bindingName)}
         />
       </Group>
-      <Group legend="Язык">
+      <Group legend="Язык" tight={layout === 'list'}>
         <Options
           layout={layout}
           options={valueOptions(LANGUAGE_ORDER, facets?.languages, value.language, 'language', languageName)}
