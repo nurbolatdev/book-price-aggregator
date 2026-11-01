@@ -1,10 +1,10 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { emptySearchPage } from '../mocks/fixtures'
+import { emptySearchPage, facets, searchPage } from '../mocks/fixtures'
 import { server } from '../mocks/server'
 import { useAuthStore } from '../stores/auth'
-import { renderWithProviders } from '../test/render'
+import { getLocation, renderWithProviders } from '../test/render'
 import SearchPage from './SearchPage'
 
 const ROUTE = '/search?q=' + encodeURIComponent('Мастер и Маргарита')
@@ -83,5 +83,40 @@ describe('SearchPage', () => {
     renderWithProviders(<SearchPage />, { route: ROUTE })
     const bells = await screen.findAllByRole('link', { name: 'Поставить маячок' })
     expect(bells[0]).toHaveAttribute('href', '/login?next=%2Feditions%2F12%3Fbeacon%3D1')
+  })
+
+  it('puts unchecked stores in the url and the next requests', async () => {
+    const seen: string[] = []
+    server.use(
+      http.get('*/api/v1/search', ({ request }) => {
+        seen.push(new URL(request.url).search)
+        return HttpResponse.json(searchPage(0))
+      }),
+      http.get('*/api/v1/search/facets', ({ request }) => {
+        seen.push('facets' + new URL(request.url).search)
+        return HttpResponse.json(facets)
+      }),
+    )
+    renderWithProviders(<SearchPage />, { route: ROUTE })
+    fireEvent.click(await screen.findByRole('checkbox', { name: /Ozon/ }))
+    await waitFor(() => expect(getLocation()).toContain('stores=FLIP%2CMELOMAN'))
+    await waitFor(() => {
+      expect(seen.some((s) => !s.startsWith('facets') && new URLSearchParams(s.replace(/^facets/, '')).get('stores') === 'FLIP,MELOMAN')).toBe(true)
+      expect(seen.some((s) => s.startsWith('facets') && new URLSearchParams(s.replace(/^facets/, '')).get('stores') === 'FLIP,MELOMAN')).toBe(true)
+    })
+  })
+
+  it('writes inStock=false when the stock filter is unchecked', async () => {
+    renderWithProviders(<SearchPage />, { route: ROUTE })
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Только в наличии' }))
+    await waitFor(() => expect(getLocation()).toContain('inStock=false'))
+  })
+
+  it('restores checkboxes from the url', async () => {
+    renderWithProviders(<SearchPage />, { route: ROUTE + '&stores=FLIP,OZON&binding=PAPERBACK&inStock=false' })
+    expect(await screen.findByRole('checkbox', { name: /Meloman/ })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /Ozon/ })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: /Мягкий/ })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Только в наличии' })).not.toBeChecked()
   })
 })

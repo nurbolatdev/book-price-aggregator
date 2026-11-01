@@ -1,6 +1,7 @@
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { ErrorBlock } from '../components/ui/ErrorBlock'
 import { Button } from '../components/ui/Button'
+import { FiltersPanel } from '../features/search/FiltersPanel'
 import { EditionResultCard } from '../features/search/EditionResultCard'
 import { ResultCardSkeleton } from '../features/search/ResultCardSkeleton'
 import { SearchEmpty } from '../features/search/SearchEmpty'
@@ -26,6 +27,7 @@ function SearchResults({ mode }: { mode: SearchMode }) {
 
   return (
     <div className="mx-auto flex w-full max-w-page items-start gap-7 px-4 pb-14 pt-7 md:px-6">
+      <FiltersPanel mode={mode} filters={filters} onChange={setFilters} />
       <main className="flex min-w-0 flex-[999_1_560px] flex-col gap-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="flex flex-col gap-1">
