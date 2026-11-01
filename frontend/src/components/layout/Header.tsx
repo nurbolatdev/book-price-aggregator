@@ -11,7 +11,7 @@ export function Header() {
 
   return (
     <header className="border-b border-line bg-surface">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2">
+      <div className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-2 px-4 py-2 md:px-6">
         <Link to="/" className={navLink + ' -ml-3'}>
           <img src={logo} alt="KitapRadar" className="h-8 w-auto" />
         </Link>

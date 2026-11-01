@@ -14,7 +14,7 @@ export function AppLayout() {
         <ErrorBoundary
           resetKey={pathname}
           fallback={(_error, reset) => (
-            <div className="mx-auto max-w-6xl px-4 py-10">
+            <div className="mx-auto w-full max-w-page px-4 md:px-6 py-10">
               <p className="mb-4">Не удалось показать страницу</p>
               <button
                 type="button"

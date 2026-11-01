@@ -18,7 +18,7 @@ createRoot(root).render(
   <StrictMode>
     <ErrorBoundary
       fallback={() => (
-        <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="mx-auto w-full max-w-page px-4 md:px-6 py-10">
           <p className="mb-4">Что-то пошло не так</p>
           <button
             type="button"

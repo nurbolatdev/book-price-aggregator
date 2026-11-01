@@ -1,5 +1,5 @@
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div aria-hidden="true" className={'animate-pulse rounded-control bg-line ' + className} />
+  return <div aria-hidden="true" className={'animate-pulse rounded-control bg-skeleton ' + className} />
 }
 
 export function SkeletonText({ lines = 3 }: { lines?: number }) {
