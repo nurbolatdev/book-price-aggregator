@@ -167,4 +167,50 @@ describe('EditionPage (desktop)', () => {
     expect(screen.queryByText('Страниц')).not.toBeInTheDocument()
     expect(screen.queryByText('ISBN')).not.toBeInTheDocument()
   })
+
+  it('switches editions in the same render tree', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } })
+    renderWithProviders(
+      <>
+        <span data-testid="probe" />
+        <EditionPage />
+      </>,
+      {
+        route: { pathname: '/editions/41', state: { from: '/search?q=bulgakov' } },
+        path: '/editions/:id',
+        queryClient,
+      },
+    )
+    const probe = screen.getByTestId('probe')
+    const current = await screen.findByRole('button', { name: 'АСТ 2023 · твёрдый' })
+    expect(current).toHaveAttribute('aria-pressed', 'true')
+    const other = screen.getByRole('button', { name: 'Азбука 2022 · мягкий' })
+    expect(other).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(other)
+    await waitFor(() => expect(getLocation()).toBe('/editions/16'))
+    expect(await screen.findByRole('button', { name: 'Азбука 2022 · мягкий' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(editionDetail(16)?.book?.title ?? '')
+    expect(screen.getByTestId('probe')).toBe(probe)
+    const nav = screen.getByRole('navigation', { name: 'Хлебные крошки' })
+    expect(within(nav).getByRole('link', { name: /Поиск/ })).toBeInTheDocument()
+  })
+
+  it('prefetches another edition on hover', async () => {
+    let requests = 0
+    server.use(
+      http.get('*/api/v1/editions/:id', ({ params }) => {
+        if (Number(params.id) === 16) requests += 1
+        const detail = editionDetail(Number(params.id))
+        return detail ? HttpResponse.json(detail) : new HttpResponse(null, { status: 404 })
+      }),
+    )
+    renderEdition()
+    const other = await screen.findByRole('button', { name: 'Азбука 2022 · мягкий' })
+    fireEvent.mouseEnter(other)
+    fireEvent.mouseEnter(other)
+    await waitFor(() => expect(requests).toBe(1))
+    fireEvent.click(other)
+    await screen.findByRole('heading', { level: 1 })
+    expect(requests).toBe(1)
+  })
 })

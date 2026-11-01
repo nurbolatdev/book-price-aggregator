@@ -4,8 +4,10 @@ import { BestPriceCard } from './BestPriceCard'
 import { EditionBreadcrumbs } from './EditionBreadcrumbs'
 import { EditionDescription } from './EditionDescription'
 import { EditionFacts } from './EditionFacts'
+import { EditionSwitcher } from './EditionSwitcher'
 import { OffersTable } from './OffersTable'
 import { PriceHistory } from './PriceHistory'
+import { SimilarBooks } from './SimilarBooks'
 
 interface EditionDesktopProps {
   edition: EditionDetailResponse
@@ -28,6 +30,7 @@ export function EditionDesktop({ edition, editionId }: EditionDesktopProps) {
         <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-3.5">
           <h1 className="font-display text-4xl font-bold leading-[1.15] text-ink">{book?.title}</h1>
           {book?.author && <p className="text-lg text-muted">{book.author}</p>}
+          <EditionSwitcher edition={edition} editionId={editionId} />
           <EditionFacts edition={edition} />
           <EditionDescription text={book?.description} />
         </div>
@@ -39,6 +42,7 @@ export function EditionDesktop({ edition, editionId }: EditionDesktopProps) {
       </section>
       <OffersTable edition={edition} />
       <PriceHistory editionId={editionId} />
+      <SimilarBooks editionId={editionId} />
     </>
   )
 }
