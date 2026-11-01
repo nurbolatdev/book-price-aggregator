@@ -3,6 +3,8 @@ import { render, type RenderResult } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 
+type Entry = string | { pathname: string; search?: string; state?: unknown }
+
 let currentLocation = '/'
 
 function LocationProbe() {
@@ -16,7 +18,7 @@ export function getLocation(): string {
 }
 
 interface RenderOptions {
-  route?: string
+  route?: Entry
   path?: string
   queryClient?: QueryClient
 }

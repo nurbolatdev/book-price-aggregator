@@ -11,7 +11,7 @@ import { getLocation, renderWithProviders } from '../test/render'
 import { setViewport } from '../test/viewport'
 import EditionPage from './EditionPage'
 
-function renderEdition(route = '/editions/41', queryClient?: QueryClient) {
+function renderEdition(route: string | { pathname: string; state?: unknown } = '/editions/41', queryClient?: QueryClient) {
   return renderWithProviders(<EditionPage />, {
     route,
     path: '/editions/:id',
@@ -129,5 +129,42 @@ describe('EditionPage (desktop)', () => {
     renderEdition('/editions/41?beacon=1')
     await waitFor(() => expect(getLocation()).toBe('/editions/41'))
     expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument()
+  })
+
+  it('shows breadcrumbs with the search origin', async () => {
+    const from = '/search?q=' + encodeURIComponent('Мастер и Маргарита')
+    renderEdition({ pathname: '/editions/41', state: { from } })
+    const nav = await screen.findByRole('navigation', { name: 'Хлебные крошки' })
+    const links = within(nav).getAllByRole('link')
+    expect(links.map((l) => l.textContent)).toEqual(['Главная', 'Поиск «Мастер и Маргарита»'])
+    expect(links[1]).toHaveAttribute('href', from)
+    expect(within(nav).getByText('Мастер и Маргарита')).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('shows short breadcrumbs without an origin', async () => {
+    renderEdition()
+    const nav = await screen.findByRole('navigation', { name: 'Хлебные крошки' })
+    expect(within(nav).getAllByRole('link').map((l) => l.textContent)).toEqual(['Главная'])
+    expect(within(nav).getByText('Мастер и Маргарита')).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('shows the facts', async () => {
+    renderEdition()
+    expect(await screen.findByText('978-5-17-090630-4')).toBeInTheDocument()
+    expect(screen.getByText('480')).toBeInTheDocument()
+    expect(screen.getByText('Русский')).toBeInTheDocument()
+  })
+
+  it('omits facts that are missing', async () => {
+    server.use(
+      http.get('*/api/v1/editions/:id', ({ params }) => {
+        const detail = editionDetail(Number(params.id))
+        return HttpResponse.json({ ...detail, pages: undefined, isbn13: undefined })
+      }),
+    )
+    renderEdition()
+    await screen.findByText('Русский')
+    expect(screen.queryByText('Страниц')).not.toBeInTheDocument()
+    expect(screen.queryByText('ISBN')).not.toBeInTheDocument()
   })
 })

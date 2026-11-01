@@ -1,6 +1,9 @@
 import type { EditionDetailResponse } from '../../api/types'
 import { Cover } from '../../components/ui/Cover'
 import { BestPriceCard } from './BestPriceCard'
+import { EditionBreadcrumbs } from './EditionBreadcrumbs'
+import { EditionDescription } from './EditionDescription'
+import { EditionFacts } from './EditionFacts'
 import { OffersTable } from './OffersTable'
 
 interface EditionDesktopProps {
@@ -12,6 +15,7 @@ export function EditionDesktop({ edition, editionId }: EditionDesktopProps) {
   const { book } = edition
   return (
     <>
+      <EditionBreadcrumbs title={book?.title ?? ''} />
       <section className="flex flex-wrap items-start gap-8">
         <Cover
           editionId={editionId}
@@ -23,6 +27,8 @@ export function EditionDesktop({ edition, editionId }: EditionDesktopProps) {
         <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-3.5">
           <h1 className="font-display text-4xl font-bold leading-[1.15] text-ink">{book?.title}</h1>
           {book?.author && <p className="text-lg text-muted">{book.author}</p>}
+          <EditionFacts edition={edition} />
+          <EditionDescription text={book?.description} />
         </div>
         <BestPriceCard
           edition={edition}
