@@ -61,7 +61,7 @@ describe('App', () => {
 
   it('renders the search page for the catalog', async () => {
     renderAt('/catalog')
-    expect(await screen.findByRole('heading', { name: 'Поиск' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Каталог' })).toBeInTheDocument()
   })
 
   it('shows the footer', async () => {
