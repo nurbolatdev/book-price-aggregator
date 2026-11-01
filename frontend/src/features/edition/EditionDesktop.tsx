@@ -5,6 +5,7 @@ import { EditionBreadcrumbs } from './EditionBreadcrumbs'
 import { EditionDescription } from './EditionDescription'
 import { EditionFacts } from './EditionFacts'
 import { OffersTable } from './OffersTable'
+import { PriceHistory } from './PriceHistory'
 
 interface EditionDesktopProps {
   edition: EditionDetailResponse
@@ -37,6 +38,7 @@ export function EditionDesktop({ edition, editionId }: EditionDesktopProps) {
         />
       </section>
       <OffersTable edition={edition} />
+      <PriceHistory editionId={editionId} />
     </>
   )
 }
