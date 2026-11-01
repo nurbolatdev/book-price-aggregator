@@ -6,6 +6,7 @@ import { AppLayout } from '../components/layout/AppLayout'
 
 const HomePage = lazy(() => import('../pages/HomePage'))
 const SearchPage = lazy(() => import('../pages/SearchPage'))
+const DealsPage = lazy(() => import('../pages/DealsPage'))
 const EditionPage = lazy(() => import('../pages/EditionPage'))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/RegisterPage'))
@@ -20,6 +21,8 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route index element={<HomePage />} />
         <Route path="search" element={<SearchPage />} />
+        <Route path="catalog" element={<SearchPage />} />
+        <Route path="deals" element={<DealsPage />} />
         <Route path="editions/:id" element={<EditionPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />

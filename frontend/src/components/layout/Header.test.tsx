@@ -57,6 +57,8 @@ describe('Header', () => {
     renderWithProviders(<Header />, { route: '/' })
     expect(screen.getByRole('button', { name: 'Меню пользователя' })).toHaveTextContent('A')
     expect(screen.queryByRole('link', { name: 'Войти' })).toBeNull()
-    expect(screen.getByRole('link', { name: 'Мои маячки' })).toHaveAttribute('href', '/beacons')
+    for (const link of screen.getAllByRole('link', { name: 'Мои маячки' })) {
+      expect(link).toHaveAttribute('href', '/beacons')
+    }
   })
 })

@@ -75,7 +75,7 @@ export function UserMenu({ className }: { className?: string }) {
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          'inline-flex h-11 w-11 items-center justify-center rounded-full bg-ink text-base font-semibold text-white',
+          'inline-flex h-9 w-9 items-center md:h-11 md:w-11 justify-center rounded-full bg-ink text-sm md:text-base font-semibold text-white',
           focusRing,
         )}
       >

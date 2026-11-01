@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { act } from 'react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuthStore } from '../stores/auth'
 import { getLocation, renderWithProviders } from '../test/render'
 import App from './App'
@@ -51,5 +52,36 @@ describe('App', () => {
     await screen.findByRole('heading', { level: 1 })
     expect(screen.getByRole('button', { name: 'Меню пользователя' })).toHaveTextContent('A')
     expect(screen.queryByRole('link', { name: 'Войти' })).toBeNull()
+  })
+
+  it('renders the deals page', async () => {
+    renderAt('/deals')
+    expect(await screen.findByRole('heading', { name: 'Скидки недели' })).toBeInTheDocument()
+  })
+
+  it('renders the search page for the catalog', async () => {
+    renderAt('/catalog')
+    expect(await screen.findByRole('heading', { name: 'Поиск' })).toBeInTheDocument()
+  })
+
+  it('shows the footer', async () => {
+    renderAt('/')
+    await screen.findByRole('heading', { level: 1 })
+    expect(screen.getByText(/учебный портфолио-проект/)).toBeInTheDocument()
+    expect(screen.getByText('Алматы, 2026')).toBeInTheDocument()
+  })
+
+  it('shows the offline banner', async () => {
+    const spy = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    try {
+      renderAt('/')
+      await screen.findByRole('heading', { level: 1 })
+      act(() => {
+        window.dispatchEvent(new Event('offline'))
+      })
+      expect(screen.getByRole('status')).toHaveTextContent('Нет подключения к интернету')
+    } finally {
+      spy.mockRestore()
+    }
   })
 })
