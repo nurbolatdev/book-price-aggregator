@@ -1,4 +1,4 @@
-import { HttpResponse, http } from 'msw'
+import { HttpResponse, delay, http } from 'msw'
 import { bookDetail, editionDetail, priceHistory, similarFor } from './editionFixtures'
 import { drops, emptySearchPage, facets, popular, searchPage, stores, suggestions } from './fixtures'
 
@@ -36,7 +36,8 @@ export const handlers = [
     return HttpResponse.json(drops.slice(0, limit))
   }),
 
-  http.get('*/api/v1/editions/:id', ({ params }) => {
+  http.get('*/api/v1/editions/:id', async ({ params }) => {
+    if (Number(params.id) === 999) await delay('infinite')
     const detail = editionDetail(Number(params.id))
     if (!detail) {
       return HttpResponse.json({ code: 'NOT_FOUND', message: 'Издание не найдено' }, { status: 404 })

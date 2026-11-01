@@ -11,7 +11,7 @@ for (const entry of screens) {
     test(`${entry.name} @ ${width}`, async ({ page }) => {
       await page.setViewportSize(SIZES[width])
       await page.goto(entry.path)
-      await page.waitForLoadState('networkidle')
+      await page.waitForLoadState(entry.waitFor ?? 'networkidle')
       await page.evaluate(() => document.fonts.ready)
       if (entry.prepare) await entry.prepare(page)
       await page.screenshot({
