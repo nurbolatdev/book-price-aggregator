@@ -17,9 +17,9 @@ interface SortSelectProps {
 
 export function SortSelect({ mode, value, onChange }: SortSelectProps) {
   return (
-    <label className="flex items-center gap-2 text-sm text-muted">
-      <span>Сортировка</span>
-      <Select value={value} onChange={(e) => onChange(e.target.value as SortKey)} className="text-ink">
+    <label className="flex min-w-0 flex-1 items-center gap-2 text-sm text-muted md:flex-none">
+      <span className="sr-only md:not-sr-only">Сортировка</span>
+      <Select value={value} onChange={(e) => onChange(e.target.value as SortKey)} className="min-w-0 flex-1 text-ink md:flex-none">
         {OPTIONS.filter((o) => mode === 'search' || o.value !== 'RELEVANCE').map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}

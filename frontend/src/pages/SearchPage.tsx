@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button'
 import { FiltersPanel } from '../features/search/FiltersPanel'
 import { EditionResultCard } from '../features/search/EditionResultCard'
 import { ResultCardSkeleton } from '../features/search/ResultCardSkeleton'
+import { SearchFiltersSheet } from '../features/search/SearchFiltersSheet'
 import { SearchEmpty } from '../features/search/SearchEmpty'
 import { SortSelect } from '../features/search/SortSelect'
 import {
@@ -29,16 +30,21 @@ function SearchResults({ mode }: { mode: SearchMode }) {
     <div className="mx-auto flex w-full max-w-page items-start gap-7 px-4 pb-14 pt-7 md:px-6">
       <FiltersPanel mode={mode} filters={filters} onChange={setFilters} />
       <main className="flex min-w-0 flex-[999_1_560px] flex-col gap-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <h1 className="font-display text-2xl font-medium">{mode === 'catalog' ? 'Каталог' : `«${q}»`}</h1>
+        <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:justify-between">
+          <div className="order-last flex flex-col gap-1 md:order-none">
+            <h1 className="font-display text-2xl font-medium max-md:sr-only">
+              {mode === 'catalog' ? 'Каталог' : `«${q}»`}
+            </h1>
             {query.isSuccess && total > 0 && (
-              <p className="text-[15px] text-muted">
+              <p className="text-sm text-muted md:text-[15px]">
                 Найдено {total} {pluralRu(total, EDITIONS)}
               </p>
             )}
           </div>
-          <SortSelect mode={mode} value={filters.sort} onChange={(sort) => setFilters({ sort })} />
+          <div className="flex items-center gap-2">
+            <SearchFiltersSheet mode={mode} filters={filters} onApply={(next) => setFilters(next)} />
+            <SortSelect mode={mode} value={filters.sort} onChange={(sort) => setFilters({ sort })} />
+          </div>
         </div>
 
         {query.isPending ? (
