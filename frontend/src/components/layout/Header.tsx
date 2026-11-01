@@ -1,43 +1,117 @@
-import { Link } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Bell, Search } from 'lucide-react'
+import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import logo from '../../assets/logo-full.svg'
+import { cn } from '../../lib/cn'
 import { useAuthStore } from '../../stores/auth'
+import { focusRing } from '../ui/focusRing'
+import { getHeaderVariant } from './headerVariant'
+import { UserMenu } from './UserMenu'
 
-const navLink =
-  'inline-flex min-h-touch items-center rounded-control px-3 text-sm font-medium text-ink hover:text-link focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link'
+const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    'inline-flex min-h-touch items-center rounded-control text-[15px] font-medium hover:text-accent',
+    isActive ? 'text-accent' : 'text-ink',
+    focusRing,
+  )
+
+const BEACONS_LOGIN = '/login?next=%2Fbeacons'
+
+function HeaderSearch({ defaultValue }: { defaultValue: string }) {
+  const navigate = useNavigate()
+  const [value, setValue] = useState(defaultValue)
+
+  function onSubmit(event: FormEvent) {
+    event.preventDefault()
+    const trimmed = value.trim()
+    if (trimmed.length < 2) return
+    navigate('/search?q=' + encodeURIComponent(trimmed))
+  }
+
+  return (
+    <form role="search" onSubmit={onSubmit} className="relative flex-[1_1_360px]">
+      <Search
+        aria-hidden="true"
+        size={20}
+        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+      />
+      <input
+        type="search"
+        aria-label="Поиск книги"
+        placeholder="Название, автор или ISBN"
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        className={cn(
+          'h-[46px] w-full rounded-xl border border-line bg-canvas pl-11 pr-3.5 text-[15px] text-ink placeholder:text-muted',
+          focusRing,
+        )}
+      />
+    </form>
+  )
+}
 
 export function Header() {
   const status = useAuthStore((s) => s.status)
-  const user = useAuthStore((s) => s.user)
+  const { pathname } = useLocation()
+  const [params] = useSearchParams()
+  const variant = getHeaderVariant(pathname)
+  const authenticated = status === 'authenticated'
+  const q = params.get('q') ?? ''
+  const beaconsHref = authenticated ? '/beacons' : BEACONS_LOGIN
+
+  const account = authenticated ? (
+    <UserMenu />
+  ) : (
+    status === 'anonymous' && (
+      <Link
+        to="/login"
+        className={cn(
+          'inline-flex items-center rounded-xl border border-line text-[15px] font-semibold text-ink hover:bg-canvas',
+          variant === 'nav' ? 'px-[18px] py-2.5' : 'px-4 py-[9px]',
+          focusRing,
+        )}
+      >
+        Войти
+      </Link>
+    )
+  )
 
   return (
     <header className="border-b border-line bg-surface">
-      <div className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-2 px-4 py-2 md:px-6">
-        <Link to="/" className={navLink + ' -ml-3'}>
-          <img src={logo} alt="KitapRadar" className="h-8 w-auto" />
+      <div
+        className={cn(
+          'mx-auto flex w-full max-w-page flex-wrap items-center px-4 md:px-6',
+          variant === 'nav' ? 'gap-6 py-3.5' : 'gap-5 py-3',
+        )}
+      >
+        <Link to="/" className={cn('inline-flex shrink-0 items-center rounded-control', focusRing)}>
+          <img src={logo} alt="KitapRadar" className={variant === 'nav' ? 'h-7 w-auto' : 'h-[26px] w-auto'} />
         </Link>
-        <nav className="flex flex-wrap items-center gap-1">
-          {status === 'authenticated' && user ? (
-            <>
-              <Link to="/beacons" className={navLink}>
-                Маячки
-              </Link>
-              {user.role === 'ADMIN' && (
-                <Link to="/admin" className={navLink}>
-                  Админка
-                </Link>
-              )}
-              <Link to="/profile" className={navLink}>
-                {user.name}
-              </Link>
-            </>
-          ) : (
-            status === 'anonymous' && (
-              <Link to="/login" className={navLink}>
-                Войти
-              </Link>
-            )
-          )}
-        </nav>
+        {variant === 'nav' ? (
+          <>
+            <nav aria-label="Основная навигация" className="flex flex-grow items-center gap-5">
+              <NavLink to="/catalog" className={navLinkClasses}>
+                Каталог
+              </NavLink>
+              <NavLink to="/deals" className={navLinkClasses}>
+                Скидки недели
+              </NavLink>
+              <NavLink to={beaconsHref} className={navLinkClasses}>
+                Мои маячки
+              </NavLink>
+            </nav>
+            {account}
+          </>
+        ) : (
+          <>
+            <HeaderSearch key={q} defaultValue={q} />
+            <Link to={beaconsHref} className={cn(navLinkClasses({ isActive: false }), 'gap-2')}>
+              <Bell aria-hidden="true" size={20} />
+              Мои маячки
+            </Link>
+            {account}
+          </>
+        )}
       </div>
     </header>
   )
