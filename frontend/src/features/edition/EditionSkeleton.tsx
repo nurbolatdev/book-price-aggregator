@@ -1,10 +1,27 @@
-import { Skeleton } from '../../components/ui/Skeleton'
-import { CHART_BOX } from './PriceHistory'
+import { Skeleton } from "../../components/ui/Skeleton";
+import { CHART_BOX } from "./PriceHistory";
 
-export function EditionSkeleton({ variant = 'desktop' }: { variant?: 'desktop' | 'mobile' }) {
-  if (variant === 'mobile') {
+export function EditionBarSkeleton() {
+  return (
+    <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-line bg-surface px-4 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))]">
+      <Skeleton className="h-[52px] flex-1" />
+      <Skeleton className="h-[52px] flex-[1.4]" />
+    </div>
+  );
+}
+
+export function EditionSkeleton({
+  variant = "desktop",
+}: {
+  variant?: "desktop" | "mobile";
+}) {
+  if (variant === "mobile") {
     return (
-      <div role="status" aria-label="Загружаем издание" className="flex flex-col">
+      <div
+        role="status"
+        aria-label="Загружаем издание"
+        className="flex flex-col"
+      >
         <div className="flex flex-col gap-3.5">
           <div className="flex gap-3.5">
             <Skeleton className="h-[140px] w-24 shrink-0 rounded-lg" />
@@ -26,15 +43,15 @@ export function EditionSkeleton({ variant = 'desktop' }: { variant?: 'desktop' |
             <Skeleton className={CHART_BOX} />
           </div>
         </div>
-        <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-line bg-surface px-4 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))]">
-          <Skeleton className="h-[52px] flex-1" />
-          <Skeleton className="h-[52px] flex-[1.4]" />
-        </div>
       </div>
-    )
+    );
   }
   return (
-    <div role="status" aria-label="Загружаем издание" className="flex flex-col gap-6">
+    <div
+      role="status"
+      aria-label="Загружаем издание"
+      className="flex flex-col gap-6"
+    >
       <Skeleton className="h-5 w-64 max-w-full" />
       <div className="flex flex-wrap items-start gap-8">
         <Skeleton className="h-[380px] w-[260px] max-w-full rounded-[14px]" />
@@ -53,5 +70,5 @@ export function EditionSkeleton({ variant = 'desktop' }: { variant?: 'desktop' |
         <Skeleton className={CHART_BOX} />
       </div>
     </div>
-  )
+  );
 }
