@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bindingName, formatPrice, formatRelative, languageName, pluralRu } from './format'
+import { bindingName, formatIsbn13, formatNumber, formatPrice, formatRelative, languageName, pluralRu } from './format'
 
 const nbsp = ' '
 
@@ -71,5 +71,21 @@ describe('bindingName', () => {
   it('maps bindings', () => {
     expect(bindingName('HARDCOVER')).toBe('Твёрдый')
     expect(bindingName('PAPERBACK')).toBe('Мягкий')
+  })
+})
+
+describe('formatNumber', () => {
+  it('groups thousands without currency', () => {
+    expect(formatNumber(3150)).toBe(`3${nbsp}150`)
+  })
+})
+
+describe('formatIsbn13', () => {
+  it('groups 13 digits', () => {
+    expect(formatIsbn13('9785170906304')).toBe('978-5-17-090630-4')
+  })
+  it('leaves other input unchanged', () => {
+    expect(formatIsbn13('5170906307')).toBe('5170906307')
+    expect(formatIsbn13('abc')).toBe('abc')
   })
 })
