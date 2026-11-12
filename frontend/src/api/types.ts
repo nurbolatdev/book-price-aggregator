@@ -32,3 +32,7 @@ export type SimilarEdition = Schemas['SimilarEdition']
 export type BookResponse = Schemas['BookResponse']
 export type EditionResponse = Schemas['EditionResponse']
 export type BeaconResponse = Schemas['BeaconResponse']
+export type RegisterRequest = Schemas['RegisterRequest']
+export type RegisterResponse = Schemas['RegisterResponse']
+export type UpdateProfileRequest = Schemas['UpdateProfileRequest']
+export type NotifyFrequency = NonNullable<UserResponse['notifyFrequency']>

@@ -2,7 +2,7 @@ import { api, refreshSession } from './client'
 import { publishAuth } from './authSync'
 import { removeLegacyRefreshToken, useAuthStore } from '../stores/auth'
 import type { Session } from '../stores/auth'
-import type { AuthResponse, UserResponse } from './types'
+import type { AuthResponse, RegisterRequest, RegisterResponse, UserResponse } from './types'
 
 export function toSession(data: AuthResponse): Session {
   const { accessToken, user } = data
@@ -27,6 +27,33 @@ export async function logout(): Promise<void> {
     useAuthStore.getState().clearSession()
     publishAuth({ type: 'logout' })
   }
+}
+
+export async function logoutAll(): Promise<void> {
+  await api.post('/auth/logout-all')
+  useAuthStore.getState().clearSession()
+  publishAuth({ type: 'logout' })
+}
+
+export async function register(body: RegisterRequest): Promise<RegisterResponse> {
+  const { data } = await api.post<RegisterResponse>('/auth/register', body)
+  return data
+}
+
+export async function resendVerification(email: string): Promise<void> {
+  await api.post('/auth/resend-verification', { email })
+}
+
+export async function verifyEmail(token: string): Promise<void> {
+  await api.post('/auth/verify-email', { token })
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  await api.post('/auth/forgot-password', { email })
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  await api.post('/auth/reset-password', { token, newPassword })
 }
 
 export async function restoreSession(): Promise<void> {

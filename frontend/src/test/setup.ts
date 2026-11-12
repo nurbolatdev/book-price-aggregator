@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
+import { resetMockAuth } from '../mocks/authFixtures'
 import { server } from '../mocks/server'
 import { useAuthStore } from '../stores/auth'
 import { resetViewport } from './viewport'
@@ -41,6 +42,8 @@ afterEach(() => {
   resetViewport()
   server.resetHandlers()
   localStorage.clear()
+  sessionStorage.clear()
+  resetMockAuth()
 })
 
 afterAll(() => server.close())

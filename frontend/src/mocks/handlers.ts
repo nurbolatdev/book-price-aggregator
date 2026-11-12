@@ -1,4 +1,5 @@
 import { HttpResponse, delay, http } from 'msw'
+import { authHandlers } from './authHandlers'
 import { bookDetail, editionDetail, priceHistory, similarFor } from './editionFixtures'
 import { drops, emptySearchPage, facets, popular, searchPage, stores, suggestions } from './fixtures'
 
@@ -11,6 +12,8 @@ function notFound(message: string) {
 }
 
 export const handlers = [
+  ...authHandlers,
+
   http.get('*/api/v1/stores', () => HttpResponse.json(stores)),
 
   http.get('*/api/v1/search/popular', ({ request }) => {
