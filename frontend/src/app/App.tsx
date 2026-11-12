@@ -13,6 +13,7 @@ const EditionPage = lazy(loadEditionPage)
 const BookRedirectPage = lazy(() => import('../pages/BookRedirectPage'))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/RegisterPage'))
+const CheckEmailPage = lazy(() => import('../pages/CheckEmailPage'))
 const BeaconsPage = lazy(() => import('../pages/BeaconsPage'))
 const ProfilePage = lazy(() => import('../pages/ProfilePage'))
 const AdminPage = lazy(() => import('../pages/AdminPage'))
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
         </Route>
+        <Route path="check-email" element={<CheckEmailPage />} />
         <Route element={<RequireAuth />}>
           <Route path="beacons" element={<BeaconsPage />} />
           <Route path="profile" element={<ProfilePage />} />
