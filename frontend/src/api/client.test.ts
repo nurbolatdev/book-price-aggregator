@@ -34,6 +34,22 @@ describe('api client', () => {
     expect(seen['/auth/login']).toBe('')
   })
 
+  it('sends the bearer token and credentials on /auth/logout-all', async () => {
+    startSession('tok')
+    const seen: Record<string, { auth: string; credentials: boolean | undefined }> = {}
+    mockApi((config) => {
+      seen[config.url ?? ''] = {
+        auth: authorizationOf(config.headers),
+        credentials: config.withCredentials,
+      }
+      return [204, null]
+    })
+    await api.post('/auth/logout-all')
+    await api.post('/auth/logout')
+    expect(seen['/auth/logout-all']).toEqual({ auth: 'Bearer tok', credentials: true })
+    expect(seen['/auth/logout']).toEqual({ auth: '', credentials: true })
+  })
+
   it('sends credentials to /auth/* only and no body on refresh', async () => {
     startSession()
     const seen: Record<string, { credentials: boolean | undefined; data: unknown }> = {}

@@ -64,7 +64,10 @@ export const authHandlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
-  http.post('*/api/v1/auth/logout-all', () => {
+  http.post('*/api/v1/auth/logout-all', ({ request }) => {
+    if (request.headers.get('Authorization') !== `Bearer ${MOCK_ACCESS_TOKEN}`) {
+      return error(401, 'UNAUTHORIZED', 'Войдите, чтобы продолжить')
+    }
     setMockSignedIn(false)
     return new HttpResponse(null, { status: 204 })
   }),

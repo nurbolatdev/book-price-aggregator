@@ -18,11 +18,13 @@ function isAuthUrl(url: string | undefined): boolean {
   return url?.startsWith('/auth/') ?? false
 }
 
+function isCookieOnlyAuthUrl(url: string | undefined): boolean {
+  return isAuthUrl(url) && url !== '/auth/logout-all'
+}
+
 api.interceptors.request.use((config) => {
-  if (isAuthUrl(config.url)) {
-    config.withCredentials = true
-    return config
-  }
+  if (isAuthUrl(config.url)) config.withCredentials = true
+  if (isCookieOnlyAuthUrl(config.url)) return config
   const token = useAuthStore.getState().accessToken
   if (token) {
     config.headers.set('Authorization', `Bearer ${token}`)
@@ -82,7 +84,7 @@ api.interceptors.response.use(
     if (
       config &&
       !config._retried &&
-      !isAuthUrl(config.url) &&
+      !isCookieOnlyAuthUrl(config.url) &&
       apiError.status === 401 &&
       apiError.code === 'TOKEN_EXPIRED'
     ) {
