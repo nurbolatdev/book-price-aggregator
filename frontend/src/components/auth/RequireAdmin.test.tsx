@@ -27,7 +27,6 @@ function setup() {
 function signIn(role: Role) {
   useAuthStore.getState().setSession({
     accessToken: 'a',
-    refreshToken: 'r',
     user: { id: 1, name: 'A', role },
   })
 }

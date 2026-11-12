@@ -35,7 +35,6 @@ describe('RequireAuth', () => {
   it('renders content when authenticated', () => {
     useAuthStore.getState().setSession({
       accessToken: 'a',
-      refreshToken: 'r',
       user: { id: 1, name: 'A', role: 'USER' },
     })
     setup()

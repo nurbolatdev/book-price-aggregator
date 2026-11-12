@@ -26,7 +26,6 @@ describe('MobileMenu', () => {
   it('has no login link for authenticated users', () => {
     useAuthStore.getState().setSession({
       accessToken: 'a',
-      refreshToken: 'r',
       user: { id: 1, name: 'Aidar', role: 'USER' },
     })
     renderWithProviders(<Header />, { route: '/' })

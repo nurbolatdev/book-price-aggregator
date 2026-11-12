@@ -54,7 +54,7 @@
 | [F1](frontend/F1-foundation.md) | Фундамент: TypeScript, токены, layout, API-клиент | `feature/f1-foundation` | ✅ |
 | [F2](frontend/F2-home-search.md) | Добор фундамента (компоненты, моки, снимки, CI) + главная, поиск, каталог, скидки | `feature/f2-search` | ✅ |
 | [F3](frontend/F3-edition.md) | Карточка издания | `feature/f3-edition-page` | ✅ |
-| [F4](frontend/F4-auth-profile.md) | Вход, регистрация, пароль, профиль | `feature/f4-auth` | ⬜ |
+| [F4](frontend/F4-auth-profile.md) | Вход, регистрация, пароль, профиль | `feature/f4-auth` | 🟡 |
 | [F5](frontend/F5-beacons.md) | Маячки | `feature/f5-beacons` | ⬜ |
 | [F6](frontend/F6-admin.md) | Админ-панель | `feature/f6-admin` | ⬜ |
 | [F7](frontend/F7-polish-release.md) | Полировка, доступность, скорость, релиз | `feature/f7-polish` | ⬜ |

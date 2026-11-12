@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterAll, afterEach, beforeAll } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
 import { server } from '../mocks/server'
+import { useAuthStore } from '../stores/auth'
 import { resetViewport } from './viewport'
 
 resetViewport()
@@ -30,6 +31,10 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 }
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+
+beforeEach(() => {
+  useAuthStore.setState({ status: 'anonymous', user: null, accessToken: null })
+})
 
 afterEach(() => {
   cleanup()

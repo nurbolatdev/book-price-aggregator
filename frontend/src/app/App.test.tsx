@@ -45,7 +45,6 @@ describe('App', () => {
   it('shows the user menu button for authenticated', async () => {
     useAuthStore.getState().setSession({
       accessToken: 'a',
-      refreshToken: 'r',
       user: { id: 1, name: 'Aidar', role: 'USER' },
     })
     renderAt('/')

@@ -58,7 +58,6 @@ describe('Header', () => {
   it('shows the user menu button for authenticated users', () => {
     useAuthStore.getState().setSession({
       accessToken: 'a',
-      refreshToken: 'r',
       user: { id: 1, name: 'Aidar', role: 'USER' },
     })
     renderWithProviders(<Header />, { route: '/' })

@@ -1,6 +1,8 @@
 import axios from 'axios'
-import { getRefreshToken, useAuthStore } from '../stores/auth'
+import { getSessionEpoch, useAuthStore } from '../stores/auth'
+import { toast } from '../stores/toast'
 import { ApiError, ERROR_MESSAGES, toApiError } from './errors'
+import { toSession } from './auth'
 import type { AuthResponse } from './types'
 
 declare module 'axios' {
@@ -16,7 +18,10 @@ function isAuthUrl(url: string | undefined): boolean {
 }
 
 api.interceptors.request.use((config) => {
-  if (isAuthUrl(config.url)) return config
+  if (isAuthUrl(config.url)) {
+    config.withCredentials = true
+    return config
+  }
   const token = useAuthStore.getState().accessToken
   if (token) {
     config.headers.set('Authorization', `Bearer ${token}`)
@@ -30,24 +35,24 @@ let inflight: Promise<void> | null = null
 
 async function doRefresh(): Promise<void> {
   const { setSession, clearSession } = useAuthStore.getState()
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) {
-    clearSession()
-    throw new ApiError(401, 'UNAUTHORIZED', ERROR_MESSAGES.UNAUTHORIZED)
-  }
+  const wasAuthenticated = useAuthStore.getState().status === 'authenticated'
+  const epoch = getSessionEpoch()
   let data: AuthResponse
   try {
-    data = (await api.post<AuthResponse>('/auth/refresh', { refreshToken })).data
+    data = (await api.post<AuthResponse>('/auth/refresh')).data
   } catch (e) {
     const error = toApiError(e)
-    if (error.status === 401 && getRefreshToken() === refreshToken) clearSession()
+    if (error.status === 401 && getSessionEpoch() === epoch) {
+      clearSession()
+      if (wasAuthenticated) toast.info('Сессия закончилась, войдите снова')
+    }
     throw error
   }
-  if (getRefreshToken() !== refreshToken) {
+  if (getSessionEpoch() !== epoch) {
     throw new ApiError(401, 'UNAUTHORIZED', ERROR_MESSAGES.UNAUTHORIZED)
   }
   try {
-    setSession(data)
+    setSession(toSession(data))
   } catch {
     clearSession()
     throw new ApiError(500, 'INTERNAL_ERROR', ERROR_MESSAGES.INTERNAL_ERROR)

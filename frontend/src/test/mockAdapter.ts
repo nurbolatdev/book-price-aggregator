@@ -36,10 +36,9 @@ export function mockApi(handler: MockHandler): void {
   api.defaults.adapter = adapter
 }
 
-export function authBody(accessToken: string, refreshToken: string): AuthResponse {
+export function authBody(accessToken: string): AuthResponse {
   return {
     accessToken,
-    refreshToken,
     expiresIn: 900,
     user: { id: 1, email: 'reader@example.com', name: 'Reader', role: 'USER' },
   }
