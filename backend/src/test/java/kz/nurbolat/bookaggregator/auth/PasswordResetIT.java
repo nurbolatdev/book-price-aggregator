@@ -1,6 +1,5 @@
 package kz.nurbolat.bookaggregator.auth;
 
-import com.jayway.jsonpath.JsonPath;
 import jakarta.mail.internet.MimeMessage;
 import kz.nurbolat.bookaggregator.support.AbstractMailIT;
 import kz.nurbolat.bookaggregator.user.User;
@@ -12,6 +11,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,8 +31,8 @@ class PasswordResetIT extends AbstractMailIT {
     @Test
     void shouldSetNewPasswordAndSignOutEverywhereWhenResetLinkIsUsed() throws Exception {
         String email = registered();
-        String refreshToken = JsonPath.read(login(email, OLD_PASSWORD).andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(), "$.refreshToken");
+        String refreshToken = refreshTokenOf(login(email, OLD_PASSWORD).andExpect(status().isOk())
+                .andReturn().getResponse());
 
         postJson("/api/v1/auth/forgot-password", "{\"email\": \"" + email + "\"}").andExpect(status().isNoContent());
         List<MimeMessage> mail = awaitMail(email, 2);

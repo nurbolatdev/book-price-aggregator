@@ -52,7 +52,7 @@ public class AuthService {
      * Signing in does not need a confirmed email; the response tells the client whether it is confirmed.
      */
     @Transactional
-    public AuthResponse login(LoginRequest request, String userAgent) {
+    public SignedIn login(LoginRequest request, String userAgent) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
@@ -69,7 +69,7 @@ public class AuthService {
      * New access token and the next refresh token; the one used is revoked.
      */
     @Transactional(noRollbackFor = AppException.class)
-    public AuthResponse refresh(String refreshToken, String userAgent) {
+    public SignedIn refresh(String refreshToken, String userAgent) {
         return tokens(refreshTokenService.rotate(refreshToken, userAgent));
     }
 
@@ -77,9 +77,16 @@ public class AuthService {
         refreshTokenService.revoke(refreshToken);
     }
 
-    private AuthResponse tokens(RefreshTokenService.IssuedToken issued) {
+    /**
+     * Result of signing in or refreshing: the response body and the refresh token that goes into the cookie only.
+     */
+    public record SignedIn(AuthResponse response, String refreshToken) {
+    }
+
+    private SignedIn tokens(RefreshTokenService.IssuedToken issued) {
         User user = issued.user();
-        return new AuthResponse(jwtService.generateAccessToken(user, issued.familyId()), issued.token(),
+        AuthResponse response = new AuthResponse(jwtService.generateAccessToken(user, issued.familyId()),
                 jwtService.accessTtlSeconds(), UserResponse.from(user));
+        return new SignedIn(response, issued.token());
     }
 }

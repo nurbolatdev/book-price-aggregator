@@ -375,7 +375,7 @@ export interface paths {
         put?: never;
         /**
          * Вход
-         * @description Возвращает пару access и refresh токенов.
+         * @description Возвращает access-токен и данные пользователя; refresh-токен — в cookie kr_refresh.
          */
         post: operations["login"];
         delete?: never;
@@ -435,7 +435,7 @@ export interface paths {
         put?: never;
         /**
          * Обновление пары токенов
-         * @description Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Запрос с cookie обязан прийти с разрешённым заголовком Origin.
+         * @description Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Новый refresh-токен приходит только в cookie, в теле — access-токен и пользователь. Запрос с cookie обязан прийти с разрешённым заголовком Origin.
          */
         post: operations["refresh"];
         delete?: never;
@@ -937,11 +937,6 @@ export interface components {
             accessToken?: string;
             /** Format: int64 */
             expiresIn?: number;
-            /**
-             * @deprecated
-             * @description Refresh-токен; дублируется в cookie kr_refresh. Устарело: убрать в F4
-             */
-            refreshToken?: string;
             user?: components["schemas"]["UserResponse"];
         };
         BeaconResponse: {

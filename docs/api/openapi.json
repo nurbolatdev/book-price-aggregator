@@ -1002,7 +1002,7 @@
     },
     "/api/v1/auth/login" : {
       "post" : {
-        "description" : "Возвращает пару access и refresh токенов.",
+        "description" : "Возвращает access-токен и данные пользователя; refresh-токен — в cookie kr_refresh.",
         "operationId" : "login",
         "parameters" : [ {
           "in" : "header",
@@ -1150,7 +1150,7 @@
     },
     "/api/v1/auth/refresh" : {
       "post" : {
-        "description" : "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Запрос с cookie обязан прийти с разрешённым заголовком Origin.",
+        "description" : "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Новый refresh-токен приходит только в cookie, в теле — access-токен и пользователь. Запрос с cookie обязан прийти с разрешённым заголовком Origin.",
         "operationId" : "refresh",
         "parameters" : [ {
           "in" : "header",
@@ -2732,11 +2732,6 @@
           "expiresIn" : {
             "type" : "integer",
             "format" : "int64"
-          },
-          "refreshToken" : {
-            "type" : "string",
-            "description" : "Refresh-токен; дублируется в cookie kr_refresh. Устарело: убрать в F4",
-            "deprecated" : true
           },
           "user" : {
             "$ref" : "#/components/schemas/UserResponse"

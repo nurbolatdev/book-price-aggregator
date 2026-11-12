@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -28,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,12 +59,14 @@ class RefreshTokenIT extends AbstractIntegrationTest {
     void shouldIssueNewPairAndRevokeOldTokenWhenRefreshing() throws Exception {
         String first = refreshTokenOf(signIn(registered()));
 
-        String body = refresh(first)
+        MockHttpServletResponse refreshed = refresh(first)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").isString())
                 .andExpect(jsonPath("$.expiresIn").value(900))
-                .andReturn().getResponse().getContentAsString();
-        String second = JsonPath.read(body, "$.refreshToken");
+                .andExpect(jsonPath("$.refreshToken").doesNotExist())
+                .andReturn().getResponse();
+        String body = refreshed.getContentAsString();
+        String second = refreshTokenOf(refreshed);
 
         assertThat(second).isNotEqualTo(first);
         assertThat(revokedAt(first)).isNotNull();
@@ -76,7 +80,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
         String email = registered();
         String stolen = refreshTokenOf(signIn(email));
         String otherDevice = refreshTokenOf(signIn(email));
-        String rotated = JsonPath.read(refresh(stolen).andReturn().getResponse().getContentAsString(), "$.refreshToken");
+        String rotated = refreshTokenOf(refresh(stolen).andReturn().getResponse());
         // Outside the grace window a replay is a copy
         jdbc.update("UPDATE refresh_tokens SET revoked_at = revoked_at - INTERVAL '11 seconds' WHERE token_hash = ?",
                 TokenHasher.hash(stolen));
@@ -110,7 +114,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
             signIn(email);
         }
         // Refreshing makes the second session the most recently used one
-        second = JsonPath.read(refresh(second).andReturn().getResponse().getContentAsString(), "$.refreshToken");
+        second = refreshTokenOf(refresh(second).andReturn().getResponse());
 
         String newest = refreshTokenOf(signIn(email));
 
@@ -206,12 +210,12 @@ class RefreshTokenIT extends AbstractIntegrationTest {
         return email;
     }
 
-    private String signIn(String email) throws Exception {
+    private MockHttpServletResponse signIn(String email) throws Exception {
         return mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.USER_AGENT, "RefreshTokenIT")
                         .content("{\"email\": \"" + email + "\", \"password\": \"" + PASSWORD + "\"}"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse();
     }
 
     private ResultActions refresh(String token) throws Exception {
@@ -222,9 +226,5 @@ class RefreshTokenIT extends AbstractIntegrationTest {
     private Instant revokedAt(String token) {
         return jdbc.queryForObject("SELECT revoked_at FROM refresh_tokens WHERE token_hash = ?", Instant.class,
                 TokenHasher.hash(token));
-    }
-
-    private static String refreshTokenOf(String loginBody) {
-        return JsonPath.read(loginBody, "$.refreshToken");
     }
 }

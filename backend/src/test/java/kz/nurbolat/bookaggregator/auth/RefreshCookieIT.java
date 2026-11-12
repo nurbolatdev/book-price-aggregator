@@ -1,6 +1,5 @@
 package kz.nurbolat.bookaggregator.auth;
 
-import com.jayway.jsonpath.JsonPath;
 import jakarta.servlet.http.Cookie;
 import kz.nurbolat.bookaggregator.security.TokenHasher;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
@@ -20,6 +19,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.bearerOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
@@ -54,45 +55,49 @@ class RefreshCookieIT extends AbstractIntegrationTest {
         String cookie = cookieHeader(result);
         assertThat(cookie).startsWith(COOKIE + "=")
                 .contains("HttpOnly", "Secure", "SameSite=Strict", "Path=/api/v1/auth", "Max-Age=2592000");
-        assertThat(cookie).contains(refreshTokenOf(result));
+        assertThat(cookie).contains(refreshTokenOf(result.getResponse()));
     }
 
     @Test
     void shouldRotateCookieWhenRefreshingWithCookieOnly() throws Exception {
         MvcResult login = login(registered()).andReturn();
-        String token = refreshTokenOf(login);
+        String token = refreshTokenOf(login.getResponse());
 
         MvcResult refreshed = mockMvc.perform(post("/api/v1/auth/refresh").header(HttpHeaders.ORIGIN, ALLOWED)
                         .cookie(new Cookie(COOKIE, token)))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertThat(refreshTokenOf(refreshed)).isNotEqualTo(token);
-        assertThat(cookieHeader(refreshed)).startsWith(COOKIE + "=" + refreshTokenOf(refreshed));
+        assertThat(refreshTokenOf(refreshed.getResponse())).isNotEqualTo(token);
+        assertThat(cookieHeader(refreshed)).startsWith(COOKIE + "=" + refreshTokenOf(refreshed.getResponse()));
     }
 
     @Test
     void shouldAcceptBodyTokenWithoutOriginInTransitionalMode() throws Exception {
-        String token = refreshTokenOf(login(registered()).andReturn());
+        String token = refreshTokenOf(login(registered()).andReturn().getResponse());
 
         refreshWithBody(token, null).andExpect(status().isOk());
     }
 
     @Test
-    void shouldAcceptBodyTokenWithAllowedOriginAndKeepTokenInResponseBody() throws Exception {
-        String token = refreshTokenOf(login(registered()).andReturn());
+    void shouldAnswerRefreshWithCookieWithoutRefreshTokenInBody() throws Exception {
+        String token = refreshTokenOf(login(registered()).andReturn().getResponse());
 
-        refreshWithBody(token, ALLOWED)
+        MvcResult refreshed = mockMvc.perform(post("/api/v1/auth/refresh").header(HttpHeaders.ORIGIN, ALLOWED)
+                        .cookie(new Cookie(COOKIE, token)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
-                .andExpect(jsonPath("$.accessToken").isNotEmpty());
+                .andExpect(jsonPath("$.refreshToken").doesNotExist())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andReturn();
+
+        assertThat(refreshTokenOf(refreshed.getResponse())).isNotEqualTo(token);
     }
 
     @Test
     void shouldPreferCookieOverBodyWhenBothArePresent() throws Exception {
         String email = registered();
-        String cookieToken = refreshTokenOf(login(email).andReturn());
-        String bodyToken = refreshTokenOf(login(email).andReturn());
+        String cookieToken = refreshTokenOf(login(email).andReturn().getResponse());
+        String bodyToken = refreshTokenOf(login(email).andReturn().getResponse());
 
         mockMvc.perform(post("/api/v1/auth/refresh").header(HttpHeaders.ORIGIN, ALLOWED)
                         .cookie(new Cookie(COOKIE, cookieToken))
@@ -119,7 +124,7 @@ class RefreshCookieIT extends AbstractIntegrationTest {
 
     @Test
     void shouldRejectForeignOriginOnRefreshAndLogout() throws Exception {
-        String token = refreshTokenOf(login(registered()).andReturn());
+        String token = refreshTokenOf(login(registered()).andReturn().getResponse());
 
         mockMvc.perform(post("/api/v1/auth/refresh").header(HttpHeaders.ORIGIN, EVIL)
                         .cookie(new Cookie(COOKIE, token)))
@@ -133,7 +138,7 @@ class RefreshCookieIT extends AbstractIntegrationTest {
 
     @Test
     void shouldRejectCookieWithoutOrigin() throws Exception {
-        String token = refreshTokenOf(login(registered()).andReturn());
+        String token = refreshTokenOf(login(registered()).andReturn().getResponse());
 
         mockMvc.perform(post("/api/v1/auth/refresh").cookie(new Cookie(COOKIE, token)))
                 .andExpect(status().isForbidden());
@@ -143,7 +148,7 @@ class RefreshCookieIT extends AbstractIntegrationTest {
 
     @Test
     void shouldClearCookieAndEndSessionOnLogout() throws Exception {
-        String token = refreshTokenOf(login(registered()).andReturn());
+        String token = refreshTokenOf(login(registered()).andReturn().getResponse());
 
         MvcResult result = mockMvc.perform(post("/api/v1/auth/logout").header(HttpHeaders.ORIGIN, ALLOWED)
                         .cookie(new Cookie(COOKIE, token)))
@@ -167,7 +172,7 @@ class RefreshCookieIT extends AbstractIntegrationTest {
     void shouldClearCookieOnLogoutAll() throws Exception {
         MvcResult login = login(registered()).andReturn();
 
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/logout-all").header(HttpHeaders.AUTHORIZATION, bearerOf(login)))
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/logout-all").header(HttpHeaders.AUTHORIZATION, bearerOf(login.getResponse())))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
@@ -191,7 +196,7 @@ class RefreshCookieIT extends AbstractIntegrationTest {
     void shouldClearCookieWhenAccountIsDeleted() throws Exception {
         MvcResult login = login(registered()).andReturn();
 
-        MvcResult result = mockMvc.perform(delete("/api/v1/me").header(HttpHeaders.AUTHORIZATION, bearerOf(login))
+        MvcResult result = mockMvc.perform(delete("/api/v1/me").header(HttpHeaders.AUTHORIZATION, bearerOf(login.getResponse()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"password\": \"" + PASSWORD + "\"}"))
                 .andExpect(status().isNoContent())
@@ -207,15 +212,15 @@ class RefreshCookieIT extends AbstractIntegrationTest {
         MvcResult other = login(email).andReturn();
 
         MvcResult result = mockMvc.perform(post("/api/v1/me/password")
-                        .header(HttpHeaders.AUTHORIZATION, bearerOf(current))
+                        .header(HttpHeaders.AUTHORIZATION, bearerOf(current.getResponse()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"currentPassword\": \"" + PASSWORD + "\", \"newPassword\": \"newSecret123\"}"))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
         assertThat(result.getResponse().getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
-        refreshWithBody(refreshTokenOf(current), null).andExpect(status().isOk());
-        refreshWithBody(refreshTokenOf(other), null).andExpect(status().isUnauthorized());
+        refreshWithBody(refreshTokenOf(current.getResponse()), null).andExpect(status().isOk());
+        refreshWithBody(refreshTokenOf(other.getResponse()), null).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -254,13 +259,5 @@ class RefreshCookieIT extends AbstractIntegrationTest {
         List<String> cookies = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
         assertThat(cookies).hasSize(1);
         return cookies.get(0);
-    }
-
-    private static String refreshTokenOf(MvcResult result) throws Exception {
-        return JsonPath.read(result.getResponse().getContentAsString(), "$.refreshToken");
-    }
-
-    private static String bearerOf(MvcResult result) throws Exception {
-        return "Bearer " + JsonPath.<String>read(result.getResponse().getContentAsString(), "$.accessToken");
     }
 }

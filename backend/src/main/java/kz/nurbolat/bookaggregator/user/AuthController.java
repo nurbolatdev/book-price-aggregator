@@ -56,7 +56,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
-    @Operation(summary = "Вход", description = "Возвращает пару access и refresh токенов.")
+    @Operation(summary = "Вход", description = "Возвращает access-токен и данные пользователя; refresh-токен — в cookie kr_refresh.")
     @ApiResponse(responseCode = "401", description = "Неверный email или пароль")
     @ApiResponse(responseCode = "403", description = "Email не подтверждён")
     @ApiResponse(responseCode = "422", description = "Ошибка валидации")
@@ -70,6 +70,7 @@ public class AuthController {
     @Operation(summary = "Обновление пары токенов",
             description = "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. "
                     + "Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). "
+                    + "Новый refresh-токен приходит только в cookie, в теле — access-токен и пользователь. "
                     + "Запрос с cookie обязан прийти с разрешённым заголовком Origin.")
     @ApiResponse(responseCode = "401", description = "Токена нет, сессия недействительна или истекла")
     @ApiResponse(responseCode = "403", description = "Origin не разрешён или не указан при токене из cookie")
@@ -155,9 +156,9 @@ public class AuthController {
         return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshCookies.clear()).build();
     }
 
-    private ResponseEntity<AuthResponse> withCookie(AuthResponse response) {
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshCookies.issue(response.refreshToken()))
-                .body(response);
+    private ResponseEntity<AuthResponse> withCookie(AuthService.SignedIn signedIn) {
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshCookies.issue(signedIn.refreshToken()))
+                .body(signedIn.response());
     }
 
     private static String bodyToken(RefreshRequest body) {
