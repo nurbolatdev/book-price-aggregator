@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './app/App'
 import { restoreSession } from './api/auth'
+import { startAuthSync } from './api/authSync'
 import { AppProviders } from './app/AppProviders'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -19,6 +20,7 @@ async function enableMocking(): Promise<void> {
 }
 
 void enableMocking().then(() => {
+  startAuthSync()
   void restoreSession()
 
   createRoot(root).render(

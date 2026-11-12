@@ -2,6 +2,7 @@ import type { PricePeriod } from './types'
 import type { FacetParams, SearchParams } from './search'
 
 export const queryKeys = {
+  me: ['me'],
   stores: ['stores'],
   popular: (limit: number) => ['search', 'popular', limit],
   suggest: (q: string) => ['search', 'suggest', q],
@@ -14,3 +15,5 @@ export const queryKeys = {
   book: (id: number) => ['books', id],
   beaconForEdition: (id: number) => ['beacons', 'edition', id],
 } as const
+
+export const USER_SCOPED_KEYS: readonly (readonly string[])[] = [['me'], ['beacons']]
