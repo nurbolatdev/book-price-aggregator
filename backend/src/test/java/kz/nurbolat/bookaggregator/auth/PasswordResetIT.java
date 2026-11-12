@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.withRefreshCookie;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,7 +46,7 @@ class PasswordResetIT extends AbstractMailIT {
         login(email, OLD_PASSWORD).andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
         login(email, NEW_PASSWORD).andExpect(status().isOk());
-        postJson("/api/v1/auth/refresh", "{\"refreshToken\": \"" + refreshToken + "\"}")
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), refreshToken))
                 .andExpect(status().isUnauthorized());
         // The link works once
         postJson("/api/v1/auth/reset-password", resetJson(token))

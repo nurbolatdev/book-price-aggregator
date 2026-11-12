@@ -30,6 +30,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.withRefreshCookie;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -85,9 +86,8 @@ class RefreshTokenIT extends AbstractIntegrationTest {
         jdbc.update("UPDATE refresh_tokens SET revoked_at = revoked_at - INTERVAL '11 seconds' WHERE token_hash = ?",
                 TokenHasher.hash(stolen));
 
-        mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
-                        .header(HttpHeaders.USER_AGENT, "X".repeat(1000))
-                        .content("{\"refreshToken\": \"" + stolen + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), stolen)
+                        .header(HttpHeaders.USER_AGENT, "X".repeat(1000)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
         Long userId = userRepository.findByEmail(email).orElseThrow().getId();
@@ -177,14 +177,12 @@ class RefreshTokenIT extends AbstractIntegrationTest {
     void shouldRevokeTokenWhenLoggingOut() throws Exception {
         String token = refreshTokenOf(signIn(registered()));
 
-        mockMvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\": \"" + token + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/logout"), token))
                 .andExpect(status().isNoContent());
 
         refresh(token).andExpect(status().isUnauthorized());
         // Unknown tokens are ignored: logging out twice is not an error
-        mockMvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\": \"" + token + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/logout"), token))
                 .andExpect(status().isNoContent());
     }
 
@@ -219,8 +217,7 @@ class RefreshTokenIT extends AbstractIntegrationTest {
     }
 
     private ResultActions refresh(String token) throws Exception {
-        return mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"refreshToken\": \"" + token + "\"}"));
+        return mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), token));
     }
 
     private Instant revokedAt(String token) {

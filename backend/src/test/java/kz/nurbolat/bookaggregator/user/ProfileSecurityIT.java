@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.bearerOf;
 import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.withRefreshCookie;
 import static kz.nurbolat.bookaggregator.support.PriceFixtures.daysAgo;
 import static kz.nurbolat.bookaggregator.support.PriceFixtures.editionWithHistory;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +50,7 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, bearerOf(deviceA))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody(PASSWORD, "newSecret123", refreshTokenOf(deviceA))))
+                        .content(passwordBody(PASSWORD, "newSecret123")))
                 .andExpect(status().isNoContent());
 
         refresh(refreshTokenOf(deviceA)).andExpect(status().isOk());
@@ -65,12 +66,12 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     void shouldEndEverySessionWhenPasswordChangesWithoutSessionInfo() throws Exception {
         String email = registered();
         MockHttpServletResponse deviceA = signIn(email);
-        // An access token issued before the session claim existed and no refresh token in the body
+        // An access token issued before the session claim existed and 
         String legacyBearer = "Bearer " + jwtService.generateAccessToken(userRepository.findByEmail(email).orElseThrow());
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, legacyBearer)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody(PASSWORD, "newSecret123", null)))
+                        .content(passwordBody(PASSWORD, "newSecret123")))
                 .andExpect(status().isNoContent());
 
         refresh(refreshTokenOf(deviceA)).andExpect(status().isUnauthorized());
@@ -82,7 +83,7 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, bearerOf(session))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody("wrong-password", "newSecret123", null)))
+                        .content(passwordBody("wrong-password", "newSecret123")))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("currentPassword"))
@@ -95,7 +96,7 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, bearerOf(session))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody(PASSWORD, "1234567", null)))
+                        .content(passwordBody(PASSWORD, "1234567")))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("newPassword"))
                 .andExpect(jsonPath("$.fieldErrors[0].message").value("Минимум 8 символов"));
@@ -206,12 +207,10 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     }
 
     private ResultActions refresh(String token) throws Exception {
-        return mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"refreshToken\": \"" + token + "\"}"));
+        return mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), token));
     }
 
-    private static String passwordBody(String current, String next, String refreshToken) {
-        return "{\"currentPassword\": \"" + current + "\", \"newPassword\": \"" + next + "\""
-                + (refreshToken == null ? "" : ", \"refreshToken\": \"" + refreshToken + "\"") + "}";
+    private static String passwordBody(String current, String next) {
+        return "{\"currentPassword\": \"" + current + "\", \"newPassword\": \"" + next + "\"}";
     }
 }

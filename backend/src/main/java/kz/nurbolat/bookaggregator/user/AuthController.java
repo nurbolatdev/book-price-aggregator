@@ -10,7 +10,6 @@ import kz.nurbolat.bookaggregator.auth.PasswordResetService;
 import kz.nurbolat.bookaggregator.user.dto.AuthResponse;
 import kz.nurbolat.bookaggregator.user.dto.EmailRequest;
 import kz.nurbolat.bookaggregator.user.dto.LoginRequest;
-import kz.nurbolat.bookaggregator.user.dto.RefreshRequest;
 import kz.nurbolat.bookaggregator.user.dto.RegisterRequest;
 import kz.nurbolat.bookaggregator.user.dto.RegisterResponse;
 import kz.nurbolat.bookaggregator.user.dto.ResetPasswordRequest;
@@ -69,39 +68,30 @@ public class AuthController {
 
     @Operation(summary = "Обновление пары токенов",
             description = "Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. "
-                    + "Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). "
+                    + "Токен берётся только из cookie kr_refresh, тело запроса игнорируется. "
                     + "Новый refresh-токен приходит только в cookie, в теле — access-токен и пользователь. "
-                    + "Запрос с cookie обязан прийти с разрешённым заголовком Origin.")
+                    + "Запрос обязан прийти с разрешённым заголовком Origin.")
     @ApiResponse(responseCode = "401", description = "Токена нет, сессия недействительна или истекла")
-    @ApiResponse(responseCode = "403", description = "Origin не разрешён или не указан при токене из cookie")
-    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
+    @ApiResponse(responseCode = "403", description = "Origin не разрешён или не указан")
     @PostMapping("/refresh")
-    ResponseEntity<AuthResponse> refresh(@Valid @RequestBody(required = false) RefreshRequest body,
-                                         HttpServletRequest request,
+    ResponseEntity<AuthResponse> refresh(HttpServletRequest request,
                                          @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
-        Optional<String> fromCookie = refreshCookies.read(request);
-        String token = fromCookie.orElseGet(() -> bodyToken(body));
-        if (token == null) {
-            throw new AppException(ErrorCode.UNAUTHORIZED, "Сессия недействительна, войдите снова");
-        }
-        refreshCookies.checkOrigin(request, fromCookie.isPresent());
+        String token = refreshCookies.read(request)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED, "Сессия недействительна, войдите снова"));
+        refreshCookies.checkOrigin(request, true);
         return withCookie(authService.refresh(token, userAgent));
     }
 
     @Operation(summary = "Выход",
-            description = "Завершает сессию, к которой относится refresh-токен (cookie kr_refresh или тело запроса), "
-                    + "и удаляет cookie. Без токена тоже отвечает 204.")
+            description = "Завершает сессию, к которой относится refresh-токен из cookie kr_refresh, "
+                    + "и удаляет cookie. Без cookie тоже отвечает 204. Cookie принимается только с разрешённым заголовком Origin.")
     @ApiResponse(responseCode = "204", description = "Сессия завершена")
     @ApiResponse(responseCode = "403", description = "Origin не разрешён или не указан при токене из cookie")
-    @ApiResponse(responseCode = "422", description = "Ошибка валидации")
     @PostMapping("/logout")
-    ResponseEntity<Void> logout(@Valid @RequestBody(required = false) RefreshRequest body, HttpServletRequest request) {
+    ResponseEntity<Void> logout(HttpServletRequest request) {
         Optional<String> fromCookie = refreshCookies.read(request);
-        String token = fromCookie.orElseGet(() -> bodyToken(body));
         refreshCookies.checkOrigin(request, fromCookie.isPresent());
-        if (token != null) {
-            authService.logout(token);
-        }
+        fromCookie.ifPresent(authService::logout);
         return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshCookies.clear()).build();
     }
 
@@ -159,9 +149,5 @@ public class AuthController {
     private ResponseEntity<AuthResponse> withCookie(AuthService.SignedIn signedIn) {
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshCookies.issue(signedIn.refreshToken()))
                 .body(signedIn.response());
-    }
-
-    private static String bodyToken(RefreshRequest body) {
-        return body == null || body.refreshToken() == null || body.refreshToken().isBlank() ? null : body.refreshToken();
     }
 }

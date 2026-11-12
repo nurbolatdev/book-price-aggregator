@@ -7,7 +7,6 @@ import kz.nurbolat.bookaggregator.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -19,6 +18,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.withRefreshCookie;
 import static kz.nurbolat.bookaggregator.support.TestData.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -117,8 +117,7 @@ class TokenCleanupServiceIT extends AbstractIntegrationTest {
 
         service.cleanUp();
 
-        mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\": \"" + stolen + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), stolen))
                 .andExpect(status().isUnauthorized());
         assertThat(jdbc.queryForObject("SELECT revoked_at IS NOT NULL FROM refresh_tokens WHERE token_hash = ?",
                 Boolean.class, TokenHasher.hash(sibling))).isTrue();

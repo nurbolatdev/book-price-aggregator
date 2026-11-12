@@ -395,7 +395,7 @@ export interface paths {
         put?: never;
         /**
          * Выход
-         * @description Завершает сессию, к которой относится refresh-токен (cookie kr_refresh или тело запроса), и удаляет cookie. Без токена тоже отвечает 204.
+         * @description Завершает сессию, к которой относится refresh-токен из cookie kr_refresh, и удаляет cookie. Без cookie тоже отвечает 204. Cookie принимается только с разрешённым заголовком Origin.
          */
         post: operations["logout"];
         delete?: never;
@@ -435,7 +435,7 @@ export interface paths {
         put?: never;
         /**
          * Обновление пары токенов
-         * @description Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся из cookie kr_refresh, а если её нет, из тела запроса (переходный режим до F4). Новый refresh-токен приходит только в cookie, в теле — access-токен и пользователь. Запрос с cookie обязан прийти с разрешённым заголовком Origin.
+         * @description Меняет refresh-токен на новую пару; использованный токен перестаёт действовать. Токен берётся только из cookie kr_refresh, тело запроса игнорируется. Новый refresh-токен приходит только в cookie, в теле — access-токен и пользователь. Запрос обязан прийти с разрешённым заголовком Origin.
          */
         post: operations["refresh"];
         delete?: never;
@@ -1023,12 +1023,6 @@ export interface components {
              * @example newSecret123
              */
             newPassword: string;
-            /**
-             * @deprecated
-             * @description Refresh-токен этого устройства: его сессия остаётся, остальные завершаются. Без него завершаются все сессии. Устарело: текущая сессия определяется по access-токену, убрать в F4
-             * @example 3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0
-             */
-            refreshToken?: string;
         };
         ComponentHealth: {
             details?: string;
@@ -1308,14 +1302,6 @@ export interface components {
             ready?: number;
             /** Format: int64 */
             unacknowledged?: number;
-        };
-        RefreshRequest: {
-            /**
-             * @deprecated
-             * @description Refresh-токен, полученный при входе. Не нужен, если браузер шлёт cookie kr_refresh; поле нужно только до перехода frontend на cookie (F4)
-             * @example 3f1c0c1e5a7b4f4a9d52c7e1b6a8d2f0
-             */
-            refreshToken?: string;
         };
         RegisterRequest: {
             /**
@@ -2304,11 +2290,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["RefreshRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Сессия завершена */
             204: {
@@ -2319,15 +2301,6 @@ export interface operations {
             };
             /** @description Origin не разрешён или не указан при токене из cookie */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Ошибка валидации */
-            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2373,11 +2346,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["RefreshRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Успешный ответ */
             200: {
@@ -2397,17 +2366,8 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Origin не разрешён или не указан при токене из cookie */
+            /** @description Origin не разрешён или не указан */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Ошибка валидации */
-            422: {
                 headers: {
                     [name: string]: unknown;
                 };

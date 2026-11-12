@@ -1,8 +1,10 @@
 package kz.nurbolat.bookaggregator.support;
 
 import com.jayway.jsonpath.JsonPath;
+import jakarta.servlet.http.Cookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public final class RefreshCookieSupport {
 
+    private static final String ALLOWED_ORIGIN = "http://localhost:5173";
     private static final String PREFIX = "kr_refresh=";
 
     private RefreshCookieSupport() {
@@ -30,5 +33,10 @@ public final class RefreshCookieSupport {
     /** {@code Bearer <access token>} taken from the response body. */
     public static String bearerOf(MockHttpServletResponse response) throws Exception {
         return "Bearer " + JsonPath.<String>read(response.getContentAsString(), "$.accessToken");
+    }
+
+    /** Sends the token the way the browser does: the {@code kr_refresh} cookie plus an allowed {@code Origin}. */
+    public static MockHttpServletRequestBuilder withRefreshCookie(MockHttpServletRequestBuilder request, String token) {
+        return request.cookie(new Cookie("kr_refresh", token)).header(HttpHeaders.ORIGIN, ALLOWED_ORIGIN);
     }
 }

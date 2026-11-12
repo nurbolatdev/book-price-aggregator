@@ -23,6 +23,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.withRefreshCookie;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -123,8 +124,7 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
         String t1 = next(t0);
         Long userId = userRepository.findByEmail(email).orElseThrow().getId();
 
-        mockMvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\": \"" + t1 + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/logout"), t1))
                 .andExpect(status().isNoContent());
 
         refresh(t0).andExpect(status().isUnauthorized());
@@ -142,8 +142,7 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
         mockMvc.perform(post("/api/v1/me/password")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + JsonPath.read(deviceA.getContentAsString(), "$.accessToken"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"currentPassword\": \"" + PASSWORD + "\", \"newPassword\": \"newSecret123\", "
-                                + "\"refreshToken\": \"" + refreshTokenOf(deviceA) + "\"}"))
+                        .content("{\"currentPassword\": \"" + PASSWORD + "\", \"newPassword\": \"newSecret123\"}"))
                 .andExpect(status().isNoContent());
 
         refresh(deviceB0).andExpect(status().isUnauthorized());
@@ -154,8 +153,7 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
         String t0 = refreshTokenOf(signIn(registered()));
         String t1 = next(t0);
 
-        mockMvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\": \"" + t0 + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/logout"), t0))
                 .andExpect(status().isNoContent());
 
         refresh(t1).andExpect(status().isUnauthorized());
@@ -192,7 +190,6 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
     }
 
     private ResultActions refresh(String token) throws Exception {
-        return mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"refreshToken\": \"" + token + "\"}"));
+        return mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), token));
     }
 }
