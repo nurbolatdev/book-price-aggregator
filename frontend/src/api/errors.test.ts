@@ -5,12 +5,12 @@ import { ApiError, getErrorMessage, toApiError } from './errors'
 
 const config = { headers: new AxiosHeaders() } as InternalAxiosRequestConfig
 
-function withResponse(status: number, data: unknown): AxiosError {
+function withResponse(status: number, data: unknown, headers: Record<string, string> = {}): AxiosError {
   return new AxiosError('failed', 'ERR_BAD_REQUEST', config, null, {
     data,
     status,
     statusText: '',
-    headers: {},
+    headers,
     config,
   })
 }
@@ -54,5 +54,23 @@ describe('getErrorMessage', () => {
 
   it('returns the generic text for a plain error', () => {
     expect(getErrorMessage(new Error('boom'))).toBe('Что-то пошло не так')
+  })
+})
+
+describe('toApiError retryAfter', () => {
+  const body = { status: 429, code: 'RATE_LIMITED', message: 'slow down' }
+
+  it('reads the retry-after header in seconds', () => {
+    expect(toApiError(withResponse(429, body, { 'retry-after': '45' })).retryAfter).toBe(45)
+  })
+
+  it('is null when the header is missing or not a number of seconds', () => {
+    expect(toApiError(withResponse(429, body)).retryAfter).toBeNull()
+    expect(toApiError(withResponse(429, body, { 'retry-after': 'soon' })).retryAfter).toBeNull()
+    expect(toApiError(withResponse(429, body, { 'retry-after': '0' })).retryAfter).toBeNull()
+  })
+
+  it('is read for bodies without an error code too', () => {
+    expect(toApiError(withResponse(429, 'x', { 'retry-after': '7' })).retryAfter).toBe(7)
   })
 })

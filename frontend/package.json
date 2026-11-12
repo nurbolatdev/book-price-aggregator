@@ -18,13 +18,16 @@
     "gen:api": "openapi-typescript ../docs/api/openapi.json -o src/api/schema.d.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^7.0.6",
     "@tanstack/react-query": "^5.104.5",
     "axios": "^1.7.2",
     "lucide-react": "^1.66.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.92.0",
     "react-router-dom": "^6.23.1",
     "recharts": "^3.10.1",
+    "zod": "^4.6.7",
     "zustand": "^5.0.16"
   },
   "devDependencies": {
