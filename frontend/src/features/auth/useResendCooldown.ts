@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { resendVerification } from '../../api/auth'
-import { getErrorMessage } from '../../api/errors'
+import { ApiError, getErrorMessage } from '../../api/errors'
 import { useCountdown } from '../../lib/useCountdown'
 import { toast } from '../../stores/toast'
 import { useRateLimit, type RateLimit } from './useRateLimit'
@@ -17,7 +17,7 @@ export interface ResendCooldown {
   rateLimit: RateLimit
 }
 
-export function useResendCooldown(): ResendCooldown {
+export function useResendCooldown(options: { onRateLimited?: (seconds: number) => void } = {}): ResendCooldown {
   const cooldown = useCountdown()
   const rateLimit = useRateLimit()
   const mutation = useMutation({
@@ -31,7 +31,12 @@ export function useResendCooldown(): ResendCooldown {
       toast.success('Письмо отправлено')
       cooldown.start(COOLDOWN_SECONDS)
     } catch (error) {
-      if (!rateLimit.handle(error)) toast.error(getErrorMessage(error))
+      if (rateLimit.handle(error)) {
+        const seconds = error instanceof ApiError ? error.retryAfter ?? 60 : 60
+        options.onRateLimited?.(seconds)
+      } else {
+        toast.error(getErrorMessage(error))
+      }
     }
   })
 

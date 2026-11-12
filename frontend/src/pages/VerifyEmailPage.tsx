@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router-dom'
 import { verifyEmail } from '../api/auth'
+import { fetchMe } from '../api/me'
 import { ApiError } from '../api/errors'
 import { queryKeys } from '../api/queryKeys'
 import { Button, buttonClasses } from '../components/ui/Button'
@@ -15,8 +16,8 @@ import { RateLimitAlert } from '../features/auth/RateLimitAlert'
 import { authLinkClasses } from '../features/auth/authLink'
 import { emailSchema } from '../features/auth/schemas'
 import { useResendCooldown } from '../features/auth/useResendCooldown'
-import { writeUser } from '../features/profile/userCache'
 import { formatCountdown } from '../lib/format'
+import { writeUser } from '../features/profile/userCache'
 import { usePageMeta } from '../lib/usePageMeta'
 import { useAuthStore } from '../stores/auth'
 
@@ -53,7 +54,7 @@ function LinkNotWorking() {
         <Button
           variant="dark"
           size="form"
-          className="w-full"
+          className="w-full md:w-auto md:self-start"
           loading={resend.pending}
           disabled={resend.blocked}
           onClick={() => void resend.resend(ownEmail)}
@@ -83,7 +84,7 @@ function LinkNotWorking() {
             type="submit"
             variant="dark"
             size="form"
-            className="w-full"
+            className="w-full md:w-auto md:self-start"
             loading={resend.pending}
             disabled={resend.blocked}
           >
@@ -110,10 +111,10 @@ export default function VerifyEmailPage() {
     mutationFn: verifyEmail,
     meta: { silentError: true },
     onSuccess: () => {
-      const current = useAuthStore.getState().user
-      if (current) {
-        writeUser(queryClient, { ...current, emailVerified: true })
-        void queryClient.invalidateQueries({ queryKey: queryKeys.me })
+      if (useAuthStore.getState().user) {
+        void fetchMe()
+          .then((me) => writeUser(queryClient, me))
+          .catch(() => queryClient.invalidateQueries({ queryKey: queryKeys.me }))
       }
     },
   })
@@ -147,7 +148,7 @@ export default function VerifyEmailPage() {
           className={buttonClasses({
             variant: 'primary',
             size: 'form',
-            className: 'w-full',
+            className: 'w-full md:w-auto md:self-start',
           })}
         >
           К моим маячкам

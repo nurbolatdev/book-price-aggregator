@@ -50,6 +50,24 @@ describe('ProfilePage', () => {
     )
   })
 
+  it('shows a toast when resending the verification email is rate limited', async () => {
+    signIn()
+    server.use(
+      http.post('*/api/v1/auth/resend-verification', () =>
+        HttpResponse.json(
+          { code: 'RATE_LIMITED', message: 'Слишком много запросов', fieldErrors: [] },
+          { status: 429, headers: { 'Retry-After': '30' } },
+        ),
+      ),
+    )
+    renderProfile()
+    await screen.findByRole('heading', { level: 1, name: 'Профиль и настройки' })
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить письмо ещё раз' }))
+    await waitFor(() =>
+      expect(useToastStore.getState().toasts.map((t) => t.message)).toContain('Подождите 30 сек.'),
+    )
+  })
+
   it('has no banner for a verified user', async () => {
     signIn({ emailVerified: true })
     server.use(http.get('*/api/v1/me', () => HttpResponse.json({ ...user, emailVerified: true })))

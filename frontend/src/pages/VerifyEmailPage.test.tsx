@@ -57,7 +57,7 @@ describe('VerifyEmailPage', () => {
     const { queryClient } = renderPage('?token=valid')
     const strong = await screen.findByText('nurbo@example.com')
     expect(strong.tagName).toBe('STRONG')
-    expect(useAuthStore.getState().user?.emailVerified).toBe(true)
+    await waitFor(() => expect(useAuthStore.getState().user?.emailVerified).toBe(true))
     expect(queryClient.getQueryData<typeof user>(queryKeys.me)?.emailVerified).toBe(true)
   })
 
