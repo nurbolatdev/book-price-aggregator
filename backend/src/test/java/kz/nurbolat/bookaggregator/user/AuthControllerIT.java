@@ -3,13 +3,16 @@ package kz.nurbolat.bookaggregator.user;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -39,7 +42,9 @@ class AuthControllerIT extends AbstractIntegrationTest {
         login(email, PASSWORD)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken", notNullValue()))
-                .andExpect(jsonPath("$.refreshToken", notNullValue()))
+                .andExpect(jsonPath("$.refreshToken").doesNotExist())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, startsWith("kr_refresh=")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, not(startsWith("kr_refresh=;"))))
                 .andExpect(jsonPath("$.expiresIn").value(900))
                 .andExpect(jsonPath("$.user.email").value(email))
                 .andExpect(jsonPath("$.user.emailVerified").value(false));

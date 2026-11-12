@@ -159,7 +159,8 @@ docker compose up -d postgres redis rabbitmq mailpit
 
 Две последние команды запускаются в разных терминалах и друг от друга не зависят.
 
-- Frontend (`cd frontend`): `npm run lint`, `npm test`, `npm run build`, `npm run gen:api` (перегенерировать `src/api/schema.d.ts` после изменения `docs/api/openapi.json`), `npm run dev:mock` (приложение без backend, на фикстурах MSW), `npm run analyze` (production-сборка и проверка, что Recharts не попадает в начальные чанки), `npm run screens` (снимки экранов при 1280 и 390 px в `frontend/screens/`; один раз нужен `npx playwright install chromium`).
+- Frontend (`cd frontend`): `npm run lint`, `npm test`, `npm run build`, `npm run gen:api` (перегенерировать `src/api/schema.d.ts` после изменения `docs/api/openapi.json`), `npm run dev:mock` (приложение без backend, на фикстурах MSW; войти можно с любым email и паролем `password123`, `limit@example.com` показывает состояние «слишком много попыток»), `npm run analyze` (production-сборка и проверка, что Recharts не попадает в начальные чанки), `npm run screens` (снимки экранов при 1280 и 390 px в `frontend/screens/`; один раз нужен `npx playwright install chromium`).
+- Refresh-токен хранится в cookie `kr_refresh`; при разработке по обычному http (не localhost-профиль `local`) нужен `REFRESH_COOKIE_SECURE=false`, в профиле `local` он уже выключен.
 - Тесты: `cd backend && ./mvnw verify` (нужен Docker для Testcontainers). Отчёт покрытия — `backend/target/site/jacoco/index.html`; порог для сервисов — 70% строк.
 - Нагрузочный тест k6 и результаты — [docs/performance.md](docs/performance.md).
 - Контракт OpenAPI экспортирован в [docs/api/openapi.json](docs/api/openapi.json); после изменения аннотаций обновить: `cd backend && ./mvnw -B verify -Dit.test=OpenApiSpecIT -Dopenapi.update=true`.

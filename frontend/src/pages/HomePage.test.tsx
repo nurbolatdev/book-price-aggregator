@@ -39,7 +39,6 @@ describe('HomePage', () => {
     unmount()
     useAuthStore.getState().setSession({
       accessToken: 'a',
-      refreshToken: 'r',
       user: { id: 1, name: 'Aidar', role: 'USER' },
     })
     renderWithProviders(<HomePage />)

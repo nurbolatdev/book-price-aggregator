@@ -123,16 +123,6 @@ public class RefreshTokenService {
         repository.revokeAllOfUser(userId, clock.instant());
     }
 
-    /** Family of the token if it is an active token of this user; empty otherwise. */
-    @Transactional
-    public Optional<UUID> activeFamilyOf(String token, Long userId) {
-        Instant now = clock.instant();
-        return repository.findByTokenHash(TokenHasher.hash(token))
-                .filter(t -> t.getRevokedAt() == null && t.getExpiresAt().isAfter(now))
-                .filter(t -> t.getUser().getId().equals(userId))
-                .map(RefreshToken::getFamilyId);
-    }
-
     /** Signs the user out everywhere except the session of the given family (password changed on this device). */
     @Transactional
     public void revokeAllExcept(Long userId, UUID familyId) {

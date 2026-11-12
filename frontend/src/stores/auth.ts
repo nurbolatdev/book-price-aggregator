@@ -1,36 +1,48 @@
 import { create } from 'zustand'
-import type { AuthResponse, UserResponse } from '../api/types'
+import type { UserResponse } from '../api/types'
 
-export const REFRESH_TOKEN_KEY = 'kr.refreshToken'
+export const LEGACY_REFRESH_TOKEN_KEY = 'kr.refreshToken'
 
 export type AuthStatus = 'restoring' | 'authenticated' | 'anonymous'
+
+export type Session = { accessToken: string; user: UserResponse }
 
 interface AuthState {
   status: AuthStatus
   user: UserResponse | null
   accessToken: string | null
-  setSession: (auth: AuthResponse) => void
+  setSession: (session: Session) => void
+  setUser: (user: UserResponse) => void
   clearSession: () => void
 }
 
-export function getRefreshToken(): string | null {
-  return localStorage.getItem(REFRESH_TOKEN_KEY)
+let sessionEpoch = 0
+
+export function getSessionEpoch(): number {
+  return sessionEpoch
+}
+
+export function removeLegacyRefreshToken(): void {
+  try {
+    localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY)
+  } catch {
+    // storage may be unavailable; nothing to clean up then
+  }
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  status: getRefreshToken() ? 'restoring' : 'anonymous',
+  status: 'restoring',
   user: null,
   accessToken: null,
-  setSession: (auth) => {
-    const { accessToken, refreshToken, user } = auth
-    if (!accessToken || !refreshToken || !user) {
+  setSession: ({ accessToken, user }) => {
+    if (!accessToken || !user) {
       throw new Error('Incomplete auth response')
     }
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
     set({ status: 'authenticated', user, accessToken })
   },
+  setUser: (user) => set({ user }),
   clearSession: () => {
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    sessionEpoch += 1
     set({ status: 'anonymous', user: null, accessToken: null })
   },
 }))

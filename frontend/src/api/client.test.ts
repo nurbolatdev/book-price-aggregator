@@ -2,19 +2,22 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { NETWORK_FAILURE, authBody, mockApi } from '../test/mockAdapter'
 import type { MockReply } from '../test/mockAdapter'
 import { useAuthStore } from '../stores/auth'
-import { api } from './client'
+import { useToastStore } from '../stores/toast'
+import { api, refreshSession } from './client'
 import { ApiError } from './errors'
 
 function authorizationOf(headers: { get(name: string): unknown }): string {
   return String(headers.get('Authorization') ?? '')
 }
 
-function startSession(access = 'old', refresh = 'r1') {
-  useAuthStore.getState().setSession(authBody(access, refresh))
+function startSession(access = 'old') {
+  const { accessToken, user } = authBody(access)
+  useAuthStore.getState().setSession({ accessToken: accessToken!, user: user! })
 }
 
 beforeEach(() => {
   useAuthStore.setState({ status: 'anonymous', user: null, accessToken: null })
+  useToastStore.setState({ toasts: [] })
 })
 
 describe('api client', () => {
@@ -31,6 +34,37 @@ describe('api client', () => {
     expect(seen['/auth/login']).toBe('')
   })
 
+  it('sends the bearer token and credentials on /auth/logout-all', async () => {
+    startSession('tok')
+    const seen: Record<string, { auth: string; credentials: boolean | undefined }> = {}
+    mockApi((config) => {
+      seen[config.url ?? ''] = {
+        auth: authorizationOf(config.headers),
+        credentials: config.withCredentials,
+      }
+      return [204, null]
+    })
+    await api.post('/auth/logout-all')
+    await api.post('/auth/logout')
+    expect(seen['/auth/logout-all']).toEqual({ auth: 'Bearer tok', credentials: true })
+    expect(seen['/auth/logout']).toEqual({ auth: '', credentials: true })
+  })
+
+  it('sends credentials to /auth/* only and no body on refresh', async () => {
+    startSession()
+    const seen: Record<string, { credentials: boolean | undefined; data: unknown }> = {}
+    mockApi((config) => {
+      seen[config.url ?? ''] = { credentials: config.withCredentials, data: config.data }
+      return [200, authBody('n')]
+    })
+    await api.post('/auth/refresh')
+    await api.post('/auth/login', {})
+    await api.get('/me')
+    expect(seen['/auth/refresh']).toEqual({ credentials: true, data: undefined })
+    expect(seen['/auth/login']?.credentials).toBe(true)
+    expect(seen['/me']?.credentials).not.toBe(true)
+  })
+
   it('refreshes once for parallel expired requests and retries them all', async () => {
     startSession()
     let refreshCalls = 0
@@ -38,7 +72,7 @@ describe('api client', () => {
       if (config.url === '/auth/refresh') {
         refreshCalls += 1
         await Promise.resolve()
-        return [200, authBody('new', 'r2')]
+        return [200, authBody('new')]
       }
       return authorizationOf(config.headers) === 'Bearer new'
         ? [200, { ok: true }]
@@ -49,7 +83,6 @@ describe('api client', () => {
 
     expect(refreshCalls).toBe(1)
     expect(results.map((r) => r.status)).toEqual([200, 200, 200])
-    expect(localStorage.getItem('kr.refreshToken')).toBe('r2')
     expect(useAuthStore.getState().accessToken).toBe('new')
   })
 
@@ -71,8 +104,18 @@ describe('api client', () => {
       expect((reason as ApiError).status).toBe(401)
     }
     expect(useAuthStore.getState().status).toBe('anonymous')
-    expect(localStorage.getItem('kr.refreshToken')).toBeNull()
     expect(window.location.href).toBe(hrefBefore)
+    expect(useToastStore.getState().toasts.map((t) => t.message)).toEqual([
+      'Сессия закончилась, войдите снова',
+    ])
+  })
+
+  it('does not toast when the refresh is refused while restoring', async () => {
+    useAuthStore.setState({ status: 'restoring' })
+    mockApi(() => [401, { status: 401, code: 'UNAUTHORIZED', message: 'no' }])
+    await expect(refreshSession()).rejects.toBeInstanceOf(ApiError)
+    expect(useAuthStore.getState().status).toBe('anonymous')
+    expect(useToastStore.getState().toasts).toEqual([])
   })
 
   it('does not refresh on a failed login', async () => {
@@ -105,7 +148,7 @@ describe('api client', () => {
     mockApi((config): MockReply => {
       if (config.url === '/auth/refresh') {
         refreshCalls += 1
-        return [200, authBody('new', 'r2')]
+        return [200, authBody('new')]
       }
       meCalls += 1
       return [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }]
@@ -115,7 +158,7 @@ describe('api client', () => {
     expect(refreshCalls).toBe(1)
   })
 
-  it('keeps the refresh token when refresh fails with a network error', async () => {
+  it('keeps the session when refresh fails with a network error', async () => {
     startSession()
     mockApi((config) =>
       config.url === '/auth/refresh'
@@ -123,10 +166,9 @@ describe('api client', () => {
         : [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }],
     )
     await expect(api.get('/me')).rejects.toMatchObject({ code: 'NETWORK_ERROR' })
-    expect(localStorage.getItem('kr.refreshToken')).toBe('r1')
   })
 
-  it('keeps the refresh token on 429 and rejects with RATE_LIMITED', async () => {
+  it('keeps the session on 429 and rejects with RATE_LIMITED', async () => {
     startSession()
     mockApi((config) =>
       config.url === '/auth/refresh'
@@ -134,10 +176,9 @@ describe('api client', () => {
         : [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }],
     )
     await expect(api.get('/me')).rejects.toMatchObject({ code: 'RATE_LIMITED' })
-    expect(localStorage.getItem('kr.refreshToken')).toBe('r1')
   })
 
-  it('keeps the refresh token and status on 503', async () => {
+  it('keeps the session on 503', async () => {
     startSession()
     mockApi((config) =>
       config.url === '/auth/refresh'
@@ -145,7 +186,6 @@ describe('api client', () => {
         : [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }],
     )
     await expect(api.get('/me')).rejects.toMatchObject({ status: 503 })
-    expect(localStorage.getItem('kr.refreshToken')).toBe('r1')
     expect(useAuthStore.getState().status).toBe('authenticated')
   })
 
@@ -154,13 +194,12 @@ describe('api client', () => {
     mockApi(async (config) => {
       if (config.url === '/auth/refresh') {
         useAuthStore.getState().clearSession()
-        return [200, authBody('new', 'r2')]
+        return [200, authBody('new')]
       }
       return [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }]
     })
     await expect(api.get('/me')).rejects.toBeInstanceOf(ApiError)
     expect(useAuthStore.getState().status).toBe('anonymous')
-    expect(localStorage.getItem('kr.refreshToken')).toBeNull()
   })
 
   it('clears the session when a 2xx refresh body is incomplete', async () => {
@@ -172,22 +211,21 @@ describe('api client', () => {
     )
     await expect(api.get('/me')).rejects.toBeInstanceOf(ApiError)
     expect(useAuthStore.getState().status).toBe('anonymous')
-    expect(localStorage.getItem('kr.refreshToken')).toBeNull()
   })
 
   it('retries with the current token without refreshing when it changed meanwhile', async () => {
-    startSession('old', 'r1')
+    startSession('old')
     let refreshCalls = 0
     const seen: string[] = []
     mockApi((config) => {
       if (config.url === '/auth/refresh') {
         refreshCalls += 1
-        return [200, authBody('x', 'rx')]
+        return [200, authBody('x')]
       }
       const auth = authorizationOf(config.headers)
       seen.push(auth)
       if (auth === 'Bearer old') {
-        startSession('new', 'r2')
+        startSession('new')
         return [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }]
       }
       return [200, {}]

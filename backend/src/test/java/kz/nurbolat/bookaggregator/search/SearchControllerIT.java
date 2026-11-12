@@ -3,7 +3,10 @@ package kz.nurbolat.bookaggregator.search;
 import kz.nurbolat.bookaggregator.edition.EditionRepository;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
+import kz.nurbolat.bookaggregator.support.PriceFixtures;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,14 @@ class SearchControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private EditionRepository editionRepository;
+
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    @BeforeEach
+    void removeBooksLeftByOtherTests() {
+        PriceFixtures.removeBooksWithoutAuthor(jdbc);
+    }
 
     @Test
     void shouldReturnPageInContractFormatWithoutAuthentication() throws Exception {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bindingName, formatIsbn13, formatNumber, formatPrice, formatRelative, languageName, pluralRu } from './format'
+import { bindingName, formatCountdown, formatIsbn13, formatNumber, formatPrice, formatRelative, languageName, pluralRu } from './format'
 
 const nbsp = ' '
 
@@ -87,5 +87,13 @@ describe('formatIsbn13', () => {
   it('leaves other input unchanged', () => {
     expect(formatIsbn13('5170906307')).toBe('5170906307')
     expect(formatIsbn13('abc')).toBe('abc')
+  })
+})
+
+describe('formatCountdown', () => {
+  it('formats minutes and padded seconds', () => {
+    expect(formatCountdown(45)).toBe('0:45')
+    expect(formatCountdown(65)).toBe('1:05')
+    expect(formatCountdown(0)).toBe('0:00')
   })
 })

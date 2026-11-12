@@ -1,6 +1,9 @@
 import axios from 'axios'
-import { getRefreshToken, useAuthStore } from '../stores/auth'
+import { getSessionEpoch, useAuthStore } from '../stores/auth'
+import { toast } from '../stores/toast'
 import { ApiError, ERROR_MESSAGES, toApiError } from './errors'
+import { toSession } from './auth'
+import { publishAuth, withRefreshLock } from './authSync'
 import type { AuthResponse } from './types'
 
 declare module 'axios' {
@@ -15,8 +18,13 @@ function isAuthUrl(url: string | undefined): boolean {
   return url?.startsWith('/auth/') ?? false
 }
 
+function isCookieOnlyAuthUrl(url: string | undefined): boolean {
+  return isAuthUrl(url) && url !== '/auth/logout-all'
+}
+
 api.interceptors.request.use((config) => {
-  if (isAuthUrl(config.url)) return config
+  if (isAuthUrl(config.url)) config.withCredentials = true
+  if (isCookieOnlyAuthUrl(config.url)) return config
   const token = useAuthStore.getState().accessToken
   if (token) {
     config.headers.set('Authorization', `Bearer ${token}`)
@@ -30,28 +38,35 @@ let inflight: Promise<void> | null = null
 
 async function doRefresh(): Promise<void> {
   const { setSession, clearSession } = useAuthStore.getState()
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) {
-    clearSession()
-    throw new ApiError(401, 'UNAUTHORIZED', ERROR_MESSAGES.UNAUTHORIZED)
-  }
-  let data: AuthResponse
-  try {
-    data = (await api.post<AuthResponse>('/auth/refresh', { refreshToken })).data
-  } catch (e) {
-    const error = toApiError(e)
-    if (error.status === 401 && getRefreshToken() === refreshToken) clearSession()
-    throw error
-  }
-  if (getRefreshToken() !== refreshToken) {
-    throw new ApiError(401, 'UNAUTHORIZED', ERROR_MESSAGES.UNAUTHORIZED)
-  }
-  try {
-    setSession(data)
-  } catch {
-    clearSession()
-    throw new ApiError(500, 'INTERNAL_ERROR', ERROR_MESSAGES.INTERNAL_ERROR)
-  }
+  const before = useAuthStore.getState().accessToken
+  const wasAuthenticated = useAuthStore.getState().status === 'authenticated'
+  const epoch = getSessionEpoch()
+  await withRefreshLock(async () => {
+    const current = useAuthStore.getState().accessToken
+    if (current && current !== before) return
+    let data: AuthResponse
+    try {
+      data = (await api.post<AuthResponse>('/auth/refresh')).data
+    } catch (e) {
+      const error = toApiError(e)
+      if (error.status === 401 && getSessionEpoch() === epoch) {
+        clearSession()
+        if (wasAuthenticated) toast.info('Сессия закончилась, войдите снова')
+      }
+      throw error
+    }
+    if (getSessionEpoch() !== epoch) {
+      throw new ApiError(401, 'UNAUTHORIZED', ERROR_MESSAGES.UNAUTHORIZED)
+    }
+    try {
+      const session = toSession(data)
+      setSession(session)
+      publishAuth({ type: 'session', ...session })
+    } catch {
+      clearSession()
+      throw new ApiError(500, 'INTERNAL_ERROR', ERROR_MESSAGES.INTERNAL_ERROR)
+    }
+  })
 }
 
 export function refreshSession(): Promise<void> {
@@ -69,7 +84,7 @@ api.interceptors.response.use(
     if (
       config &&
       !config._retried &&
-      !isAuthUrl(config.url) &&
+      !isCookieOnlyAuthUrl(config.url) &&
       apiError.status === 401 &&
       apiError.code === 'TOKEN_EXPIRED'
     ) {

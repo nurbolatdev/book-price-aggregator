@@ -6,10 +6,18 @@ export interface FieldControlProps {
   invalid: boolean
 }
 
+export function controlAttrs({ id, describedBy, invalid }: FieldControlProps) {
+  return {
+    id,
+    'aria-describedby': describedBy,
+    'aria-invalid': invalid || undefined,
+  }
+}
+
 interface FieldProps {
   label: string
   hint?: string
-  error?: string
+  error?: ReactNode
   children: (props: FieldControlProps) => ReactNode
 }
 

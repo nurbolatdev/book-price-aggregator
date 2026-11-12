@@ -3,7 +3,7 @@ import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
 import { api } from '../api/client'
 import type { AuthResponse } from '../api/types'
 
-export type MockReply = [status: number, body?: unknown]
+export type MockReply = [status: number, body?: unknown, headers?: Record<string, string>]
 export const NETWORK_FAILURE = Symbol('network-failure')
 
 export type MockHandler = (
@@ -16,12 +16,12 @@ export function mockApi(handler: MockHandler): void {
     if (reply === NETWORK_FAILURE) {
       throw new AxiosError('Network Error', 'ERR_NETWORK', config)
     }
-    const [status, body] = reply
+    const [status, body, headers] = reply
     const response = {
       data: body,
       status,
       statusText: String(status),
-      headers: new AxiosHeaders(),
+      headers: new AxiosHeaders(headers),
       config,
     }
     if (status >= 200 && status < 300) return response
@@ -36,10 +36,9 @@ export function mockApi(handler: MockHandler): void {
   api.defaults.adapter = adapter
 }
 
-export function authBody(accessToken: string, refreshToken: string): AuthResponse {
+export function authBody(accessToken: string): AuthResponse {
   return {
     accessToken,
-    refreshToken,
     expiresIn: 900,
     user: { id: 1, email: 'reader@example.com', name: 'Reader', role: 'USER' },
   }

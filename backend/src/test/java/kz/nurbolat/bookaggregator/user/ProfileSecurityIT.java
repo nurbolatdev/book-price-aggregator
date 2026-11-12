@@ -8,11 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
 
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.bearerOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.withRefreshCookie;
 import static kz.nurbolat.bookaggregator.support.PriceFixtures.daysAgo;
 import static kz.nurbolat.bookaggregator.support.PriceFixtures.editionWithHistory;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,12 +45,12 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     @Test
     void shouldKeepCurrentDeviceAndEndOthersWhenPasswordChanges() throws Exception {
         String email = registered();
-        String deviceA = signIn(email);
-        String deviceB = signIn(email);
+        MockHttpServletResponse deviceA = signIn(email);
+        MockHttpServletResponse deviceB = signIn(email);
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, bearerOf(deviceA))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody(PASSWORD, "newSecret123", refreshTokenOf(deviceA))))
+                        .content(passwordBody(PASSWORD, "newSecret123")))
                 .andExpect(status().isNoContent());
 
         refresh(refreshTokenOf(deviceA)).andExpect(status().isOk());
@@ -61,13 +65,13 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     @Test
     void shouldEndEverySessionWhenPasswordChangesWithoutSessionInfo() throws Exception {
         String email = registered();
-        String deviceA = signIn(email);
-        // An access token issued before the session claim existed and no refresh token in the body
+        MockHttpServletResponse deviceA = signIn(email);
+        // An access token issued before the session claim existed and 
         String legacyBearer = "Bearer " + jwtService.generateAccessToken(userRepository.findByEmail(email).orElseThrow());
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, legacyBearer)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody(PASSWORD, "newSecret123", null)))
+                        .content(passwordBody(PASSWORD, "newSecret123")))
                 .andExpect(status().isNoContent());
 
         refresh(refreshTokenOf(deviceA)).andExpect(status().isUnauthorized());
@@ -75,11 +79,11 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturnFieldErrorWhenCurrentPasswordIsWrong() throws Exception {
-        String session = signIn(registered());
+        MockHttpServletResponse session = signIn(registered());
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, bearerOf(session))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody("wrong-password", "newSecret123", null)))
+                        .content(passwordBody("wrong-password", "newSecret123")))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("currentPassword"))
@@ -88,11 +92,11 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
 
     @Test
     void shouldReturn422WhenNewPasswordIsTooShort() throws Exception {
-        String session = signIn(registered());
+        MockHttpServletResponse session = signIn(registered());
 
         mockMvc.perform(post("/api/v1/me/password").header(HttpHeaders.AUTHORIZATION, bearerOf(session))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(passwordBody(PASSWORD, "1234567", null)))
+                        .content(passwordBody(PASSWORD, "1234567")))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("newPassword"))
                 .andExpect(jsonPath("$.fieldErrors[0].message").value("Минимум 8 символов"));
@@ -101,8 +105,8 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     @Test
     void shouldEndEverySessionWhenLoggingOutEverywhere() throws Exception {
         String email = registered();
-        String deviceA = signIn(email);
-        String deviceB = signIn(email);
+        MockHttpServletResponse deviceA = signIn(email);
+        MockHttpServletResponse deviceB = signIn(email);
 
         mockMvc.perform(post("/api/v1/auth/logout-all").header(HttpHeaders.AUTHORIZATION, bearerOf(deviceA)))
                 .andExpect(status().isNoContent());
@@ -121,7 +125,7 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     @Test
     void shouldDeleteEverythingTheUserOwnsWhenAccountIsDeleted() throws Exception {
         String email = registered();
-        String session = signIn(email);
+        MockHttpServletResponse session = signIn(email);
         long userId = userId(email);
         long edition = editionWithHistory(jdbc, "Дюна", true, daysAgo(3, 5000));
         jdbc.update("INSERT INTO beacons (user_id, edition_id, condition_type) VALUES (?, ?, 'ANY_DROP')",
@@ -155,7 +159,7 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     @Test
     void shouldReturn422WhenDeletingAccountWithWrongPassword() throws Exception {
         String email = registered();
-        String session = signIn(email);
+        MockHttpServletResponse session = signIn(email);
 
         mockMvc.perform(delete("/api/v1/me").header(HttpHeaders.AUTHORIZATION, bearerOf(session))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -170,7 +174,7 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     void shouldReturn409WhenAdministratorDeletesAccount() throws Exception {
         String email = registered();
         jdbc.update("UPDATE users SET role = 'ADMIN' WHERE email = ?", email);
-        String session = signIn(email);
+        MockHttpServletResponse session = signIn(email);
 
         mockMvc.perform(delete("/api/v1/me").header(HttpHeaders.AUTHORIZATION, bearerOf(session))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -193,8 +197,8 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
         return email;
     }
 
-    private String signIn(String email) throws Exception {
-        return login(email, PASSWORD).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    private MockHttpServletResponse signIn(String email) throws Exception {
+        return login(email, PASSWORD).andExpect(status().isOk()).andReturn().getResponse();
     }
 
     private ResultActions login(String email, String password) throws Exception {
@@ -203,20 +207,10 @@ class ProfileSecurityIT extends AbstractIntegrationTest {
     }
 
     private ResultActions refresh(String token) throws Exception {
-        return mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"refreshToken\": \"" + token + "\"}"));
+        return mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), token));
     }
 
-    private static String passwordBody(String current, String next, String refreshToken) {
-        return "{\"currentPassword\": \"" + current + "\", \"newPassword\": \"" + next + "\""
-                + (refreshToken == null ? "" : ", \"refreshToken\": \"" + refreshToken + "\"") + "}";
-    }
-
-    private static String refreshTokenOf(String loginBody) {
-        return JsonPath.read(loginBody, "$.refreshToken");
-    }
-
-    private static String bearerOf(String loginBody) {
-        return "Bearer " + JsonPath.<String>read(loginBody, "$.accessToken");
+    private static String passwordBody(String current, String next) {
+        return "{\"currentPassword\": \"" + current + "\", \"newPassword\": \"" + next + "\"}";
     }
 }

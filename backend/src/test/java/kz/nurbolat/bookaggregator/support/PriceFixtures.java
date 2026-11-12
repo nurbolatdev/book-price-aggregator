@@ -14,6 +14,16 @@ public final class PriceFixtures {
     }
 
     /**
+     * Removes books without an author. Tests that do not run in a transaction commit such books
+     * (see {@link #editionWithHistory}) and never remove them, which can change the order of
+     * title suggestions in tests that expect the seeded catalog only. Call it from a test that
+     * runs in a transaction, so the removal is rolled back.
+     */
+    public static void removeBooksWithoutAuthor(JdbcTemplate jdbc) {
+        jdbc.update("DELETE FROM books WHERE author IS NULL");
+    }
+
+    /**
      * @param history pairs of (days ago, price), oldest first; the last price becomes the offer price
      * @return edition id
      */

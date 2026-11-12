@@ -9,7 +9,6 @@ import { UserMenu } from './UserMenu'
 function signIn(role: 'USER' | 'ADMIN') {
   useAuthStore.getState().setSession({
     accessToken: 'a',
-    refreshToken: 'r',
     user: { id: 1, email: 'reader@example.com', name: 'Aidar', role },
   })
 }

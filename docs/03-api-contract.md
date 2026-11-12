@@ -125,9 +125,9 @@
 | Метод | Путь | Тело | Ответ |
 |---|---|---|---|
 | POST | `/auth/register` | `{name, email, password}` | 201 `{userId, emailVerificationRequired: true}` + письмо |
-| POST | `/auth/login` | `{email, password}` | 200 `{accessToken, refreshToken, expiresIn, user}` + cookie `kr_refresh` |
-| POST | `/auth/refresh` | cookie `kr_refresh` (или `{refreshToken}`, переходный режим) | 200 новая пара (старый refresh отзывается) + новая cookie; повтор отозванного вне окна 10 с → 401 и завершение этой сессии |
-| POST | `/auth/logout` | cookie (или `{refreshToken}`) | 204, завершает всю сессию (семейство токенов) и очищает cookie; без токена тоже 204 |
+| POST | `/auth/login` | `{email, password}` | 200 `{accessToken, expiresIn, user}` + cookie `kr_refresh` |
+| POST | `/auth/refresh` | cookie `kr_refresh` (тела нет) | 200 `{accessToken, expiresIn, user}` + новая cookie (старый refresh отзывается); повтор отозванного вне окна 10 с → 401 и завершение этой сессии |
+| POST | `/auth/logout` | cookie `kr_refresh` (тела нет) | 204, завершает всю сессию (семейство токенов) и очищает cookie; без токена тоже 204 |
 | POST | `/auth/logout-all` | — (нужен access-токен) | 204, отзывает все сессии, очищает cookie; без токена → 401 |
 | POST | `/auth/verify-email` | `{token}` | 204 |
 | POST | `/auth/resend-verification` | `{email}` | 204 (всегда, даже если email нет — не раскрываем) |
@@ -136,7 +136,7 @@
 
 Лимиты (Bucket4j): `login` — 5 в минуту на IP+email, `register`/`forgot-password` — 3 в минуту на IP, `GET /search` — 60 в минуту на IP, `GET /search/facets` — 60 в минуту на IP (отдельное ведро), `account` (`POST /me/password`, `DELETE /me`) — 5 в минуту на пользователя, остальное API — 120 в минуту на пользователя (без входа — на IP). Превышение → 429 `RATE_LIMITED` и заголовок `Retry-After` (секунды).
 
-**Refresh-токен в cookie `kr_refresh`:** `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000` (`Secure` управляется `REFRESH_COOKIE_SECURE`, в профиле `local` выключен). `refresh` и `logout` берут токен из cookie, иначе из тела. Проверка `Origin`: заголовок есть и не входит в `app.cors.allowed-origins` → 403 `FORBIDDEN`; заголовка нет, а токен из cookie → 403; заголовка нет и токен из тела → разрешено (curl, тесты, переходный режим). CORS отдаёт `Access-Control-Allow-Credentials: true`. Поле `refreshToken` в теле запроса и ответе помечено `deprecated` и исчезнет в F4. Без токена `refresh` → 401 `UNAUTHORIZED`.
+**Refresh-токен в cookie `kr_refresh`:** `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000` (`Secure` управляется `REFRESH_COOKIE_SECURE`, в профиле `local` выключен). `refresh` и `logout` берут токен только из cookie, тело запроса игнорируется. Проверка `Origin`: заголовок есть и не входит в `app.cors.allowed-origins` → 403 `FORBIDDEN`; заголовка нет, а токен из cookie → 403. CORS отдаёт `Access-Control-Allow-Credentials: true`. Refresh-токен не передаётся ни в теле ответа, ни в теле запроса. Без токена `refresh` → 401 `UNAUTHORIZED`.
 
 **Окно повтора:** повтор только что ротированного токена в течение 10 с (`JWT_REFRESH_REUSE_GRACE`) не завершает сессию — две вкладки получают один и тот же новый токен; вне окна, после выхода или смены пароля — прежнее поведение (семейство отзывается, 401). Подробно — [ADR-005](adr/ADR-005-refresh-cookie-and-reuse-grace.md).
 
@@ -149,7 +149,7 @@
 |---|---|---|
 | GET | `/me` | профиль: имя, email, emailVerified, notifyFrequency, weeklyDigest |
 | PATCH | `/me` | `{name?, notifyFrequency?, weeklyDigest?}` |
-| POST | `/me/password` | `{currentPassword, newPassword, refreshToken?}` → 204. Неверный текущий → 422 `fieldErrors[currentPassword]` «Неверный пароль». Текущая сессия (по claim `sid` access-токена) остаётся, остальные отзываются; cookie не очищается |
+| POST | `/me/password` | `{currentPassword, newPassword}` → 204. Неверный текущий → 422 `fieldErrors[currentPassword]` «Неверный пароль». Текущая сессия (по claim `sid` access-токена) остаётся, остальные отзываются; cookie не очищается |
 | DELETE | `/me` | `{password}` → 204, каскадное удаление данных, cookie очищается. Неверный пароль → 422 `fieldErrors[password]`; ADMIN → 409 `CONFLICT` |
 
 Пароль при регистрации, сбросе и смене — 8–100 символов («Минимум 8 символов», «Не больше 100 символов»); при входе длина не проверяется (старые пароли работают). Сообщения валидации — на русском.

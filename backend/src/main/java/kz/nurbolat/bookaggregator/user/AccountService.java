@@ -37,7 +37,7 @@ public class AccountService {
 
     /**
      * Sets the new password and ends the user's other sessions. The current session is the one of the access token
-     * ({@code sid}); old clients may still send its refresh token instead. Without either every session ends.
+     * ({@code sid}); without it every session ends.
      */
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
@@ -45,9 +45,6 @@ public class AccountService {
         requirePassword(user, request.currentPassword(), "currentPassword");
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         UUID keptFamily = securityUtils.currentUser().map(AuthenticatedUser::sessionId).orElse(null);
-        if (keptFamily == null && request.refreshToken() != null) {
-            keptFamily = refreshTokenService.activeFamilyOf(request.refreshToken(), user.getId()).orElse(null);
-        }
         if (keptFamily == null) {
             refreshTokenService.revokeAll(user.getId());
         } else {

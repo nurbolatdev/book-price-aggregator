@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -21,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.refreshTokenOf;
+import static kz.nurbolat.bookaggregator.support.RefreshCookieSupport.withRefreshCookie;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,14 +49,14 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
 
         CountDownLatch start = new CountDownLatch(1);
         ExecutorService pool = Executors.newFixedThreadPool(2);
-        List<String> bodies;
+        List<MockHttpServletResponse> bodies;
         try {
-            Callable<String> call = () -> {
+            Callable<MockHttpServletResponse> call = () -> {
                 start.await();
-                return refresh(t0).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                return refresh(t0).andExpect(status().isOk()).andReturn().getResponse();
             };
-            Future<String> first = pool.submit(call);
-            Future<String> second = pool.submit(call);
+            Future<MockHttpServletResponse> first = pool.submit(call);
+            Future<MockHttpServletResponse> second = pool.submit(call);
             start.countDown();
             bodies = List.of(first.get(15, TimeUnit.SECONDS), second.get(15, TimeUnit.SECONDS));
         } finally {
@@ -109,9 +112,9 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
         String t1 = next(t0);
         String t2 = next(t1);
 
-        String body = refresh(t0).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        MockHttpServletResponse response = refresh(t0).andExpect(status().isOk()).andReturn().getResponse();
 
-        assertThat(refreshTokenOf(body)).isEqualTo(t2);
+        assertThat(refreshTokenOf(response)).isEqualTo(t2);
     }
 
     @Test
@@ -121,8 +124,7 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
         String t1 = next(t0);
         Long userId = userRepository.findByEmail(email).orElseThrow().getId();
 
-        mockMvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\": \"" + t1 + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/logout"), t1))
                 .andExpect(status().isNoContent());
 
         refresh(t0).andExpect(status().isUnauthorized());
@@ -133,15 +135,14 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
     @Test
     void shouldRejectReplayOfJustRotatedTokenWhenPasswordWasChangedOnAnotherDevice() throws Exception {
         String email = registered();
-        String deviceA = signIn(email);
+        MockHttpServletResponse deviceA = signIn(email);
         String deviceB0 = refreshTokenOf(signIn(email));
         next(deviceB0);
 
         mockMvc.perform(post("/api/v1/me/password")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + JsonPath.read(deviceA, "$.accessToken"))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + JsonPath.read(deviceA.getContentAsString(), "$.accessToken"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"currentPassword\": \"" + PASSWORD + "\", \"newPassword\": \"newSecret123\", "
-                                + "\"refreshToken\": \"" + refreshTokenOf(deviceA) + "\"}"))
+                        .content("{\"currentPassword\": \"" + PASSWORD + "\", \"newPassword\": \"newSecret123\"}"))
                 .andExpect(status().isNoContent());
 
         refresh(deviceB0).andExpect(status().isUnauthorized());
@@ -152,15 +153,14 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
         String t0 = refreshTokenOf(signIn(registered()));
         String t1 = next(t0);
 
-        mockMvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"refreshToken\": \"" + t0 + "\"}"))
+        mockMvc.perform(withRefreshCookie(post("/api/v1/auth/logout"), t0))
                 .andExpect(status().isNoContent());
 
         refresh(t1).andExpect(status().isUnauthorized());
     }
 
     private String next(String token) throws Exception {
-        return refreshTokenOf(refresh(token).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+        return refreshTokenOf(refresh(token).andExpect(status().isOk()).andReturn().getResponse());
     }
 
     private void shiftRevocation(String token, int seconds) {
@@ -181,20 +181,15 @@ class RefreshReuseGraceIT extends AbstractIntegrationTest {
         return email;
     }
 
-    private String signIn(String email) throws Exception {
+    private MockHttpServletResponse signIn(String email) throws Exception {
         return mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .header(HttpHeaders.USER_AGENT, "RefreshReuseGraceIT")
                         .content("{\"email\": \"" + email + "\", \"password\": \"" + PASSWORD + "\"}"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse();
     }
 
     private ResultActions refresh(String token) throws Exception {
-        return mockMvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"refreshToken\": \"" + token + "\"}"));
-    }
-
-    private static String refreshTokenOf(String body) {
-        return JsonPath.read(body, "$.refreshToken");
+        return mockMvc.perform(withRefreshCookie(post("/api/v1/auth/refresh"), token));
     }
 }

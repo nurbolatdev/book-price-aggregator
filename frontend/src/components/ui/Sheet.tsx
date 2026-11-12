@@ -1,8 +1,9 @@
-import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from 'react'
+import { useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { IconButton } from './IconButton'
+import { useDialogFocus } from './useDialogFocus'
 
 interface SheetProps {
   open: boolean
@@ -12,56 +13,12 @@ interface SheetProps {
   children: ReactNode
 }
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
 export function Sheet({ open, onClose, title, side = 'bottom', children }: SheetProps) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
-  const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
-
-  useEffect(() => {
-    if (!open) return
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    const overflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const first = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE)
-    ;(first ?? panelRef.current)?.focus()
-
-    function onKey(event: globalThis.KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.stopPropagation()
-        onCloseRef.current()
-      }
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = overflow
-      previous?.focus()
-    }
-  }, [open])
+  const onPanelKeyDown = useDialogFocus(open, panelRef, onClose)
 
   if (!open) return null
-
-  function onPanelKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key !== 'Tab') return
-    const items = Array.from(panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])
-    if (items.length === 0) {
-      event.preventDefault()
-      return
-    }
-    const firstItem = items[0]
-    const lastItem = items[items.length - 1]
-    if (event.shiftKey && document.activeElement === firstItem) {
-      event.preventDefault()
-      lastItem?.focus()
-    } else if (!event.shiftKey && document.activeElement === lastItem) {
-      event.preventDefault()
-      firstItem?.focus()
-    }
-  }
 
   return createPortal(
     <div className="fixed inset-0 z-50">

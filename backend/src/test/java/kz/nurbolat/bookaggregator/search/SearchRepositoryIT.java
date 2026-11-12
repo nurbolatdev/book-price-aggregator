@@ -4,8 +4,11 @@ import kz.nurbolat.bookaggregator.edition.Binding;
 import kz.nurbolat.bookaggregator.search.dto.SearchRequest;
 import kz.nurbolat.bookaggregator.store.StoreCode;
 import kz.nurbolat.bookaggregator.support.AbstractIntegrationTest;
+import kz.nurbolat.bookaggregator.support.PriceFixtures;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,14 @@ class SearchRepositoryIT extends AbstractIntegrationTest {
 
     @Autowired
     private SearchRepository searchRepository;
+
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    @BeforeEach
+    void removeBooksLeftByOtherTests() {
+        PriceFixtures.removeBooksWithoutAuthor(jdbc);
+    }
 
     @Test
     void shouldFindBookWhenQueryHasTypo() {

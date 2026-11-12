@@ -7,13 +7,21 @@ export class ApiError extends Error {
   readonly status: number
   readonly code: ApiErrorCode
   readonly fieldErrors: FieldError[]
+  readonly retryAfter: number | null
 
-  constructor(status: number, code: ApiErrorCode, message: string, fieldErrors: FieldError[] = []) {
+  constructor(
+    status: number,
+    code: ApiErrorCode,
+    message: string,
+    fieldErrors: FieldError[] = [],
+    retryAfter: number | null = null,
+  ) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
     this.fieldErrors = fieldErrors
+    this.retryAfter = retryAfter
   }
 }
 
@@ -44,21 +52,29 @@ function isErrorBody(data: unknown): data is ErrorResponse & { code: ErrorCode }
   )
 }
 
+function parseRetryAfter(value: unknown): number | null {
+  if (typeof value !== 'string' || !/^\d+$/.test(value.trim())) return null
+  const seconds = Number(value.trim())
+  return seconds >= 1 ? seconds : null
+}
+
 export function toApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error
   if (isAxiosError(error)) {
     const response = error.response
     if (!response) return new ApiError(0, 'NETWORK_ERROR', ERROR_MESSAGES.NETWORK_ERROR)
     const data: unknown = response.data
+    const retryAfter = parseRetryAfter(response.headers?.['retry-after'])
     if (isErrorBody(data)) {
       return new ApiError(
         response.status,
         data.code,
         data.message ?? ERROR_MESSAGES[data.code],
         data.fieldErrors ?? [],
+        retryAfter,
       )
     }
-    return new ApiError(response.status, 'UNKNOWN', ERROR_MESSAGES.UNKNOWN)
+    return new ApiError(response.status, 'UNKNOWN', ERROR_MESSAGES.UNKNOWN, [], retryAfter)
   }
   return new ApiError(0, 'UNKNOWN', ERROR_MESSAGES.UNKNOWN)
 }

@@ -27,12 +27,21 @@ describe('Button', () => {
   })
 
   it('maps variants to distinct classes', () => {
-    const all = (['primary', 'secondary', 'light', 'dark', 'ghost'] as const).map((variant) => buttonClasses({ variant }))
+    const all = (['primary', 'secondary', 'light', 'dark', 'ghost'] as const).map((variant) =>
+      buttonClasses({ variant }),
+    )
     expect(new Set(all).size).toBe(5)
   })
 
   it('light variant has no border', () => {
     expect(buttonClasses({ variant: 'light' })).not.toContain('border')
+  })
+
+  it('danger variants use the danger colour', () => {
+    expect(buttonClasses({ variant: 'danger' })).toContain('bg-danger')
+    const outline = buttonClasses({ variant: 'outline-danger' })
+    expect(outline).toContain('border-danger')
+    expect(outline).toContain('text-danger')
   })
 
   it('outline-accent variant has an accent border and text', () => {
@@ -51,6 +60,13 @@ describe('Button', () => {
       expect(cls).toContain('font-semibold')
       expect(cls).not.toContain('font-bold')
     }
+  })
+
+  it('form size is 48px tall and bold', () => {
+    const cls = buttonClasses({ size: 'form' })
+    expect(cls).toContain('h-12')
+    expect(cls).toContain('font-bold')
+    expect(cls).not.toContain('font-semibold')
   })
 
   it('buttonClasses matches the component classes', () => {

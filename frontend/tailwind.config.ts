@@ -13,7 +13,7 @@ export default {
         muted: '#5A6576',
         line: '#DDE2E8',
         accent: { DEFAULT: '#C2410C', soft: '#FFF4EC', light: '#FFD3B8' },
-        danger: { DEFAULT: '#A11B1B', soft: '#FDE8E8' },
+        danger: { DEFAULT: '#A11B1B', soft: '#FDE8E8', line: '#F3C4C4' },
         warn: { DEFAULT: '#8A4B00', soft: '#FFF4E0' },
         skeleton: '#E6EAEF',
         divider: '#EDF0F3',

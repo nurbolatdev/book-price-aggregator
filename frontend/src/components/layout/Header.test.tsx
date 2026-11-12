@@ -13,6 +13,8 @@ describe('getHeaderVariant', () => {
     ['/search', 'search'],
     ['/catalog', 'search'],
     ['/editions/5', 'search'],
+    ['/login', 'minimal'],
+    ['/reset-password', 'minimal'],
   ])('%s -> %s', (path, expected) => {
     expect(getHeaderVariant(path)).toBe(expected)
   })
@@ -28,6 +30,15 @@ describe('hasOwnPhoneHeader', () => {
 describe('Header', () => {
   beforeEach(() => {
     useAuthStore.getState().clearSession()
+  })
+
+  it.each(['/login', '/reset-password'])('shows only the logo on %s', (route) => {
+    renderWithProviders(<Header />, { route })
+    expect(screen.getByRole('link', { name: 'KitapRadar' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Войти' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Основное меню' })).toBeNull()
+    expect(screen.queryByRole('combobox')).toBeNull()
+    expect(screen.queryByRole('link', { name: 'Каталог' })).toBeNull()
   })
 
   it('shows nav links and no search field on the home page', () => {
@@ -58,7 +69,6 @@ describe('Header', () => {
   it('shows the user menu button for authenticated users', () => {
     useAuthStore.getState().setSession({
       accessToken: 'a',
-      refreshToken: 'r',
       user: { id: 1, name: 'Aidar', role: 'USER' },
     })
     renderWithProviders(<Header />, { route: '/' })

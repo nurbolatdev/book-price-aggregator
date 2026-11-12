@@ -55,8 +55,8 @@ public class RefreshCookies {
 
     /**
      * Rejects a request that could be forged by another site. An {@code Origin} that is not allowed fails always;
-     * a request without {@code Origin} fails when the token came from the cookie. A token in the body is not sent
-     * by the browser on its own, so such a request without {@code Origin} (curl, tests) is fine.
+     * a request without {@code Origin} fails when the token came from the cookie. Without a cookie there is nothing
+     * to forge, so logout without a token and without {@code Origin} is fine.
      *
      * @throws AppException {@code FORBIDDEN}
      */
