@@ -14,6 +14,7 @@ const BookRedirectPage = lazy(() => import('../pages/BookRedirectPage'))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/RegisterPage'))
 const CheckEmailPage = lazy(() => import('../pages/CheckEmailPage'))
+const VerifyEmailPage = lazy(() => import('../pages/VerifyEmailPage'))
 const BeaconsPage = lazy(() => import('../pages/BeaconsPage'))
 const ProfilePage = lazy(() => import('../pages/ProfilePage'))
 const AdminPage = lazy(() => import('../pages/AdminPage'))
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="register" element={<RegisterPage />} />
         </Route>
         <Route path="check-email" element={<CheckEmailPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route element={<RequireAuth />}>
           <Route path="beacons" element={<BeaconsPage />} />
           <Route path="profile" element={<ProfilePage />} />
