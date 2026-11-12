@@ -4,7 +4,7 @@ import { cn } from '../../lib/cn'
 import { focusRing } from './focusRing'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'light' | 'dark' | 'ghost' | 'outline-accent'
-export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl' | 'bar'
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl' | 'bar' | 'form'
 
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-accent text-white hover:bg-accent/90',
@@ -21,6 +21,7 @@ const sizes: Record<ButtonSize, string> = {
   lg: 'h-12 px-6 text-base',
   xl: 'h-[52px] px-7 text-base',
   bar: 'h-[52px] px-2.5 text-base',
+  form: 'h-12 px-6 text-base',
 }
 
 interface ButtonClassOptions {
@@ -32,7 +33,7 @@ interface ButtonClassOptions {
 export function buttonClasses({ variant = 'primary', size = 'md', className }: ButtonClassOptions = {}): string {
   return cn(
     'inline-flex items-center justify-center gap-2 rounded-xl transition-colors',
-    size === 'bar' ? 'font-bold' : 'font-semibold',
+    size === 'bar' || size === 'form' ? 'font-bold' : 'font-semibold',
     'disabled:cursor-not-allowed disabled:opacity-60',
     variants[variant],
     sizes[size],

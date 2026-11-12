@@ -1,6 +1,7 @@
 import { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { RequireAdmin } from '../components/auth/RequireAdmin'
+import { RequireGuest } from '../components/auth/RequireGuest'
 import { RequireAuth } from '../components/auth/RequireAuth'
 import { AppLayout } from '../components/layout/AppLayout'
 import { loadEditionPage } from '../features/edition/loadEditionPage'
@@ -27,8 +28,10 @@ export default function App() {
         <Route path="deals" element={<DealsPage />} />
         <Route path="editions/:id" element={<EditionPage />} />
         <Route path="books/:id" element={<BookRedirectPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
+        <Route element={<RequireGuest />}>
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+        </Route>
         <Route element={<RequireAuth />}>
           <Route path="beacons" element={<BeaconsPage />} />
           <Route path="profile" element={<ProfilePage />} />
