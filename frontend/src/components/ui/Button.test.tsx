@@ -37,6 +37,13 @@ describe('Button', () => {
     expect(buttonClasses({ variant: 'light' })).not.toContain('border')
   })
 
+  it('danger variants use the danger colour', () => {
+    expect(buttonClasses({ variant: 'danger' })).toContain('bg-danger')
+    const outline = buttonClasses({ variant: 'outline-danger' })
+    expect(outline).toContain('border-danger')
+    expect(outline).toContain('text-danger')
+  })
+
   it('outline-accent variant has an accent border and text', () => {
     const cls = buttonClasses({ variant: 'outline-accent' })
     expect(cls).toContain('border-accent')

@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { focusRing } from './focusRing'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'light' | 'dark' | 'ghost' | 'outline-accent'
+export type ButtonVariant = 'primary' | 'secondary' | 'light' | 'dark' | 'ghost' | 'outline-accent' | 'danger' | 'outline-danger'
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl' | 'bar' | 'form'
 
 const variants: Record<ButtonVariant, string> = {
@@ -13,6 +13,8 @@ const variants: Record<ButtonVariant, string> = {
   dark: 'bg-ink text-white hover:bg-ink-soft',
   ghost: 'bg-transparent text-ink hover:bg-canvas',
   'outline-accent': 'border-2 border-accent bg-surface text-accent hover:bg-accent-soft',
+  danger: 'bg-danger text-white hover:bg-danger/90',
+  'outline-danger': 'border border-danger bg-surface text-danger hover:bg-danger-soft',
 }
 
 const sizes: Record<ButtonSize, string> = {

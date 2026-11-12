@@ -1,7 +1,10 @@
+import { ChangePasswordForm } from '../features/profile/ChangePasswordForm'
+import { DeleteAccountCard } from '../features/profile/DeleteAccountCard'
 import { EmailBanner } from '../features/profile/EmailBanner'
 import { NotificationSettings } from '../features/profile/NotificationSettings'
 import { PersonalDataForm } from '../features/profile/PersonalDataForm'
 import { ProfileCard } from '../features/profile/ProfileCard'
+import { SessionCard } from '../features/profile/SessionCard'
 import { useMe } from '../features/profile/useMe'
 import { usePageMeta } from '../lib/usePageMeta'
 
@@ -20,6 +23,17 @@ export default function ProfilePage() {
           <ProfileCard title="Уведомления">
             <NotificationSettings />
           </ProfileCard>
+          <ProfileCard title="Пароль">
+            <ChangePasswordForm />
+          </ProfileCard>
+          <ProfileCard title="Сессия">
+            <SessionCard />
+          </ProfileCard>
+          {user.role !== 'ADMIN' && (
+            <ProfileCard title="Удалить аккаунт" tone="danger">
+              <DeleteAccountCard />
+            </ProfileCard>
+          )}
         </>
       )}
     </div>
