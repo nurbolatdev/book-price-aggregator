@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
 import { resetMockAuth } from '../mocks/authFixtures'
+import { resetMockBeacons } from '../mocks/beaconFixtures'
 import { server } from '../mocks/server'
 import { useAuthStore } from '../stores/auth'
 import { resetViewport } from './viewport'
@@ -44,6 +45,7 @@ afterEach(() => {
   localStorage.clear()
   sessionStorage.clear()
   resetMockAuth()
+  resetMockBeacons()
 })
 
 afterAll(() => server.close())

@@ -13,6 +13,7 @@ export const queryKeys = {
   priceHistory: (id: number, period: PricePeriod) => ['editions', id, 'price-history', period],
   similar: (id: number, limit: number) => ['editions', id, 'similar', limit],
   book: (id: number) => ['books', id],
+  beacons: ['beacons', 'list'],
   beaconForEdition: (id: number) => ['beacons', 'edition', id],
 } as const
 
