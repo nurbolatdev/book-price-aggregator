@@ -4,13 +4,14 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 /**
- * Shared dialog behaviour: body scroll lock, focus on the first focusable element,
+ * Shared dialog behaviour: body scroll lock, focus on `initialFocusRef` or the first focusable element,
  * Esc to close, focus return to the opener. Returns the Tab-trap key handler for the panel.
  */
 export function useDialogFocus(
   open: boolean,
   panelRef: RefObject<HTMLElement>,
   onClose: () => void,
+  initialFocusRef?: RefObject<HTMLElement>,
 ) {
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
@@ -20,7 +21,7 @@ export function useDialogFocus(
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    const first = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE)
+    const first = initialFocusRef?.current ?? panelRef.current?.querySelector<HTMLElement>(FOCUSABLE)
     ;(first ?? panelRef.current)?.focus()
 
     function onKey(event: globalThis.KeyboardEvent) {
@@ -35,7 +36,7 @@ export function useDialogFocus(
       document.body.style.overflow = overflow
       previous?.focus()
     }
-  }, [open, panelRef])
+  }, [open, panelRef, initialFocusRef])
 
   return function onKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.key !== 'Tab') return

@@ -1,4 +1,4 @@
-import { useId, useRef, type ReactNode } from 'react'
+import { useId, useRef, type ReactNode, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { cn } from '../../lib/cn'
@@ -10,13 +10,14 @@ interface SheetProps {
   onClose: () => void
   title: string
   side?: 'bottom' | 'right'
+  initialFocusRef?: RefObject<HTMLElement>
   children: ReactNode
 }
 
-export function Sheet({ open, onClose, title, side = 'bottom', children }: SheetProps) {
+export function Sheet({ open, onClose, title, side = 'bottom', initialFocusRef, children }: SheetProps) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
-  const onPanelKeyDown = useDialogFocus(open, panelRef, onClose)
+  const onPanelKeyDown = useDialogFocus(open, panelRef, onClose, initialFocusRef)
 
   if (!open) return null
 

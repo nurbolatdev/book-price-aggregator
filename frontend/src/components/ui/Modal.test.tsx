@@ -1,11 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { resetViewport, setViewport } from '../../test/viewport'
 import { Modal } from './Modal'
 
-function Harness({ onClose }: { onClose?: () => void }) {
+function Harness({ onClose, focusLast = false }: { onClose?: () => void; focusLast?: boolean }) {
   const [open, setOpen] = useState(false)
+  const lastRef = useRef<HTMLButtonElement>(null)
   return (
     <>
       <button onClick={() => setOpen(true)}>Открыть</button>
@@ -16,9 +17,10 @@ function Harness({ onClose }: { onClose?: () => void }) {
           setOpen(false)
         }}
         title="Удалить аккаунт?"
+        initialFocusRef={focusLast ? lastRef : undefined}
       >
         <button>Первая</button>
-        <button>Последняя</button>
+        <button ref={lastRef}>Последняя</button>
       </Modal>
     </>
   )
@@ -88,6 +90,21 @@ describe('Modal on desktop', () => {
     expect(document.body.style.overflow).toBe('hidden')
     fireEvent.click(screen.getByRole('button', { name: 'Закрыть' }))
     expect(document.body.style.overflow).toBe('')
+  })
+})
+
+describe('Modal initial focus', () => {
+  it('focuses the element given by initialFocusRef on desktop', () => {
+    setViewport(1280)
+    render(<Harness focusLast />)
+    openModal()
+    expect(screen.getByRole('button', { name: 'Последняя' })).toHaveFocus()
+  })
+
+  it('focuses the element given by initialFocusRef on the phone sheet', () => {
+    render(<Harness focusLast />)
+    openModal()
+    expect(screen.getByRole('button', { name: 'Последняя' })).toHaveFocus()
   })
 })
 
