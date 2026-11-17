@@ -1,5 +1,5 @@
 import { Bell } from 'lucide-react'
-import { useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { BeaconResponse } from '../api/types'
 import { buttonClasses } from '../components/ui/Button'
@@ -49,6 +49,26 @@ export default function BeaconsPage() {
   }
   const toggle = (beacon: BeaconResponse) => setStatus(beacon, beacon.status === 'PAUSED' ? 'ACTIVE' : 'PAUSED')
 
+  const [focusAfter, setFocusAfter] = useState<{ id: number | null } | null>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+
+  const handleDelete = (beacon: BeaconResponse) => {
+    const index = visible.findIndex((b) => b.id === beacon.id)
+    const next = visible[index + 1] ?? visible[index - 1]
+    remove(beacon)
+    setFocusAfter({ id: next?.id ?? null })
+  }
+
+  useEffect(() => {
+    if (!focusAfter) return
+    const scope = `[data-beacon-id="${focusAfter.id}"]`
+    const target =
+      focusAfter.id != null ? panelRef.current?.querySelector<HTMLElement>(`${scope} button, ${scope} a[href]`) : null
+    ;(target ?? headingRef.current)?.focus()
+    setFocusAfter(null)
+  }, [focusAfter])
+
   const empty = query.isSuccess && list.length === 0
 
   let content
@@ -94,26 +114,24 @@ export default function BeaconsPage() {
         <div
           role="tabpanel"
           id={panelId}
+          ref={panelRef}
           aria-labelledby={`${idPrefix}-${tab}`}
           className="flex flex-col gap-2.5 md:gap-[18px]"
         >
           {visible.length === 0 && <p className="text-muted">В этой вкладке пока пусто.</p>}
           {visible.map((beacon) =>
             beacon.status === 'TRIGGERED' ? (
-              <TriggeredBeaconCard
-                key={beacon.id}
-                beacon={beacon}
-                storeName={storeName}
-                onFollow={(b) => setStatus(b, 'ACTIVE')}
-              />
+              <div key={beacon.id} data-beacon-id={beacon.id} className="contents">
+                <TriggeredBeaconCard
+                  beacon={beacon}
+                  storeName={storeName}
+                  onFollow={(b) => setStatus(b, 'ACTIVE')}
+                />
+              </div>
             ) : (
-              <BeaconRow
-                key={beacon.id}
-                beacon={beacon}
-                onEdit={setEditing}
-                onToggle={toggle}
-                onDelete={remove}
-              />
+              <div key={beacon.id} data-beacon-id={beacon.id} className="contents">
+                <BeaconRow beacon={beacon} onEdit={setEditing} onToggle={toggle} onDelete={handleDelete} />
+              </div>
             ),
           )}
         </div>
@@ -124,7 +142,11 @@ export default function BeaconsPage() {
   return (
     <div className="mx-auto grid w-full max-w-page gap-4 px-3 pb-16 pt-5 md:gap-7 md:px-6 md:pt-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
       <div className="flex min-w-0 flex-col gap-3 md:gap-[18px]">
-        <h1 className="font-display text-[26px] font-bold md:text-[30px] md:font-medium">Мои маячки</h1>
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-display text-[26px] font-bold focus:outline-none md:text-[30px] md:font-medium"
+        >Мои маячки</h1>
         {content}
       </div>
       <aside className="flex flex-col gap-2.5 md:gap-4">

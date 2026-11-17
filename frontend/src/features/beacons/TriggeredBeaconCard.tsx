@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { BeaconResponse } from '../../api/types'
 import { Button, buttonClasses } from '../../components/ui/Button'
+import { Cover } from '../../components/ui/Cover'
 import { ExternalLink } from '../../components/ui/ExternalLink'
 import { focusRing } from '../../components/ui/focusRing'
 import { cn } from '../../lib/cn'
@@ -18,7 +19,15 @@ export function TriggeredBeaconCard({ beacon, storeName, now, onFollow }: Trigge
   const price = beacon.currentBestPrice != null ? formatPrice(beacon.currentBestPrice) : null
   return (
     <article className="flex flex-col gap-2.5 rounded-card border-2 border-accent bg-accent-soft p-3.5 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4 md:p-[18px]">
-      <div className="flex flex-col items-start gap-2.5 md:flex-[1_1_320px] md:gap-2">
+      <div className="flex items-start gap-3 md:flex-[1_1_320px] md:gap-[18px]">
+        <Cover
+          editionId={beacon.editionId ?? 0}
+          title={beacon.title ?? ''}
+          coverUrl={beacon.coverUrl}
+          size="result"
+          className="h-[74px] w-[52px] rounded-md md:h-[92px] md:w-16"
+        />
+        <div className="flex min-w-0 flex-col items-start gap-2.5 md:gap-2">
         <span className="rounded-full bg-accent px-2.5 py-1 text-[13px] font-bold text-white">
           Сработал {beacon.lastTriggeredAt ? formatTriggered(beacon.lastTriggeredAt, now) : ''}
         </span>
@@ -40,6 +49,7 @@ export function TriggeredBeaconCard({ beacon, storeName, now, onFollow }: Trigge
             </>
           )}
         </p>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-2 md:flex">
         {beacon.currentBestUrl && price && (

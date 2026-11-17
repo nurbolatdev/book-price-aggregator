@@ -89,6 +89,11 @@ describe('BeaconRow', () => {
 })
 
 describe('TriggeredBeaconCard', () => {
+  it('renders the cover tile', () => {
+    renderUi(<TriggeredBeaconCard beacon={triggered} storeName={() => 'Flip.kz'} now={now} onFollow={vi.fn()} />)
+    expect(screen.getByTestId('cover-plate')).toBeInTheDocument()
+  })
+
   it('shows the trigger, goal, store and buy link', () => {
     const onFollow = vi.fn()
     renderUi(<TriggeredBeaconCard beacon={triggered} storeName={() => 'Flip.kz'} now={now} onFollow={onFollow} />)

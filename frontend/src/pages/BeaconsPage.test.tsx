@@ -255,6 +255,18 @@ describe('BeaconsPage', () => {
 
     const titles = () => screen.getAllByRole('article').map((a) => within(a).getAllByRole('link')[0]!.textContent)
 
+    it('moves focus off the removed row after delete', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      trackDeletes()
+      renderPage()
+      await rows()
+      fireEvent.click(within(rowOf('Чистый код')).getByRole('button', { name: 'Удалить маячок' }))
+      await waitFor(() => expect(screen.queryByRole('link', { name: 'Чистый код' })).not.toBeInTheDocument())
+      await waitFor(() => expect(document.activeElement).not.toBe(document.body))
+      fireEvent.click(screen.getByRole('button', { name: 'Отменить' }))
+      await waitFor(() => expect(screen.getByRole('link', { name: 'Чистый код' })).toBeInTheDocument())
+    })
+
     it('removes the row at once and brings it back on undo without a request', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true })
       const deletes = trackDeletes()
