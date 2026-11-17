@@ -5,12 +5,20 @@ export const MOCK_ACCESS_TOKEN = 'mock-access'
 
 const SESSION_KEY = 'kr.mock.session'
 
+function verifiedFlag(): boolean {
+  try {
+    return sessionStorage.getItem('kr.mock.emailVerified') === '1'
+  } catch {
+    return false
+  }
+}
+
 const initialUser: UserResponse = {
   id: 7,
   email: 'nurbo@example.com',
   name: 'Нурболат',
   role: 'USER',
-  emailVerified: false,
+  emailVerified: verifiedFlag(),
   notifyFrequency: 'INSTANT',
   weeklyDigest: true,
 }

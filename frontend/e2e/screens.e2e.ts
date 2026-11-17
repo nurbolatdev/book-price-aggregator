@@ -14,6 +14,11 @@ for (const entry of screens) {
       if (entry.signedIn) {
         await page.addInitScript(() => sessionStorage.setItem('kr.mock.session', '1'))
       }
+      if (entry.storage) {
+        await page.addInitScript((pairs: Record<string, string>) => {
+          for (const [key, value] of Object.entries(pairs)) sessionStorage.setItem(key, value)
+        }, entry.storage)
+      }
       await page.goto(entry.path)
       await page.waitForLoadState(entry.waitFor ?? 'networkidle')
       await page.evaluate(() => document.fonts.ready)

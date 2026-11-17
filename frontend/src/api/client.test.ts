@@ -234,4 +234,39 @@ describe('api client', () => {
     expect(refreshCalls).toBe(0)
     expect(seen).toEqual(['Bearer old', 'Bearer new'])
   })
+
+  it('sends the public unsubscribe request without a bearer and never refreshes on its 401', async () => {
+    startSession('tok')
+    const seen: { url: string; auth: string }[] = []
+    mockApi((config) => {
+      seen.push({ url: config.url ?? '', auth: authorizationOf(config.headers) })
+      if (config.url === '/beacons/unsubscribe') {
+        return [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'link expired' }]
+      }
+      return [200, []]
+    })
+    await expect(api.post('/beacons/unsubscribe', { token: 'x' })).rejects.toMatchObject({
+      code: 'TOKEN_EXPIRED',
+    })
+    expect(seen).toEqual([{ url: '/beacons/unsubscribe', auth: '' }])
+    expect(useAuthStore.getState().status).toBe('authenticated')
+    await api.get('/beacons')
+    expect(seen[1]).toEqual({ url: '/beacons', auth: 'Bearer tok' })
+  })
+
+  it('still refreshes and retries GET /beacons on TOKEN_EXPIRED', async () => {
+    startSession()
+    let refreshCalls = 0
+    mockApi((config) => {
+      if (config.url === '/auth/refresh') {
+        refreshCalls += 1
+        return [200, authBody('new')]
+      }
+      return authorizationOf(config.headers) === 'Bearer new'
+        ? [200, []]
+        : [401, { status: 401, code: 'TOKEN_EXPIRED', message: 'expired' }]
+    })
+    await api.get('/beacons')
+    expect(refreshCalls).toBe(1)
+  })
 })

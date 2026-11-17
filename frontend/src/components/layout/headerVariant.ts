@@ -7,6 +7,7 @@ const MINIMAL_PATHS = new Set([
   '/verify-email',
   '/forgot-password',
   '/reset-password',
+  '/unsubscribe',
 ])
 
 export function getHeaderVariant(pathname: string): HeaderVariant {

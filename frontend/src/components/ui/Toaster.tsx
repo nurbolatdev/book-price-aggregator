@@ -23,6 +23,18 @@ export function Toaster() {
           className={`flex items-center justify-between gap-2 rounded-control border px-4 py-2 shadow ${STYLES[t.kind]}`}
         >
           <span>{t.message}</span>
+          {t.action && (
+            <button
+              type="button"
+              onClick={() => {
+                t.action?.onClick()
+                dismiss(t.id, 'action')
+              }}
+              className="min-h-touch font-semibold text-link focus:outline-none focus-visible:ring-2 focus-visible:ring-link"
+            >
+              {t.action.label}
+            </button>
+          )}
           <button
             type="button"
             aria-label="Закрыть"

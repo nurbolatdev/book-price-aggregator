@@ -10,6 +10,7 @@ import { Input } from '../../components/ui/Input'
 import { applyFieldErrors } from '../../lib/applyFieldErrors'
 import { profileNameSchema } from '../auth/schemas'
 import { useSingleSubmit } from '../auth/useSingleSubmit'
+import { EmailStatus } from './EmailStatus'
 import { useUpdateProfile } from './useUpdateProfile'
 
 interface NameValues {
@@ -52,15 +53,7 @@ export function PersonalDataForm({ user }: { user: UserResponse }) {
           <span className="text-sm font-semibold text-ink">Email</span>
           <div className="flex min-h-12 items-center gap-2 text-base text-ink">
             <span>{user.email}</span>
-            <span
-              className={
-                user.emailVerified
-                  ? 'rounded-md bg-deal-soft px-2 py-0.5 text-xs font-semibold text-deal'
-                  : 'rounded-md bg-warn-soft px-2 py-0.5 text-xs font-semibold text-warn'
-              }
-            >
-              {user.emailVerified ? 'подтверждён' : 'не подтверждён'}
-            </span>
+            <EmailStatus verified={Boolean(user.emailVerified)} />
           </div>
         </div>
       </div>

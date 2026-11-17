@@ -1,5 +1,6 @@
 import { HttpResponse, delay, http } from 'msw'
 import { authHandlers } from './authHandlers'
+import { beaconHandlers } from './beaconHandlers'
 import { bookDetail, editionDetail, priceHistory, similarFor } from './editionFixtures'
 import { drops, emptySearchPage, facets, popular, searchPage, stores, suggestions } from './fixtures'
 
@@ -67,5 +68,5 @@ export const handlers = [
     return HttpResponse.json(book)
   }),
 
-  http.get('*/api/v1/beacons', () => HttpResponse.json([])),
+  ...beaconHandlers,
 ]

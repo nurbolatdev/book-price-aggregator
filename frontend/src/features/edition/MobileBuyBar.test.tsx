@@ -1,11 +1,11 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { formatPrice } from '../../lib/format'
 import { editionDetail } from '../../mocks/editionFixtures'
 import { server } from '../../mocks/server'
 import { useAuthStore } from '../../stores/auth'
-import { renderWithProviders } from '../../test/render'
+import { getLocation, renderWithProviders } from '../../test/render'
 import { MobileBuyBar } from './MobileBuyBar'
 
 describe('MobileBuyBar', () => {
@@ -29,8 +29,16 @@ describe('MobileBuyBar', () => {
     useAuthStore.setState({ status: 'authenticated' })
     server.use(http.get('*/api/v1/beacons', () => HttpResponse.json([{ id: 7, editionId: 41 }])))
     renderWithProviders(<MobileBuyBar edition={editionDetail(41)!} editionId={41} />)
-    const link = await screen.findByRole('link', { name: 'Маячок стоит' })
-    expect(link).toHaveAttribute('href', '/beacons')
+    const button = await screen.findByRole('button', { name: 'Маячок стоит' })
+    fireEvent.click(button)
+    expect(getLocation()).toBe('/?beacon=1')
+  })
+
+  it('offers a button to follow when signed in without a beacon', () => {
+    useAuthStore.setState({ status: 'authenticated' })
+    renderWithProviders(<MobileBuyBar edition={editionDetail(41)!} editionId={41} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Следить' }))
+    expect(getLocation()).toBe('/?beacon=1')
   })
 
   it('has only the follow button without a best price', () => {
@@ -41,12 +49,13 @@ describe('MobileBuyBar', () => {
   })
 
   it('is sticky with a safe-area bottom padding and 52px buttons', () => {
+    useAuthStore.setState({ status: 'authenticated' })
     renderWithProviders(<MobileBuyBar edition={editionDetail(41)!} editionId={41} />)
-    const links = screen.getAllByRole('link')
-    const bar = links[0]!.parentElement!
+    const controls = [screen.getByRole('button', { name: 'Следить' }), ...screen.getAllByRole('link')]
+    const bar = controls[0]!.parentElement!
     expect(bar.className).toContain('sticky')
     expect(bar.className).toContain('bottom-0')
     expect(bar.className).toContain('env(safe-area-inset-bottom)')
-    for (const l of links) expect(l.className).toContain('h-[52px]')
+    for (const l of controls) expect(l.className).toContain('h-[52px]')
   })
 })

@@ -16,6 +16,8 @@ export default {
         danger: { DEFAULT: '#A11B1B', soft: '#FDE8E8', line: '#F3C4C4' },
         warn: { DEFAULT: '#8A4B00', soft: '#FFF4E0' },
         skeleton: '#E6EAEF',
+        'status-soft': '#EEF2F7',
+        'paused-soft': '#F1F1F1',
         divider: '#EDF0F3',
         'best-row': '#F1FAF5',
         mist: '#C9D1DC',

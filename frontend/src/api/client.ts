@@ -22,7 +22,15 @@ function isCookieOnlyAuthUrl(url: string | undefined): boolean {
   return isAuthUrl(url) && url !== '/auth/logout-all'
 }
 
+function isPublicTokenUrl(url: string | undefined): boolean {
+  return url === '/beacons/unsubscribe'
+}
+
 api.interceptors.request.use((config) => {
+  if (isPublicTokenUrl(config.url)) {
+    config.headers.delete('Authorization')
+    return config
+  }
   if (isAuthUrl(config.url)) config.withCredentials = true
   if (isCookieOnlyAuthUrl(config.url)) return config
   const token = useAuthStore.getState().accessToken
@@ -85,6 +93,7 @@ api.interceptors.response.use(
       config &&
       !config._retried &&
       !isCookieOnlyAuthUrl(config.url) &&
+      !isPublicTokenUrl(config.url) &&
       apiError.status === 401 &&
       apiError.code === 'TOKEN_EXPIRED'
     ) {

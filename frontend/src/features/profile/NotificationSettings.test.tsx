@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import App from '../../app/App'
 import { MOCK_ACCESS_TOKEN, setMockSignedIn } from '../../mocks/authFixtures'
 import { server } from '../../mocks/server'
+import { NotificationSettings } from './NotificationSettings'
 import { useAuthStore } from '../../stores/auth'
 import { useToastStore } from '../../stores/toast'
 import { renderWithProviders } from '../../test/render'
@@ -79,5 +80,15 @@ describe('NotificationSettings', () => {
     renderSettings()
     fireEvent.click(await screen.findByRole('checkbox', { name: /Еженедельная подборка/ }))
     await waitFor(() => expect(bodies).toEqual([{ weeklyDigest: false }]))
+  })
+
+  it('renders the short panel labels without the note', async () => {
+    setMockSignedIn(true)
+    useAuthStore.getState().setSession({ accessToken: MOCK_ACCESS_TOKEN, user })
+    renderWithProviders(<NotificationSettings variant="panel" />)
+    expect(await screen.findByRole('radio', { name: 'Сразу, как сработает' })).toBeChecked()
+    expect(screen.getByRole('radio', { name: 'Сводка раз в день' })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'Еженедельная подборка скидок' })).toBeChecked()
+    expect(screen.queryByText('Сохраняется сразу при изменении.')).not.toBeInTheDocument()
   })
 })
