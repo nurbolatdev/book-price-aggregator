@@ -1,6 +1,7 @@
 import { useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 import { deleteBeacon } from '../../api/beacons'
+import { ApiError } from '../../api/errors'
 import type { BeaconResponse } from '../../api/types'
 import { useAuthStore } from '../../stores/auth'
 import { toast, useToastStore } from '../../stores/toast'
@@ -17,10 +18,12 @@ interface Pending {
 async function commit(queryClient: QueryClient, { beacon, index }: Pending): Promise<void> {
   try {
     await deleteBeacon(beacon.id ?? 0)
-  } catch {
-    pendingDeletes.delete(beacon.id ?? 0)
-    insertBeaconAt(queryClient, beacon, index)
-    toast.error('Не удалось удалить маячок')
+  } catch (error) {
+    if (!(error instanceof ApiError && error.code === 'NOT_FOUND')) {
+      pendingDeletes.delete(beacon.id ?? 0)
+      insertBeaconAt(queryClient, beacon, index)
+      toast.error('Не удалось удалить маячок')
+    }
   } finally {
     pendingDeletes.delete(beacon.id ?? 0)
     void queryClient.invalidateQueries({ queryKey: ['beacons'] })

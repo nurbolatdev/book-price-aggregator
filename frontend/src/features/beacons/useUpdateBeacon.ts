@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateBeacon } from '../../api/beacons'
 import { ApiError } from '../../api/errors'
 import type { BeaconResponse, UpdateBeaconRequest } from '../../api/types'
+import { BEACON_MUTATION_KEY } from './beaconCache'
 import { toast } from '../../stores/toast'
-import { patchBeacon, restore, snapshot, upsertBeacon, type BeaconSnapshot } from './beaconCache'
+import { findBeacon, patchBeacon, upsertBeacon } from './beaconCache'
 
 export interface UpdateBeaconVariables {
   id: number
@@ -13,22 +14,28 @@ export interface UpdateBeaconVariables {
 
 export function useUpdateBeacon() {
   const queryClient = useQueryClient()
-  return useMutation<BeaconResponse, unknown, UpdateBeaconVariables, { saved: BeaconSnapshot }>({
+  return useMutation<BeaconResponse, unknown, UpdateBeaconVariables, { previous: BeaconResponse | undefined }>({
     mutationFn: ({ id, patch }) => updateBeacon(id, patch),
+    mutationKey: BEACON_MUTATION_KEY,
     meta: { silentError: true },
-    onMutate: async ({ id, editionId, patch }) => {
+    onMutate: async ({ id, patch }) => {
       await queryClient.cancelQueries({ queryKey: ['beacons'] })
-      const saved = snapshot(queryClient, editionId)
+      const previous = findBeacon(queryClient, id)
       patchBeacon(queryClient, id, patch)
-      return { saved }
+      return { previous }
     },
-    onError: (error, { editionId }, context) => {
-      if (context) restore(queryClient, context.saved, editionId)
+    onError: (error, _variables, context) => {
+      if (context?.previous) upsertBeacon(queryClient, context.previous)
       if (!(error instanceof ApiError && error.code === 'VALIDATION_FAILED')) {
         toast.error('Не удалось сохранить. Изменения отменены.')
       }
     },
     onSuccess: (beacon) => upsertBeacon(queryClient, beacon),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['beacons'] }),
+    onSettled: () => {
+      // a refetch while another beacon mutation is in flight would overwrite its optimistic state
+      if (queryClient.isMutating({ mutationKey: BEACON_MUTATION_KEY }) <= 1) {
+        return queryClient.invalidateQueries({ queryKey: ['beacons'] })
+      }
+    },
   })
 }

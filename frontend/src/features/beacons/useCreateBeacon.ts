@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { createBeacon } from '../../api/beacons'
 import { ApiError } from '../../api/errors'
 import type { BeaconResponse, CreateBeaconRequest } from '../../api/types'
+import { BEACON_MUTATION_KEY } from './beaconCache'
 import { toast } from '../../stores/toast'
 import type { BeaconBook } from './beaconBook'
-import { applyPatch, restore, snapshot, upsertBeacon, type BeaconSnapshot } from './beaconCache'
+import { applyPatch, discardBeacon, snapshot, upsertBeacon, type BeaconSnapshot } from './beaconCache'
 
 export interface CreateBeaconVariables {
   request: CreateBeaconRequest
@@ -22,6 +23,7 @@ export function useCreateBeacon() {
   const navigate = useNavigate()
   return useMutation<BeaconResponse, unknown, CreateBeaconVariables, Context>({
     mutationFn: ({ request }) => createBeacon(request),
+    mutationKey: BEACON_MUTATION_KEY,
     meta: { silentError: true },
     onMutate: async ({ request, book }) => {
       await queryClient.cancelQueries({ queryKey: ['beacons'] })
@@ -43,7 +45,7 @@ export function useCreateBeacon() {
       return { saved, tempId }
     },
     onError: (error, { request }, context) => {
-      if (context) restore(queryClient, context.saved, request.editionId)
+      if (context) discardBeacon(queryClient, context.tempId, request.editionId, context.saved.edition)
       if (error instanceof ApiError && error.code === 'CONFLICT') {
         toast.info('На эту книгу маячок уже стоит', {
           action: { label: 'Изменить', onClick: () => navigate('/beacons') },
@@ -58,6 +60,11 @@ export function useCreateBeacon() {
         action: { label: 'Мои маячки', onClick: () => navigate('/beacons') },
       })
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['beacons'] }),
+    onSettled: () => {
+      // a refetch while another beacon mutation is in flight would overwrite its optimistic state
+      if (queryClient.isMutating({ mutationKey: BEACON_MUTATION_KEY }) <= 1) {
+        return queryClient.invalidateQueries({ queryKey: ['beacons'] })
+      }
+    },
   })
 }

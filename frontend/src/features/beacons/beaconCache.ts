@@ -2,6 +2,8 @@ import type { QueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../api/queryKeys'
 import type { BeaconResponse, UpdateBeaconRequest } from '../../api/types'
 
+export const BEACON_MUTATION_KEY = ['beacons', 'mutation']
+
 export interface BeaconSnapshot {
   list: BeaconResponse[] | undefined
   edition: BeaconResponse | null | undefined
@@ -27,10 +29,15 @@ export function snapshot(qc: QueryClient, editionId: number): BeaconSnapshot {
   }
 }
 
-export function restore(qc: QueryClient, saved: BeaconSnapshot, editionId: number): void {
-  if (saved.list !== undefined) qc.setQueryData(queryKeys.beacons, saved.list)
-  if (saved.edition === undefined) qc.removeQueries({ queryKey: editionKey(editionId), exact: true })
-  else setEdition(qc, editionId, saved.edition)
+/** Drops a temporary item from the list and puts the edition entry back, if it still holds that item. */
+export function discardBeacon(qc: QueryClient, tempId: number, editionId: number, savedEdition: BeaconResponse | null | undefined): void {
+  qc.setQueryData<BeaconResponse[] | undefined>(queryKeys.beacons, (list) =>
+    list && list.some((item) => item.id === tempId) ? list.filter((item) => item.id !== tempId) : list,
+  )
+  const current = qc.getQueryData<BeaconResponse | null>(editionKey(editionId))
+  if (current?.id !== tempId) return
+  if (savedEdition === undefined) qc.removeQueries({ queryKey: editionKey(editionId), exact: true })
+  else setEdition(qc, editionId, savedEdition)
 }
 
 /** Replaces the item with `replaceId` (or with the same id), or inserts it after the triggered ones. */
@@ -64,7 +71,7 @@ export function applyPatch(beacon: BeaconResponse, patch: UpdateBeaconRequest, n
   return next
 }
 
-function findBeacon(qc: QueryClient, id: number): BeaconResponse | undefined {
+export function findBeacon(qc: QueryClient, id: number): BeaconResponse | undefined {
   const fromList = qc.getQueryData<BeaconResponse[]>(queryKeys.beacons)?.find((item) => item.id === id)
   if (fromList) return fromList
   const entries = qc.getQueriesData<BeaconResponse | null>({ queryKey: ['beacons', 'edition'] })

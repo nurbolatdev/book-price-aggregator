@@ -238,10 +238,10 @@ describe('BeaconsPage', () => {
       server.use(
         http.delete('*/api/v1/beacons/:id', ({ params }) => {
           deletes.push(Number(params.id))
-          if (status === 204) setMockBeacons(mockBeacons.filter((b) => b.id !== Number(params.id)))
-          return status === 204
-            ? new HttpResponse(null, { status })
-            : HttpResponse.json({ code: 'INTERNAL_ERROR', message: 'x' }, { status })
+          if (status === 204 || status === 404) setMockBeacons(mockBeacons.filter((b) => b.id !== Number(params.id)))
+          if (status === 204) return new HttpResponse(null, { status })
+          const code = status === 404 ? 'NOT_FOUND' : 'INTERNAL_ERROR'
+          return HttpResponse.json({ code, message: 'x' }, { status })
         }),
       )
       return deletes
@@ -299,6 +299,58 @@ describe('BeaconsPage', () => {
       fireEvent.click(within(screen.getByRole('banner')).getByRole('link', { name: 'Каталог' }))
       await waitFor(() => expect(deletes).toEqual([3]))
       expect(screen.queryByText('Маячок удалён')).not.toBeInTheDocument()
+    })
+
+    it('brings the row back on undo after another row changed and the list refetched', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      const deletes = trackDeletes()
+      await removeCleanCode()
+      await waitFor(() => expect(screen.queryByRole('link', { name: 'Чистый код' })).not.toBeInTheDocument())
+      fireEvent.click(within(rowOf('Атомные привычки')).getByRole('button', { name: 'Поставить на паузу' }))
+      expect(await screen.findByRole('tab', { name: 'На паузе · 2' })).toBeInTheDocument()
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(500)
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Отменить' }))
+      expect(await screen.findByRole('link', { name: 'Чистый код' })).toBeInTheDocument()
+      expect(deletes).toEqual([])
+    })
+
+    it('keeps a second pause on screen when the first one fails', async () => {
+      let release: () => void = () => {}
+      const gate = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      server.use(
+        http.patch('*/api/v1/beacons/:id', async ({ params }) => {
+          if (Number(params.id) !== 2) return undefined
+          await gate
+          return HttpResponse.json({ code: 'INTERNAL_ERROR', message: 'x' }, { status: 500 })
+        }),
+      )
+      renderPage()
+      await rows()
+      fireEvent.click(within(rowOf('Атомные привычки')).getByRole('button', { name: 'Поставить на паузу' }))
+      fireEvent.click(within(rowOf('Абай жолы')).getByRole('button', { name: 'Поставить на паузу' }))
+      expect(await screen.findByRole('tab', { name: 'На паузе · 3' })).toBeInTheDocument()
+      release()
+      await waitFor(() =>
+        expect(useToastStore.getState().toasts.map((t) => t.message)).toContain(
+          'Не удалось сохранить. Изменения отменены.',
+        ),
+      )
+      expect(within(rowOf('Атомные привычки')).getByText('Ждёт')).toBeInTheDocument()
+      expect(within(rowOf('Абай жолы')).getByText('На паузе')).toBeInTheDocument()
+    })
+
+    it('treats a 404 on DELETE as done', async () => {
+      const deletes = trackDeletes(404)
+      await removeCleanCode()
+      fireEvent.click(screen.getByRole('button', { name: 'Закрыть' }))
+      await waitFor(() => expect(deletes).toEqual([3]))
+      await waitFor(() => expect(pendingDeletes.size).toBe(0))
+      expect(screen.queryByText('Не удалось удалить маячок')).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'Чистый код' })).not.toBeInTheDocument()
     })
 
     it('puts the row back and warns when the DELETE fails', async () => {
