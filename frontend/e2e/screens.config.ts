@@ -6,6 +6,7 @@ export interface ScreenEntry {
   widths?: (1280 | 960 | 390)[]
   waitFor?: 'networkidle' | 'load'
   signedIn?: boolean
+  storage?: Record<string, string>
   prepare?: (page: Page) => Promise<void>
 }
 
@@ -134,4 +135,72 @@ const authScreens: ScreenEntry[] = [
   },
 ]
 
-screens.push(...authScreens)
+const VERIFIED = { 'kr.mock.emailVerified': '1' }
+
+const beaconScreens: ScreenEntry[] = [
+  {
+    name: 'beacon-modal',
+    path: '/editions/41?beacon=1',
+    widths: [1280, 390],
+    signedIn: true,
+    storage: VERIFIED,
+    prepare: async (page) => {
+      await page.getByRole('dialog', { name: 'Маячок на книгу' }).waitFor()
+    },
+  },
+  {
+    name: 'beacon-modal-unverified',
+    path: '/editions/41?beacon=1',
+    widths: [1280],
+    signedIn: true,
+    prepare: async (page) => {
+      await page.getByRole('dialog', { name: 'Маячок на книгу' }).waitFor()
+    },
+  },
+  {
+    name: 'beacon-modal-edit',
+    path: '/beacons',
+    widths: [1280, 390],
+    signedIn: true,
+    storage: VERIFIED,
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Изменить условие' }).first().click()
+      await page.getByRole('dialog', { name: 'Изменить маячок' }).waitFor()
+    },
+  },
+  { name: 'beacons', path: '/beacons', widths: [1280, 390], signedIn: true, storage: VERIFIED },
+  { name: 'beacons-triggered', path: '/beacons?tab=triggered', widths: [1280], signedIn: true, storage: VERIFIED },
+  { name: 'beacons-active', path: '/beacons?tab=active', widths: [1280], signedIn: true, storage: VERIFIED },
+  { name: 'beacons-paused', path: '/beacons?tab=paused', widths: [1280], signedIn: true, storage: VERIFIED },
+  {
+    name: 'beacons-empty',
+    path: '/beacons',
+    widths: [1280, 390],
+    signedIn: true,
+    storage: { ...VERIFIED, 'kr.mock.beacons': 'empty' },
+    prepare: async (page) => {
+      await page.getByText('Маячков пока нет').waitFor()
+    },
+  },
+  { name: 'unsubscribe', path: '/unsubscribe?token=valid', widths: [960, 390] },
+  {
+    name: 'unsubscribe-paused',
+    path: '/unsubscribe?token=valid',
+    widths: [960, 390],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Поставить маячок на паузу' }).click()
+      await page.getByRole('heading', { name: 'Маячок на паузе' }).waitFor()
+    },
+  },
+  {
+    name: 'unsubscribe-invalid',
+    path: '/unsubscribe?token=bad',
+    widths: [960],
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Поставить маячок на паузу' }).click()
+      await page.getByRole('heading', { name: 'Ссылка недействительна' }).waitFor()
+    },
+  },
+]
+
+screens.push(...authScreens, ...beaconScreens)

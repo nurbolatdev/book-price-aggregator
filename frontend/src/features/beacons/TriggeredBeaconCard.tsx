@@ -17,38 +17,40 @@ interface TriggeredBeaconCardProps {
 export function TriggeredBeaconCard({ beacon, storeName, now, onFollow }: TriggeredBeaconCardProps) {
   const price = beacon.currentBestPrice != null ? formatPrice(beacon.currentBestPrice) : null
   return (
-    <article className="flex flex-col gap-2.5 rounded-card border-2 border-accent bg-accent-soft p-3.5 md:gap-3 md:p-[18px]">
-      <span className="self-start rounded-full bg-accent px-2.5 py-1 text-[13px] font-bold text-white">
-        Сработал {beacon.lastTriggeredAt ? formatTriggered(beacon.lastTriggeredAt, now) : ''}
-      </span>
-      <Link
-        to={`/editions/${beacon.editionId}`}
-        className={cn('self-start rounded-sm text-base font-bold text-ink hover:underline md:text-lg', focusRing)}
-      >
-        {beacon.title}
-      </Link>
-      <p className="text-sm">
-        {goalText(beacon)}
-        {price && (
-          <>
-            {' · сейчас '}
-            <strong>
-              {price}
-              {beacon.currentBestStore ? ` на ${storeName(beacon.currentBestStore)}` : ''}
-            </strong>
-          </>
-        )}
-      </p>
+    <article className="flex flex-col gap-2.5 rounded-card border-2 border-accent bg-accent-soft p-3.5 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4 md:p-[18px]">
+      <div className="flex flex-col items-start gap-2.5 md:flex-[1_1_320px] md:gap-2">
+        <span className="rounded-full bg-accent px-2.5 py-1 text-[13px] font-bold text-white">
+          Сработал {beacon.lastTriggeredAt ? formatTriggered(beacon.lastTriggeredAt, now) : ''}
+        </span>
+        <Link
+          to={`/editions/${beacon.editionId}`}
+          className={cn('rounded-sm text-base font-bold text-ink hover:underline md:text-lg', focusRing)}
+        >
+          {beacon.title}
+        </Link>
+        <p className="text-sm">
+          {goalText(beacon)}
+          {price && (
+            <>
+              {' · сейчас '}
+              <strong>
+                {price}
+                {beacon.currentBestStore ? ` на ${storeName(beacon.currentBestStore)}` : ''}
+              </strong>
+            </>
+          )}
+        </p>
+      </div>
       <div className="grid grid-cols-2 gap-2 md:flex">
         {beacon.currentBestUrl && price && (
           <ExternalLink
             href={beacon.currentBestUrl}
-            className={buttonClasses({ variant: 'primary', size: 'lg' })}
+            className={cn(buttonClasses({ variant: 'primary', size: 'lg' }), 'whitespace-nowrap')}
           >
             Купить за {price}
           </ExternalLink>
         )}
-        <Button variant="secondary" size="lg" onClick={() => onFollow(beacon)}>
+        <Button variant="secondary" size="lg" className="whitespace-nowrap" onClick={() => onFollow(beacon)}>
           Следить дальше
         </Button>
       </div>
