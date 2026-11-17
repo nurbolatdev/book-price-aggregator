@@ -11,6 +11,7 @@ import {
   EditionSkeleton,
 } from "../features/edition/EditionSkeleton";
 import { storeNameOf } from "../features/edition/offers";
+import { EditionBeaconModal } from "../features/edition/EditionBeaconModal";
 import { useBeaconParam } from "../features/edition/useBeaconParam";
 import { useEdition } from "../features/edition/useEdition";
 import { formatPrice, pluralRu } from "../lib/format";
@@ -49,16 +50,30 @@ function EditionContent({
   edition,
   id,
   desktop,
+  beaconOpen,
+  closeBeacon,
 }: {
   edition: EditionDetailResponse;
   id: number;
   desktop: boolean;
+  beaconOpen: boolean;
+  closeBeacon: () => void;
 }) {
   usePageMeta(metaFor(edition));
-  return desktop ? (
-    <EditionDesktop edition={edition} editionId={id} />
-  ) : (
-    <EditionMobile edition={edition} editionId={id} />
+  return (
+    <>
+      {desktop ? (
+        <EditionDesktop edition={edition} editionId={id} />
+      ) : (
+        <EditionMobile edition={edition} editionId={id} />
+      )}
+      <EditionBeaconModal
+        edition={edition}
+        editionId={id}
+        open={beaconOpen}
+        onClose={closeBeacon}
+      />
+    </>
   );
 }
 
@@ -82,11 +97,18 @@ export default function EditionPage() {
   const id = parseId(useParams().id);
   const desktop = useMediaQuery("(min-width: 768px)");
   const { data, error, isPending, refetch } = useEdition(id);
-  useBeaconParam(id);
+  const beacon = useBeaconParam(id);
 
   if (data) {
     const content = (
-      <EditionContent key={id} edition={data} id={id} desktop={desktop} />
+      <EditionContent
+        key={id}
+        edition={data}
+        id={id}
+        desktop={desktop}
+        beaconOpen={beacon.open}
+        closeBeacon={beacon.close}
+      />
     );
     return desktop ? <Container>{content}</Container> : content;
   }

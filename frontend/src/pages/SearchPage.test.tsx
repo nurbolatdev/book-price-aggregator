@@ -2,8 +2,14 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 import { emptySearchPage, facets, searchPage } from "../mocks/fixtures";
+import {
+  MOCK_ACCESS_TOKEN,
+  mockUser,
+  setMockSignedIn,
+} from "../mocks/authFixtures";
 import { server } from "../mocks/server";
 import { useAuthStore } from "../stores/auth";
+import { useToastStore } from "../stores/toast";
 import { getLocation, renderWithProviders } from "../test/render";
 import { setViewport } from "../test/viewport";
 import { Route, Routes } from "react-router-dom";
@@ -131,6 +137,65 @@ describe("SearchPage", () => {
     expect(bells[0]).toHaveAttribute(
       "href",
       "/login?next=%2Feditions%2F12%3Fbeacon%3D1",
+    );
+  });
+
+  it("opens the beacon dialog from the bell for a signed-in user", async () => {
+    setMockSignedIn(true);
+    useAuthStore.getState().setSession({
+      accessToken: MOCK_ACCESS_TOKEN,
+      user: { ...mockUser, emailVerified: true },
+    });
+    const bodies: unknown[] = [];
+    server.use(
+      http.post("*/api/v1/beacons", async ({ request }) => {
+        bodies.push(await request.json());
+        return HttpResponse.json(
+          { id: 99, editionId: 12, title: "Мастер и Маргарита", status: "ACTIVE" },
+          { status: 201 },
+        );
+      }),
+    );
+    renderWithProviders(<SearchPage />, { route: ROUTE });
+    const bells = await screen.findAllByRole("button", {
+      name: "Поставить маячок",
+    });
+    expect(screen.queryByRole("link", { name: "Поставить маячок" })).toBeNull();
+    fireEvent.click(bells[0]!);
+    const dialog = await screen.findByRole("dialog", { name: "Маячок на книгу" });
+    expect(within(dialog).getByText("Мастер и Маргарита", { selector: "strong" })).toBeInTheDocument();
+    expect(within(dialog).getByText(/АСТ/)).toBeInTheDocument();
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Поставить маячок" }),
+    );
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]).toMatchObject({ editionId: 12 });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+  });
+
+  it("tells that a beacon already stands for edition 16", async () => {
+    setMockSignedIn(true);
+    useAuthStore.getState().setSession({
+      accessToken: MOCK_ACCESS_TOKEN,
+      user: { ...mockUser, emailVerified: true },
+    });
+    renderWithProviders(<SearchPage />, { route: ROUTE });
+    const bells = await screen.findAllByRole("button", {
+      name: "Поставить маячок",
+    });
+    fireEvent.click(bells[1]!);
+    const dialog = await screen.findByRole("dialog", { name: "Маячок на книгу" });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Поставить маячок" }),
+    );
+    await waitFor(() =>
+      expect(
+        useToastStore
+          .getState()
+          .toasts.some((t) => t.message === "На эту книгу маячок уже стоит"),
+      ).toBe(true),
     );
   });
 

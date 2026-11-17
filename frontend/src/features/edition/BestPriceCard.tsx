@@ -19,6 +19,11 @@ export function BestPriceCard({ edition, editionId, className }: BestPriceCardPr
   const beacon = useBeaconAction(editionId)
   const store = storeNameOf(offers, bestPrice)
   const seen = lastSeen(offers)
+  const beaconClasses = buttonClasses({
+    variant: beacon.hasBeacon ? 'secondary' : 'primary',
+    size: 'lg',
+    className: 'w-full',
+  })
 
   return (
     <aside
@@ -49,17 +54,17 @@ export function BestPriceCard({ edition, editionId, className }: BestPriceCardPr
       ) : (
         <p className="text-base font-semibold text-ink">Сейчас нет в наличии ни в одном магазине</p>
       )}
-      <Link
-        to={beacon.href}
-        className={buttonClasses({
-          variant: beacon.hasBeacon ? 'secondary' : 'primary',
-          size: 'lg',
-          className: 'w-full',
-        })}
-      >
-        <Bell size={18} aria-hidden="true" />
-        {beacon.label}
-      </Link>
+      {beacon.kind === 'link' ? (
+        <Link to={beacon.href} className={beaconClasses}>
+          <Bell size={18} aria-hidden="true" />
+          {beacon.label}
+        </Link>
+      ) : (
+        <button type="button" onClick={beacon.onOpen} className={beaconClasses}>
+          <Bell size={18} aria-hidden="true" />
+          {beacon.label}
+        </button>
+      )}
       {seen && (
         <p className="text-[13px] text-muted">
           Обновлено {formatRelative(seen)}. Цена на сайте магазина может отличаться.

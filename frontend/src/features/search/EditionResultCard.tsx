@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Bell } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import type { SearchItem } from '../../api/types'
@@ -8,6 +9,8 @@ import { iconButtonClasses } from '../../components/ui/IconButton'
 import { PriceTag } from '../../components/ui/PriceTag'
 import { cn } from '../../lib/cn'
 import { bindingName, formatPrice, pluralRu } from '../../lib/format'
+import { BeaconModal } from '../beacons/BeaconModal'
+import { bookFromSearchItem } from '../beacons/beaconBook'
 import { usePrefetchEdition } from '../edition/usePrefetchEdition'
 import { useStores } from './useStores'
 import { useAuthStore } from '../../stores/auth'
@@ -44,14 +47,13 @@ export function EditionResultCard({ item }: { item: SearchItem }) {
   const linkState = { from: pathname + search }
   const { storeName } = useStores()
   const authed = useAuthStore((s) => s.status === 'authenticated')
+  const [beaconOpen, setBeaconOpen] = useState(false)
   const id = item.editionId ?? 0
   const title = item.title ?? ''
   const best = item.bestPrice
   const detailPath = `/editions/${id}`
   const beaconPath = `${detailPath}?beacon=1`
-  const beaconHref = authed
-    ? beaconPath
-    : '/login?next=' + encodeURIComponent(beaconPath)
+  const beaconHref = '/login?next=' + encodeURIComponent(beaconPath)
 
   return (
     <article className="grid grid-cols-[64px_minmax(0,1fr)_auto] gap-x-3 gap-y-1 rounded-card border border-line bg-surface p-3 md:flex md:gap-5 md:p-5">
@@ -136,15 +138,34 @@ export function EditionResultCard({ item }: { item: SearchItem }) {
           >
             Сравнить
           </Link>
-          <Link
-            to={beaconHref}
-            aria-label="Поставить маячок"
-            className={iconButtonClasses({ tone: 'accent' })}
-          >
-            <Bell aria-hidden="true" className="h-5 w-5" />
-          </Link>
+          {authed ? (
+            <button
+              type="button"
+              aria-label="Поставить маячок"
+              onClick={() => setBeaconOpen(true)}
+              className={iconButtonClasses({ tone: 'accent' })}
+            >
+              <Bell aria-hidden="true" className="h-5 w-5" />
+            </button>
+          ) : (
+            <Link
+              to={beaconHref}
+              aria-label="Поставить маячок"
+              className={iconButtonClasses({ tone: 'accent' })}
+            >
+              <Bell aria-hidden="true" className="h-5 w-5" />
+            </Link>
+          )}
         </div>
       </div>
+      {beaconOpen && (
+        <BeaconModal
+          open
+          book={bookFromSearchItem(item)}
+          beacon={null}
+          onClose={() => setBeaconOpen(false)}
+        />
+      )}
     </article>
   )
 }

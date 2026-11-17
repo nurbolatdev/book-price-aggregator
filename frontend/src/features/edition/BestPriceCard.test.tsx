@@ -1,10 +1,10 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { editionDetail } from '../../mocks/editionFixtures'
 import { server } from '../../mocks/server'
 import { useAuthStore } from '../../stores/auth'
-import { renderWithProviders } from '../../test/render'
+import { getLocation, renderWithProviders } from '../../test/render'
 import { BestPriceCard } from './BestPriceCard'
 
 describe('BestPriceCard', () => {
@@ -39,17 +39,18 @@ describe('BestPriceCard', () => {
       http.get('*/api/v1/beacons', () => HttpResponse.json([{ id: 7, editionId: 41 }])),
     )
     renderWithProviders(<BestPriceCard edition={editionDetail(41)!} editionId={41} />)
-    const link = await screen.findByRole('link', { name: 'Маячок стоит · изменить' })
-    expect(link).toHaveAttribute('href', '/beacons')
+    const button = await screen.findByRole('button', { name: 'Маячок стоит · изменить' })
+    expect(screen.queryByRole('link', { name: 'Маячок стоит · изменить' })).not.toBeInTheDocument()
+    fireEvent.click(button)
+    expect(getLocation()).toBe('/?beacon=1')
   })
 
   it('offers to follow when authenticated without a beacon', () => {
     useAuthStore.setState({ status: 'authenticated' })
     renderWithProviders(<BestPriceCard edition={editionDetail(41)!} editionId={41} />)
-    expect(screen.getByRole('link', { name: 'Следить за ценой' })).toHaveAttribute(
-      'href',
-      '/beacons',
-    )
+    expect(screen.queryByRole('link', { name: 'Следить за ценой' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Следить за ценой' }))
+    expect(getLocation()).toBe('/?beacon=1')
   })
 
   it('handles an edition without a best price', () => {

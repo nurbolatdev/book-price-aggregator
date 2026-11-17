@@ -6,12 +6,18 @@ import { queryKeys } from '../api/queryKeys'
 import { formatPrice } from '../lib/format'
 import { editionDetail } from '../mocks/editionFixtures'
 import { server } from '../mocks/server'
+import { MOCK_ACCESS_TOKEN, mockUser, setMockSignedIn } from '../mocks/authFixtures'
 import { useAuthStore } from '../stores/auth'
 import { getLocation, renderWithProviders } from '../test/render'
 import { resetViewport, setViewport } from '../test/viewport'
 import EditionPage from './EditionPage'
 
-function renderEdition(route: string | { pathname: string; state?: unknown } = '/editions/41', queryClient?: QueryClient) {
+function signIn() {
+  setMockSignedIn(true)
+  useAuthStore.getState().setSession({ accessToken: MOCK_ACCESS_TOKEN, user: { ...mockUser, emailVerified: true } })
+}
+
+function renderEdition(route: string | { pathname: string; search?: string; state?: unknown } = '/editions/41', queryClient?: QueryClient) {
   return renderWithProviders(<EditionPage />, {
     route,
     path: '/editions/:id',
@@ -124,11 +130,74 @@ describe('EditionPage (desktop)', () => {
     await waitFor(() => expect(getLocation()).toBe('/login?next=%2Feditions%2F41%3Fbeacon%3D1'))
   })
 
-  it('removes ?beacon=1 for a signed-in user', async () => {
-    useAuthStore.setState({ status: 'authenticated' })
+  it('opens the beacon dialog from ?beacon=1 for a signed-in user', async () => {
+    signIn()
     renderEdition('/editions/41?beacon=1')
-    await waitFor(() => expect(getLocation()).toBe('/editions/41'))
-    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument()
+    expect(await screen.findByRole('dialog', { name: 'Маячок на книгу' })).toBeInTheDocument()
+  })
+
+  it('opens the dialog in edit mode when a beacon exists', async () => {
+    signIn()
+    server.use(
+      http.get('*/api/v1/beacons', () =>
+        HttpResponse.json([
+          { id: 7, editionId: 41, title: 'Мастер и Маргарита', status: 'ACTIVE', conditionType: 'ANY_DROP' },
+        ]),
+      ),
+    )
+    renderEdition('/editions/41?beacon=1')
+    expect(await screen.findByRole('dialog', { name: 'Изменить маячок' })).toBeInTheDocument()
+  })
+
+  it('closes the dialog with Escape, removes the parameter and keeps the origin', async () => {
+    signIn()
+    const from = '/search?q=' + encodeURIComponent('Мастер и Маргарита')
+    renderEdition({ pathname: '/editions/41', search: '?beacon=1', state: { from } })
+    await screen.findByRole('dialog', { name: 'Маячок на книгу' })
+    fireEvent.keyDown(document, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(getLocation()).toBe('/editions/41')
+    const nav = screen.getByRole('navigation', { name: 'Хлебные крошки' })
+    expect(within(nav).getAllByRole('link')[1]).toHaveAttribute('href', from)
+  })
+
+  it('opens from the button and returns focus to it on close', async () => {
+    signIn()
+    renderEdition()
+    const button = await screen.findByRole('button', { name: 'Следить за ценой' })
+    button.focus()
+    fireEvent.click(button)
+    await screen.findByRole('dialog', { name: 'Маячок на книгу' })
+    expect(getLocation()).toBe('/editions/41?beacon=1')
+    fireEvent.keyDown(document, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(button).toHaveFocus()
+  })
+
+  it('shows the beacon on the button before the server answers', async () => {
+    signIn()
+    let release: () => void = () => {}
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    server.use(
+      http.post('*/api/v1/beacons', async () => {
+        await gate
+        return HttpResponse.json(
+          { id: 99, editionId: 41, title: 'Мастер и Маргарита', status: 'ACTIVE', conditionType: 'BELOW_PRICE' },
+          { status: 201 },
+        )
+      }),
+    )
+    renderEdition('/editions/41?beacon=1')
+    const dialog = await screen.findByRole('dialog', { name: 'Маячок на книгу' })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Поставить маячок' }))
+    await waitFor(() =>
+      expect(screen.getAllByText('Маячок стоит · изменить', { selector: 'button' }).length).toBeGreaterThan(0),
+    )
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    release()
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 
   it('shows breadcrumbs with the search origin', async () => {
@@ -236,6 +305,14 @@ describe('EditionPage (phone)', () => {
       expect(card).toHaveAttribute('target', '_blank')
       expect(card).toHaveAttribute('rel', 'noopener noreferrer')
     }
+  })
+
+  it('opens the beacon bottom sheet from the bar', async () => {
+    signIn()
+    renderEdition()
+    fireEvent.click(await screen.findByRole('button', { name: 'Следить' }))
+    expect(await screen.findByRole('dialog', { name: 'Маячок на книгу' })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Когда цена станет ниже' })).toBeChecked()
   })
 
   it('shows the compact summary and the details section', async () => {

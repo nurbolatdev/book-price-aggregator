@@ -15,19 +15,24 @@ interface MobileBuyBarProps {
 export function MobileBuyBar({ edition, editionId }: MobileBuyBarProps) {
   const { bestPrice, offers } = edition
   const beacon = useBeaconAction(editionId)
+  const beaconClasses = buttonClasses({ variant: 'outline-accent', size: 'bar', className: 'flex-1' })
   const store = storeNameOf(offers, bestPrice)
   const showBuy = bestPrice?.price != null && Boolean(bestPrice.url)
   const label = showBuy ? `${formatPrice(bestPrice.price!)} в ${store}` : ''
 
   return (
     <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-line bg-surface px-4 pt-3 pb-[calc(20px+env(safe-area-inset-bottom))]">
-      <Link
-        to={beacon.href}
-        className={buttonClasses({ variant: 'outline-accent', size: 'bar', className: 'flex-1' })}
-      >
-        <Bell size={18} aria-hidden="true" />
-        {beacon.shortLabel}
-      </Link>
+      {beacon.kind === 'link' ? (
+        <Link to={beacon.href} className={beaconClasses}>
+          <Bell size={18} aria-hidden="true" />
+          {beacon.shortLabel}
+        </Link>
+      ) : (
+        <button type="button" onClick={beacon.onOpen} className={beaconClasses}>
+          <Bell size={18} aria-hidden="true" />
+          {beacon.shortLabel}
+        </button>
+      )}
       {showBuy && (
         <ExternalLink
           href={bestPrice.url}
