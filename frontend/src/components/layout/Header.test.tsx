@@ -15,6 +15,7 @@ describe('getHeaderVariant', () => {
     ['/editions/5', 'search'],
     ['/login', 'minimal'],
     ['/reset-password', 'minimal'],
+    ['/unsubscribe', 'minimal'],
   ])('%s -> %s', (path, expected) => {
     expect(getHeaderVariant(path)).toBe(expected)
   })
@@ -32,7 +33,7 @@ describe('Header', () => {
     useAuthStore.getState().clearSession()
   })
 
-  it.each(['/login', '/reset-password'])('shows only the logo on %s', (route) => {
+  it.each(['/login', '/reset-password', '/unsubscribe'])('shows only the logo on %s', (route) => {
     renderWithProviders(<Header />, { route })
     expect(screen.getByRole('link', { name: 'KitapRadar' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Войти' })).toBeNull()
