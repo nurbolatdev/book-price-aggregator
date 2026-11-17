@@ -8,7 +8,7 @@ import { writeUser } from './userCache'
 
 type NotificationPatch = Pick<UpdateProfileRequest, 'notifyFrequency' | 'weeklyDigest'>
 
-export function useUpdateNotifications() {
+export function useUpdateNotifications({ successMessage }: { successMessage?: string } = {}) {
   const queryClient = useQueryClient()
   return useMutation<UserResponse, unknown, NotificationPatch, { previous: UserResponse | null }>({
     mutationFn: updateMe,
@@ -23,6 +23,9 @@ export function useUpdateNotifications() {
       if (context?.previous) writeUser(queryClient, context.previous)
       toast.error('Не удалось сохранить настройки')
     },
-    onSuccess: (user) => writeUser(queryClient, user),
+    onSuccess: (user) => {
+      writeUser(queryClient, user)
+      if (successMessage) toast.success(successMessage)
+    },
   })
 }
