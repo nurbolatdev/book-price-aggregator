@@ -31,7 +31,11 @@ interface BeaconModalProps {
 
 const UNVERIFIED_TEXT = 'Почта не подтверждена — маячок сохранится, но письма придут после подтверждения'
 
-export function BeaconModal({ open, onClose, book, beacon }: BeaconModalProps) {
+export function BeaconModal({ open, onClose, book, beacon: liveBeacon }: BeaconModalProps) {
+  // The mode is fixed while the window is open: an optimistic create must not turn it into edit.
+  const frozen = useRef(liveBeacon)
+  if (!open) frozen.current = liveBeacon
+  const beacon = frozen.current
   const initialFocusRef = useRef<HTMLInputElement | null>(null)
   return (
     <Modal

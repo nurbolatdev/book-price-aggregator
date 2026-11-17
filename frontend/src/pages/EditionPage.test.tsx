@@ -195,9 +195,36 @@ describe('EditionPage (desktop)', () => {
     await waitFor(() =>
       expect(screen.getAllByText('Маячок стоит · изменить', { selector: 'button' }).length).toBeGreaterThan(0),
     )
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Маячок на книгу' })).toBeInTheDocument()
+    expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'Поставить маячок' })).toBeInTheDocument()
     release()
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
+  it('stays in create mode when saving fails', async () => {
+    signIn()
+    let release: () => void = () => {}
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    server.use(
+      http.post('*/api/v1/beacons', async () => {
+        await gate
+        return HttpResponse.json({ code: 'INTERNAL_ERROR', message: 'boom' }, { status: 500 })
+      }),
+    )
+    renderEdition('/editions/41?beacon=1')
+    const dialog = await screen.findByRole('dialog', { name: 'Маячок на книгу' })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Поставить маячок' }))
+    await waitFor(() =>
+      expect(screen.getAllByText('Маячок стоит · изменить', { selector: 'button' }).length).toBeGreaterThan(0),
+    )
+    release()
+    await waitFor(() =>
+      expect(screen.getAllByText('Следить за ценой', { selector: 'button' }).length).toBeGreaterThan(0),
+    )
+    expect(screen.getByRole('dialog', { name: 'Маячок на книгу' })).toBeInTheDocument()
+    expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'Поставить маячок' })).toBeInTheDocument()
   })
 
   it('shows breadcrumbs with the search origin', async () => {
