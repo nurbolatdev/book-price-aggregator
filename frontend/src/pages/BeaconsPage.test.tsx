@@ -1,13 +1,16 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../app/App'
 import { Toaster } from '../components/ui/Toaster'
 import { MOCK_ACCESS_TOKEN, setMockSignedIn } from '../mocks/authFixtures'
 import { server } from '../mocks/server'
+import { pendingDeletes } from '../features/beacons/useBeacons'
 import { useAuthStore } from '../stores/auth'
 import { useToastStore } from '../stores/toast'
 import { getLocation, renderWithProviders } from '../test/render'
+import { setViewport } from '../test/viewport'
+import { mockBeacons, setMockBeacons } from '../mocks/beaconFixtures'
 
 const user = {
   id: 7,
@@ -218,6 +221,152 @@ describe('BeaconsPage', () => {
     await waitFor(() => expect(useToastStore.getState().toasts.map((t) => t.message)).toContain('Сохранено'))
     expect(screen.getByRole('region', { name: 'Как работает маячок' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Все настройки аккаунта' })).toHaveAttribute('href', '/profile')
+  })
+
+  describe('delete and edit', () => {
+    beforeEach(() => {
+      pendingDeletes.clear()
+      useToastStore.setState({ toasts: [] })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    function trackDeletes(status = 204) {
+      const deletes: number[] = []
+      server.use(
+        http.delete('*/api/v1/beacons/:id', ({ params }) => {
+          deletes.push(Number(params.id))
+          if (status === 204) setMockBeacons(mockBeacons.filter((b) => b.id !== Number(params.id)))
+          return status === 204
+            ? new HttpResponse(null, { status })
+            : HttpResponse.json({ code: 'INTERNAL_ERROR', message: 'x' }, { status })
+        }),
+      )
+      return deletes
+    }
+
+    async function removeCleanCode() {
+      renderPage()
+      await rows()
+      fireEvent.click(within(rowOf('Чистый код')).getByRole('button', { name: 'Удалить маячок' }))
+    }
+
+    const titles = () => screen.getAllByRole('article').map((a) => within(a).getAllByRole('link')[0]!.textContent)
+
+    it('removes the row at once and brings it back on undo without a request', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      const deletes = trackDeletes()
+      renderPage()
+      await rows()
+      const before = titles()
+      fireEvent.click(within(rowOf('Чистый код')).getByRole('button', { name: 'Удалить маячок' }))
+      await waitFor(() => expect(screen.queryByRole('link', { name: 'Чистый код' })).not.toBeInTheDocument())
+      expect(screen.getByRole('tab', { name: 'Все · 4' })).toBeInTheDocument()
+      expect(screen.getByText('Маячок удалён')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Отменить' }))
+      await waitFor(() => expect(titles()).toEqual(before))
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(6000)
+      })
+      expect(deletes).toEqual([])
+      expect(screen.getByRole('tab', { name: 'Все · 5' })).toBeInTheDocument()
+    })
+
+    it('sends one DELETE after the toast times out', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      const deletes = trackDeletes()
+      await removeCleanCode()
+      expect(deletes).toEqual([])
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5100)
+      })
+      await waitFor(() => expect(deletes).toEqual([3]))
+      expect(screen.queryByRole('link', { name: 'Чистый код' })).not.toBeInTheDocument()
+    })
+
+    it('sends the DELETE when the toast is closed', async () => {
+      const deletes = trackDeletes()
+      await removeCleanCode()
+      fireEvent.click(screen.getByRole('button', { name: 'Закрыть' }))
+      await waitFor(() => expect(deletes).toEqual([3]))
+    })
+
+    it('sends the DELETE at once when leaving the page', async () => {
+      const deletes = trackDeletes()
+      await removeCleanCode()
+      fireEvent.click(within(screen.getByRole('banner')).getByRole('link', { name: 'Каталог' }))
+      await waitFor(() => expect(deletes).toEqual([3]))
+      expect(screen.queryByText('Маячок удалён')).not.toBeInTheDocument()
+    })
+
+    it('puts the row back and warns when the DELETE fails', async () => {
+      const deletes = trackDeletes(500)
+      await removeCleanCode()
+      fireEvent.click(screen.getByRole('button', { name: 'Закрыть' }))
+      await waitFor(() => expect(deletes).toEqual([3]))
+      expect(await screen.findByText('Не удалось удалить маячок')).toBeInTheDocument()
+      expect(await screen.findByRole('link', { name: 'Чистый код' })).toBeInTheDocument()
+    })
+
+    it('edits the condition before the answer and sends the whole condition', async () => {
+      const bodies: unknown[] = []
+      let release: () => void = () => {}
+      const gate = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      server.use(
+        http.patch('*/api/v1/beacons/:id', async ({ request }) => {
+          bodies.push(await request.json())
+          await gate
+          return HttpResponse.json({
+            id: 3,
+            editionId: 9,
+            title: 'Чистый код',
+            status: 'ACTIVE',
+            conditionType: 'BELOW_PRICE',
+            targetPrice: 7500,
+          })
+        }),
+      )
+      setViewport(1280)
+      renderPage()
+      await rows()
+      fireEvent.click(within(rowOf('Чистый код')).getByRole('button', { name: 'Изменить условие' }))
+      const dialog = await screen.findByRole('dialog', { name: 'Изменить маячок' })
+      expect(within(dialog).getAllByText('Чистый код').length).toBeGreaterThan(0)
+      expect(within(dialog).getByText('Роберт Мартин')).toBeInTheDocument()
+      expect(within(dialog).getByText(/Сейчас от/)).toHaveTextContent(/8\s900/)
+      const price = within(dialog).getByRole('textbox', { name: 'Желаемая цена, ₸' })
+      expect(price).toHaveValue('8000')
+      fireEvent.change(price, { target: { value: '7500' } })
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Сохранить' }))
+      await waitFor(() => expect(rowOf('Чистый код')).toHaveTextContent(/Цель: ниже 7\s500/))
+      release()
+      await waitFor(() => expect(bodies).toEqual([{ conditionType: 'BELOW_PRICE', targetPrice: 7500 }]))
+      await waitFor(() => expect(useToastStore.getState().toasts.map((t) => t.message)).toContain('Маячок обновлён'))
+    })
+
+    it('returns focus to the edit button after Escape', async () => {
+      setViewport(1280)
+      renderPage()
+      await rows()
+      const edit = within(rowOf('Чистый код')).getByRole('button', { name: 'Изменить условие' })
+      edit.focus()
+      fireEvent.click(edit)
+      const dialog = await screen.findByRole('dialog', { name: 'Изменить маячок' })
+      fireEvent.keyDown(dialog, { key: 'Escape' })
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+      expect(edit).toHaveFocus()
+    })
+
+    it('opens a bottom sheet on the phone', async () => {
+      renderPage()
+      await rows()
+      fireEvent.click(within(rowOf('Чистый код')).getByRole('button', { name: 'Изменить условие' }))
+      expect(await screen.findByRole('dialog', { name: 'Изменить маячок' })).toBeInTheDocument()
+    })
   })
 
   it('sends a guest to the login page', async () => {

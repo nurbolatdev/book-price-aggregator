@@ -18,6 +18,7 @@ async function commit(queryClient: QueryClient, { beacon, index }: Pending): Pro
   try {
     await deleteBeacon(beacon.id ?? 0)
   } catch {
+    pendingDeletes.delete(beacon.id ?? 0)
     insertBeaconAt(queryClient, beacon, index)
     toast.error('Не удалось удалить маячок')
   } finally {
@@ -41,8 +42,8 @@ export function useDeleteBeacon() {
         onClose: (reason) => {
           pending.current.delete(toastId)
           if (reason === 'action') {
-            insertBeaconAt(queryClient, entry.beacon, entry.index)
             pendingDeletes.delete(id)
+            insertBeaconAt(queryClient, entry.beacon, entry.index)
           } else {
             void commit(queryClient, entry)
           }
