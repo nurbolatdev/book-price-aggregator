@@ -34,6 +34,20 @@ describe('Toaster', () => {
     expect(screen.queryByText('Привет')).toBeNull()
   })
 
+  it('runs the action, removes the toast and reports action', () => {
+    const onClick = vi.fn()
+    const onClose = vi.fn()
+    render(<Toaster />)
+    act(() => {
+      toast.info('Удалено', { action: { label: 'Отменить', onClick }, onClose })
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Отменить' }))
+    expect(onClick).toHaveBeenCalledOnce()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onClose).toHaveBeenCalledWith('action')
+    expect(screen.queryByText('Удалено')).toBeNull()
+  })
+
   it('styles variants differently', () => {
     render(<Toaster />)
     act(() => {
