@@ -49,7 +49,7 @@ export function OfferPanel({ offer, pending, onMatch, onReject }: OfferPanelProp
         {offer.url && (
           <>
             {' · '}
-            <ExternalLink href={offer.url} className="text-accent underline">
+            <ExternalLink href={offer.url} className="text-link underline">
               открыть на сайте магазина
             </ExternalLink>
           </>

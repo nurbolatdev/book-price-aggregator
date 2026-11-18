@@ -277,6 +277,12 @@ const adminScreens: ScreenEntry[] = [
     prepare: async (page) => {
       await page.locator('button[aria-expanded]').first().click()
       await page.locator('pre').first().waitFor()
+      await page.waitForFunction(() => {
+        const rows = document.querySelectorAll<HTMLElement>('[data-index]')
+        if (rows.length < 2) return false
+        const y = Number(/translateY\(([\d.]+)px\)/.exec(rows[1].style.transform)?.[1] ?? 0)
+        return y > rows[0].getBoundingClientRect().height
+      })
     },
   },
   { name: 'admin-narrow', path: '/admin', widths: [390], signedIn: true, storage: ADMIN },

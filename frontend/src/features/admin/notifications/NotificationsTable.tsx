@@ -1,5 +1,5 @@
 import type { AdminNotification } from '../../../api/types'
-import { Badge } from '../../../components/ui/Badge'
+import { StatusBadge } from '../StatusBadge'
 import { Button } from '../../../components/ui/Button'
 import { formatAdminTime } from '../adminFormat'
 import { deliveryLabel, notificationStatus } from '../status'
@@ -53,9 +53,7 @@ export function NotificationsTable({ items, actions }: NotificationsTableProps) 
                 <td className={td}>{n.title}</td>
                 <td className={td}>{deliveryLabel(n.delivery)}</td>
                 <td className={td}>
-                  <Badge tone={status.tone} className="font-semibold whitespace-nowrap">
-                    {status.label}
-                  </Badge>
+                  <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
                 </td>
                 <td className={`${td} text-[13px] ${n.error ? 'text-danger' : ''}`}>{n.error || '—'}</td>
                 <td className={td}>

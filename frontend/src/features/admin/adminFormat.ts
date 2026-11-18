@@ -1,4 +1,6 @@
-export type AdminPeriod = '24h' | '7d' | '30d'
+import type { AdminPeriod } from '../../api/types'
+
+export type { AdminPeriod }
 
 export const ADMIN_PERIODS: { value: AdminPeriod; label: string }[] = [
   { value: '24h', label: '24 ч' },

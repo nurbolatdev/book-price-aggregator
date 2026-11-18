@@ -29,7 +29,7 @@
 - [x] «Запустить все включённые» — по очереди для `enabled && hasParser`, итог одним toast «Поставлено в очередь: N из M».
 
 ### 4. Очереди `/admin/queues` — макет 19
-- [x] Таблица `GET /admin/queues` (`ready`, `unacknowledged`, `consumers`, `ackRate`); блок dead letter с числом сообщений и «Вернуть в работу» → подтверждение → `POST /admin/queues/dead-letter/requeue` → toast с числом возвращённых.
+- [x] Таблица `GET /admin/queues` (`ready`, `unacknowledged`, `consumers`, `ackRate`); блок dead letter с числом сообщений и «Вернуть в работу» → подтверждение → `POST /admin/queues/dead-letter/requeue` → toast с числом возвращённых (плашка вместо toast — см. SCREENS.md «Реализация (F6)»).
 
 ### 5. Пользователи `/admin/users` — макет 20
 - [x] `GET /admin/users?q=&verified=&page=`: поиск по email/имени с debounce 300 мс, чипы «Все / Подтверждённые / Не подтверждённые», таблица, пагинация «Назад/Вперёд»; фильтры в URL.

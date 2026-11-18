@@ -149,6 +149,47 @@ describe("EventsPage", () => {
     expect(log.map((u) => u.searchParams.get("page"))).toEqual(["0", "1"]);
   });
 
+  it("offers a retry when the next page fails", async () => {
+    const item = (id: number) => ({
+      id,
+      createdAt: new Date().toISOString(),
+      level: "INFO",
+      source: "parser",
+      message: `событие ${id}`,
+      details: {},
+    });
+    let failNext = true;
+    const log: number[] = [];
+    server.use(
+      http.get("*/api/v1/admin/events", ({ request }) => {
+        const page = Number(new URL(request.url).searchParams.get("page") ?? 0);
+        log.push(page);
+        if (page === 1 && failNext) {
+          return HttpResponse.json(
+            { code: "INTERNAL", message: "boom" },
+            { status: 500 },
+          );
+        }
+        return HttpResponse.json({
+          content: page === 0 ? [item(3), item(2), item(1)] : [item(0)],
+          page,
+          size: 50,
+          totalElements: 4,
+          totalPages: 2,
+        });
+      }),
+    );
+    renderAdmin("/admin/events");
+    const retry = await screen.findByRole("button", { name: "Повторить" });
+    expect(screen.getByText("событие 3")).toBeInTheDocument();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(log.filter((p) => p === 1).length).toBeLessThanOrEqual(2);
+    failNext = false;
+    fireEvent.click(retry);
+    expect(await screen.findByText("событие 0")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Повторить" })).toBeNull();
+  });
+
   it("refreshes on demand", async () => {
     const log = logRequests("/admin/events");
     renderAdmin("/admin/events");

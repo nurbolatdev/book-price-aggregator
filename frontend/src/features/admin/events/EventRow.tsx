@@ -23,7 +23,7 @@ export function EventRow({ event, expanded, onToggle }: EventRowProps) {
         onClick={onToggle}
         className="flex w-full flex-wrap items-center gap-3 text-left"
       >
-        <span className="w-[92px] text-sm text-muted">
+        <span className="w-[104px] shrink-0 whitespace-nowrap text-sm text-muted">
           {event.createdAt ? formatAdminTime(event.createdAt, new Date()) : "—"}
         </span>
         <StatusBadge tone={levelTone(event.level)}>{event.level}</StatusBadge>

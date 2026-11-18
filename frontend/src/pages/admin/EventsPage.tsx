@@ -100,9 +100,17 @@ export default function EventsPage() {
             <EventsList
               key={levelFilter}
               events={events}
-              hasNextPage={journal.hasNextPage}
+              hasNextPage={
+                journal.hasNextPage && !journal.isFetchNextPageError
+              }
               isFetchingNextPage={journal.isFetchingNextPage}
               fetchNextPage={() => void journal.fetchNextPage()}
+            />
+          )}
+          {journal.isFetchNextPageError && (
+            <ErrorBlock
+              className="mt-3"
+              onRetry={() => void journal.fetchNextPage()}
             />
           )}
         </AdminSection>

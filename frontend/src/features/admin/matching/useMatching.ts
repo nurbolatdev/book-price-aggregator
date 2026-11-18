@@ -1,7 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { fetchPendingOffers, matchOffer, rejectOffer } from '../../../api/admin'
-import { toApiError } from '../../../api/errors'
+import { getErrorMessage, toApiError } from '../../../api/errors'
 import { queryKeys } from '../../../api/queryKeys'
 import type { ReviewOffer, ReviewOfferPage } from '../../../api/types'
 import { toast } from '../../../stores/toast'
@@ -40,7 +40,7 @@ export function useMatching(page: number) {
         toast.error('Предложение уже обработано')
         void queryClient.invalidateQueries({ queryKey: queryKeys.admin.pendingOffers(page) })
       } else {
-        toast.error(toApiError(error).message)
+        toast.error(getErrorMessage(toApiError(error)))
       }
       return
     }

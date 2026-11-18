@@ -24,7 +24,7 @@ export function RecentEvents() {
               key={e.id}
               className="flex flex-wrap items-center gap-3 border-t border-divider py-2.5 first:border-t-0"
             >
-              <span className="w-24 shrink-0 text-sm text-muted">
+              <span className="w-[104px] shrink-0 whitespace-nowrap text-sm text-muted">
                 {e.createdAt ? formatAdminTime(e.createdAt, now) : "—"}
               </span>
               <StatusBadge tone={levelTone(e.level)}>{e.level}</StatusBadge>

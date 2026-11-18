@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { fetchAdminUsers } from '../../api/admin'
 import { queryKeys } from '../../api/queryKeys'
-import { Badge } from '../../components/ui/Badge'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { ErrorBlock } from '../../components/ui/ErrorBlock'
 import { Input } from '../../components/ui/Input'
@@ -16,6 +15,7 @@ import { AdminSection } from '../../features/admin/AdminSection'
 import { FilterChips } from '../../features/admin/FilterChips'
 import { useAdminStats } from '../../features/admin/overview/useOverviewQueries'
 import { Pagination } from '../../features/admin/Pagination'
+import { StatusBadge } from '../../features/admin/StatusBadge'
 import { row, table, tableWrap, td, th } from '../../features/admin/table'
 import { useAdminPageParam } from '../../features/admin/useAdminPageParam'
 import { useStepBackWhenEmpty } from '../../features/admin/useStepBackWhenEmpty'
@@ -42,11 +42,19 @@ export default function UsersPage() {
 
   const [text, setText] = useState(q)
   const debounced = useDebounce(text.trim(), 300)
+  const [seenQ, setSeenQ] = useState(q)
+  if (q !== seenQ) {
+    // the URL changed (Back/Forward): show it unless it is just our own debounced write
+    setSeenQ(q)
+    if (q !== debounced) setText(q)
+  }
   const urlQ = useRef(q)
   urlQ.current = q
+  const typed = useRef(text.trim())
+  typed.current = text.trim()
 
   useEffect(() => {
-    if (debounced === urlQ.current) return
+    if (debounced === urlQ.current || debounced !== typed.current) return
     setParams(
       (prev) => {
         const out = new URLSearchParams(prev)
@@ -147,12 +155,9 @@ export default function UsersPage() {
                       <td className={td}>{u.name}</td>
                       <td className={td}>{u.createdAt ? formatDate(u.createdAt) : '—'}</td>
                       <td className={td}>
-                        <Badge
-                          tone={u.verified ? 'ok' : 'warn'}
-                          className="font-semibold whitespace-nowrap"
-                        >
+                        <StatusBadge tone={u.verified ? 'ok' : 'warn'}>
                           {u.verified ? 'подтверждён' : 'не подтверждён'}
-                        </Badge>
+                        </StatusBadge>
                       </td>
                       <td className={td}>{formatNumber(u.beacons ?? 0)}</td>
                     </tr>

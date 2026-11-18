@@ -2,7 +2,18 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { server } from '../../mocks/server'
 import { renderAdmin } from '../../test/admin'
-import { getLocation } from '../../test/render'
+import { useNavigate } from 'react-router-dom'
+import { getLocation, renderWithProviders } from '../../test/render'
+import UsersPage from './UsersPage'
+
+function JumpButton({ to }: { to: string }) {
+  const navigate = useNavigate()
+  return (
+    <button type="button" onClick={() => navigate(to)}>
+      jump
+    </button>
+  )
+}
 
 afterEach(() => {
   server.events.removeAllListeners()
@@ -59,6 +70,21 @@ describe('UsersPage', () => {
     expect(log.slice(before)).toHaveLength(1)
     expect(last(log)?.searchParams.get('q')).toBe('aigerim')
     expect(last(log)?.searchParams.get('page')).toBe('0')
+    expect(getLocation()).toBe('/admin/users?q=aigerim')
+  })
+
+  it('syncs the search box when the URL changes under it', async () => {
+    renderWithProviders(
+      <>
+        <UsersPage />
+        <JumpButton to="/admin/users?q=aigerim" />
+      </>,
+      { route: '/admin/users?q=nurbo' },
+    )
+    const box = await screen.findByRole('searchbox', { name: 'Поиск по email или имени' })
+    expect(box).toHaveValue('nurbo')
+    fireEvent.click(screen.getByRole('button', { name: 'jump' }))
+    await waitFor(() => expect(box).toHaveValue('aigerim'))
     expect(getLocation()).toBe('/admin/users?q=aigerim')
   })
 
