@@ -92,6 +92,17 @@ export async function fetchTopQueries(
   return data
 }
 
+export async function fetchZeroResults(
+  period: AdminPeriod,
+  signal?: AbortSignal,
+): Promise<SearchQueryStat[]> {
+  const { data } = await api.get<SearchQueryStat[]>('/admin/search/zero-results', {
+    params: { period },
+    signal,
+  })
+  return data
+}
+
 export async function setStoreEnabled(code: StoreCode, enabled: boolean): Promise<StoreState> {
   const { data } = await api.patch<StoreState>(`/admin/stores/${code}`, {
     enabled,

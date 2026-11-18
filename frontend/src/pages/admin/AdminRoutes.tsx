@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { NotFound } from '../../components/ui/NotFound'
 import { AdminLayout } from '../../features/admin/AdminLayout'
+import EventsPage from './EventsPage'
 import MatchingPage from './MatchingPage'
 import NotificationsPage from './NotificationsPage'
 import OverviewPage from './OverviewPage'
@@ -18,6 +19,7 @@ export default function AdminRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="matching" element={<MatchingPage />} />
+        <Route path="events" element={<EventsPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

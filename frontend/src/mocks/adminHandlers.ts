@@ -1,6 +1,6 @@
 import { HttpResponse, http } from 'msw'
 import type { AdminEvent, EventLevel } from '../api/types'
-import { activity, health, mockAdmin, statsFor, topQueries } from './adminFixtures'
+import { activity, health, mockAdmin, statsFor, topQueries, zeroResults } from './adminFixtures'
 
 function error(status: number, code: string, message: string) {
   return HttpResponse.json({ code, message }, { status })
@@ -122,4 +122,8 @@ export const adminHandlers = [
   }),
 
   http.get('*/api/v1/admin/search/top', () => HttpResponse.json(topQueries())),
+
+  http.get('*/api/v1/admin/search/zero-results', ({ request }) =>
+    HttpResponse.json(zeroResults(new URL(request.url).searchParams.get('period') ?? '7d')),
+  ),
 ]

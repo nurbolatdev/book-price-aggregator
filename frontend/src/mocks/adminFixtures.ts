@@ -459,3 +459,20 @@ const TOP: SearchQueryStat[] = [
 export function topQueries(): SearchQueryStat[] {
   return TOP
 }
+
+const ZERO_7D: SearchQueryStat[] = [
+  { query: 'гарри поттер и дары смерти', searches: 14 },
+  { query: 'кітап оқу', searches: 6 },
+  { query: 'sapiens', searches: 5 },
+  { query: 'мастер и маргаритта', searches: 4 },
+]
+
+export function zeroResults(period: string): SearchQueryStat[] {
+  if (period === '24h') {
+    return [
+      { query: ZERO_7D[0]?.query, searches: 3 },
+      { query: ZERO_7D[1]?.query, searches: 1 },
+    ]
+  }
+  return ZERO_7D
+}

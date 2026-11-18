@@ -13,6 +13,7 @@ import {
   fetchAdminUsers,
   fetchPendingOffers,
   fetchTopQueries,
+  fetchZeroResults,
   matchOffer,
   rejectOffer,
   requeueDeadLetter,
@@ -155,6 +156,14 @@ describe('admin monitoring api', () => {
     expect(rejected.matchStatus).toBe('REJECTED')
     expect((await fetchPendingOffers(0, 20)).totalElements).toBe(21)
     await expect(matchOffer(501, 16)).rejects.toMatchObject({ status: 404 })
+  })
+
+  it('returns zero-result queries for the period', async () => {
+    const urls = captureUrls('/admin/search/zero-results')
+    expect(await fetchZeroResults('24h')).toHaveLength(2)
+    expect(urls[0]?.searchParams.get('period')).toBe('24h')
+    expect((await fetchZeroResults('7d'))[0]?.query).toBe('гарри поттер и дары смерти')
+    server.events.removeAllListeners()
   })
 
   it('drops admin data on sign-out', () => {
