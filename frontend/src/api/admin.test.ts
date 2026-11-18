@@ -9,6 +9,7 @@ import {
   fetchAdminParsers,
   fetchAdminQueues,
   fetchAdminStats,
+  fetchAdminUsers,
   fetchTopQueries,
   requeueDeadLetter,
   runParser,
@@ -97,6 +98,20 @@ describe('admin monitoring api', () => {
 
   it('requeues the dead-letter queue', async () => {
     expect(await requeueDeadLetter()).toEqual({ requeued: 6, skipped: 1 })
+  })
+
+  it('serialises user filters, omitting empty ones', async () => {
+    const urls = captureUrls('/admin/users')
+    const all = await fetchAdminUsers({ q: '', page: 0, size: 20 })
+    expect(all.totalElements).toBe(45)
+    expect(urls[0]?.searchParams.has('q')).toBe(false)
+    expect(urls[0]?.searchParams.has('verified')).toBe(false)
+    const filtered = await fetchAdminUsers({ q: 'aigerim', verified: false, page: 1, size: 20 })
+    expect(urls[1]?.searchParams.get('q')).toBe('aigerim')
+    expect(urls[1]?.searchParams.get('verified')).toBe('false')
+    expect(urls[1]?.searchParams.get('page')).toBe('1')
+    expect(filtered.content).toEqual([])
+    server.events.removeAllListeners()
   })
 
   it('drops admin data on sign-out', () => {

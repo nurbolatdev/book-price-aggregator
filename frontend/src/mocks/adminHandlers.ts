@@ -69,5 +69,18 @@ export const adminHandlers = [
     return HttpResponse.json(pageOf(items, page, size))
   }),
 
+  http.get('*/api/v1/admin/users', ({ request }) => {
+    const url = new URL(request.url)
+    const q = (url.searchParams.get('q') ?? '').trim().toLowerCase()
+    const verified = url.searchParams.get('verified')
+    const items = mockAdmin.users.filter(
+      (u) =>
+        (!q || u.email?.toLowerCase().includes(q) || u.name?.toLowerCase().includes(q)) &&
+        (verified === null || String(u.verified) === verified),
+    )
+    const { page, size } = paging(url, 20)
+    return HttpResponse.json(pageOf(items, page, size))
+  }),
+
   http.get('*/api/v1/admin/search/top', () => HttpResponse.json(topQueries())),
 ]

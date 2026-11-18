@@ -6,6 +6,7 @@ import type {
   AdminParser,
   AdminPeriod,
   AdminStats,
+  AdminUserPage,
   EventLevel,
   ParserRunQueued,
   QueueStats,
@@ -92,5 +93,28 @@ export async function setStoreEnabled(code: StoreCode, enabled: boolean): Promis
 
 export async function requeueDeadLetter(): Promise<RequeueResponse> {
   const { data } = await api.post<RequeueResponse>('/admin/queues/dead-letter/requeue')
+  return data
+}
+
+export interface AdminUsersParams {
+  q?: string
+  verified?: boolean
+  page: number
+  size: number
+}
+
+export async function fetchAdminUsers(
+  { q, verified, page, size }: AdminUsersParams,
+  signal?: AbortSignal,
+): Promise<AdminUserPage> {
+  const { data } = await api.get<AdminUserPage>('/admin/users', {
+    params: {
+      ...(q ? { q } : {}),
+      ...(verified === undefined ? {} : { verified }),
+      page,
+      size,
+    },
+    signal,
+  })
   return data
 }

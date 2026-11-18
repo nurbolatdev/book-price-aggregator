@@ -5,6 +5,7 @@ import type {
   AdminParser,
   AdminPeriod,
   AdminStats,
+  AdminUser,
   QueueStats,
   SearchQueryStat,
 } from '../api/types'
@@ -207,10 +208,35 @@ function initialEvents(): AdminEvent[] {
   })
 }
 
+const USER_COUNT = 45
+
+function initialUsers(): AdminUser[] {
+  const now = Date.now()
+  const head: [string, string, boolean, number, number][] = [
+    ['nurbo@example.com', 'Нурболат', true, 5, 5],
+    ['aigerim.s@example.com', 'Айгерим', true, 2, 9],
+    ['daniyar@example.com', 'Данияр', true, 11, 14],
+    ['aliya.k@example.com', 'Алия', false, 1, 20],
+    ['test.user@example.com', 'Тест', false, 0, 31],
+  ]
+  return Array.from({ length: USER_COUNT }, (_, i) => {
+    const known = head[i]
+    return {
+      id: USER_COUNT - i,
+      email: known ? known[0] : `reader${i + 1}@example.com`,
+      name: known ? known[1] : `Читатель ${i + 1}`,
+      verified: known ? known[2] : i % 4 !== 0,
+      beacons: known ? known[3] : i % 6,
+      createdAt: iso(now - (known ? known[4] : 32 + i) * DAY),
+    }
+  })
+}
+
 interface MockAdminState {
   parsers: AdminParser[]
   queues: QueueStats[]
   events: AdminEvent[]
+  users: AdminUser[]
 }
 
 function initialState(): MockAdminState {
@@ -218,6 +244,7 @@ function initialState(): MockAdminState {
     parsers: initialParsers(),
     queues: initialQueues(),
     events: initialEvents(),
+    users: initialUsers(),
   }
 }
 
@@ -232,6 +259,9 @@ export const mockAdmin = {
   },
   get events() {
     return state.events
+  },
+  get users() {
+    return state.users
   },
 }
 
