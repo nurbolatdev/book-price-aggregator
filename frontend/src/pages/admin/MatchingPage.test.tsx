@@ -121,6 +121,19 @@ describe('MatchingPage', () => {
     ).toBeInTheDocument()
   })
 
+  it('steps back to the last page when the final page is cleared', async () => {
+    renderAdmin('/admin/matching?page=2')
+    await screen.findByRole('heading', { level: 2, name: 'Ждут проверки · 23' })
+    expect(offerButtons()).toHaveLength(3)
+    for (let left = 23; left > 20; left--) {
+      await screen.findByRole('heading', { level: 2, name: `Ждут проверки · ${left}` })
+      fireEvent.click(screen.getByRole('button', { name: 'Отклонить: не книга / мусор' }))
+      await screen.findByRole('heading', { level: 2, name: `Ждут проверки · ${left - 1}` })
+    }
+    await waitFor(() => expect(offerButtons()).toHaveLength(20))
+    expect(screen.queryByText('Все предложения проверены')).not.toBeInTheDocument()
+  })
+
   it('shows the empty state when everything is reviewed', async () => {
     server.use(
       http.get('*/api/v1/admin/offers/pending-review', () =>

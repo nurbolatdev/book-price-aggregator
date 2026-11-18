@@ -18,6 +18,7 @@ import { useRetryNotification } from '../../features/admin/notifications/useRetr
 import { useAdminStats } from '../../features/admin/overview/useOverviewQueries'
 import { Pagination } from '../../features/admin/Pagination'
 import { useAdminPageParam } from '../../features/admin/useAdminPageParam'
+import { useStepBackWhenEmpty } from '../../features/admin/useStepBackWhenEmpty'
 
 const PAGE_SIZE = 20
 
@@ -59,6 +60,7 @@ export default function NotificationsPage() {
   const { queued, queuedDigest } = useNotificationKpis()
   const actions = useRetryNotification()
 
+  useStepBackWhenEmpty(list.data, list.isPlaceholderData, page, PAGE_SIZE, changePage)
   const items = list.data?.content ?? []
 
   return (

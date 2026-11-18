@@ -18,6 +18,7 @@ import { useAdminStats } from '../../features/admin/overview/useOverviewQueries'
 import { Pagination } from '../../features/admin/Pagination'
 import { row, table, tableWrap, td, th } from '../../features/admin/table'
 import { useAdminPageParam } from '../../features/admin/useAdminPageParam'
+import { useStepBackWhenEmpty } from '../../features/admin/useStepBackWhenEmpty'
 
 const PAGE_SIZE = 20
 
@@ -77,6 +78,7 @@ export default function UsersPage() {
   })
   const stats = useAdminStats('7d').data
 
+  useStepBackWhenEmpty(users.data, users.isPlaceholderData, page, PAGE_SIZE, changePage)
   const list = users.data?.content ?? []
   const subtitle = stats
     ? `Всего ${formatNumber(stats.users?.total ?? 0)} · новых за неделю ${formatNumber(stats.users?.newInPeriod ?? 0)} · подтвердили почту ${formatNumber(stats.users?.verified ?? 0)}`

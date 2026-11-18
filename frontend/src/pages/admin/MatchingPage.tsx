@@ -10,6 +10,7 @@ import { PENDING_PAGE_SIZE, useMatching } from '../../features/admin/matching/us
 import { useAdminStats } from '../../features/admin/overview/useOverviewQueries'
 import { Pagination } from '../../features/admin/Pagination'
 import { useAdminPageParam } from '../../features/admin/useAdminPageParam'
+import { useStepBackWhenEmpty } from '../../features/admin/useStepBackWhenEmpty'
 
 export default function MatchingPage() {
   const [page, changePage] = useAdminPageParam()
@@ -18,6 +19,7 @@ export default function MatchingPage() {
   const catalog = stats.data?.catalog
   const data = query.data
   const items = data?.content ?? []
+  useStepBackWhenEmpty(data, query.isPlaceholderData, page, PENDING_PAGE_SIZE, changePage)
 
   return (
     <>
@@ -32,7 +34,7 @@ export default function MatchingPage() {
 
       {query.isPending && <Skeleton className="h-96 w-full" />}
       {query.isError && !data && <ErrorBlock onRetry={() => void query.refetch()} />}
-      {data && items.length === 0 && (
+      {data && items.length === 0 && (data.totalElements ?? 0) === 0 && (
         <AdminSection>
           <EmptyState title="Все предложения проверены" />
         </AdminSection>
