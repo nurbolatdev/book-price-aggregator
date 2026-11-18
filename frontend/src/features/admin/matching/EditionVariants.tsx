@@ -13,7 +13,7 @@ function details(item: SearchItem): string {
   const parts: string[] = []
   const head = [item.publisher, item.year].filter(Boolean).join(' ')
   if (head) parts.push(head)
-  if (item.binding) parts.push(bindingName(item.binding))
+  if (item.binding && item.binding !== 'UNKNOWN') parts.push(bindingName(item.binding))
   if (item.storesCount !== undefined) {
     parts.push(
       `${item.storesCount} ${pluralRu(item.storesCount, ['предложение', 'предложения', 'предложений'])}`,

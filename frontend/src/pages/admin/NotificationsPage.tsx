@@ -110,13 +110,17 @@ export default function NotificationsPage() {
         </KpiGrid>
       )}
 
-      <AdminSection title="Журнал писем">
-        <FilterChips
-          label="Статус письма"
-          options={STATUS_OPTIONS}
-          value={statusFilter}
-          onChange={changeStatus}
-        />
+      <AdminSection
+        title="Журнал писем"
+        actions={
+          <FilterChips
+            label="Статус письма"
+            options={STATUS_OPTIONS}
+            value={statusFilter}
+            onChange={changeStatus}
+          />
+        }
+      >
         {list.isPending && <Skeleton className="h-72 w-full" />}
         {list.isError && !list.data && <ErrorBlock onRetry={() => void list.refetch()} />}
         {list.data && items.length === 0 && <EmptyState title="Писем нет" />}

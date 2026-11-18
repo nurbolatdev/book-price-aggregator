@@ -204,3 +204,82 @@ const beaconScreens: ScreenEntry[] = [
 ]
 
 screens.push(...authScreens, ...beaconScreens)
+
+const ADMIN = { 'kr.mock.role': 'ADMIN' }
+const ADMIN_WIDE: (1280 | 960 | 390)[] = [1280]
+
+const adminScreens: ScreenEntry[] = [
+  { name: 'admin-overview', path: '/admin', widths: ADMIN_WIDE, signedIn: true, storage: ADMIN },
+  { name: 'admin-parsers', path: '/admin/parsers', widths: ADMIN_WIDE, signedIn: true, storage: ADMIN },
+  {
+    name: 'admin-parsers-disable',
+    path: '/admin/parsers',
+    widths: ADMIN_WIDE,
+    signedIn: true,
+    storage: ADMIN,
+    prepare: async (page) => {
+      await page.getByRole('switch', { name: 'Магазин Meloman' }).click()
+      await page.getByRole('dialog', { name: 'Выключить Meloman?' }).waitFor()
+    },
+  },
+  { name: 'admin-queues', path: '/admin/queues', widths: ADMIN_WIDE, signedIn: true, storage: ADMIN },
+  {
+    name: 'admin-queues-requeue',
+    path: '/admin/queues',
+    widths: ADMIN_WIDE,
+    signedIn: true,
+    storage: ADMIN,
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Вернуть в работу' }).click()
+      await page.getByRole('dialog', { name: 'Вернуть сообщения в работу?' }).waitFor()
+    },
+  },
+  {
+    name: 'admin-queues-requeued',
+    path: '/admin/queues',
+    widths: ADMIN_WIDE,
+    signedIn: true,
+    storage: ADMIN,
+    prepare: async (page) => {
+      await page.getByRole('button', { name: 'Вернуть в работу' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Вернуть сообщения в работу?' })
+      await dialog.getByRole('button', { name: 'Вернуть в работу' }).click()
+      await page.getByText('Возвращено 6, пропущено 1.').waitFor()
+    },
+  },
+  { name: 'admin-users', path: '/admin/users', widths: ADMIN_WIDE, signedIn: true, storage: ADMIN },
+  {
+    name: 'admin-notifications',
+    path: '/admin/notifications',
+    widths: ADMIN_WIDE,
+    signedIn: true,
+    storage: ADMIN,
+  },
+  {
+    name: 'admin-matching',
+    path: '/admin/matching',
+    widths: ADMIN_WIDE,
+    signedIn: true,
+    storage: ADMIN,
+    prepare: async (page) => {
+      const first = page.getByRole('radio').first()
+      await first.waitFor()
+      await first.check()
+    },
+  },
+  { name: 'admin-events', path: '/admin/events', widths: ADMIN_WIDE, signedIn: true, storage: ADMIN },
+  {
+    name: 'admin-events-expanded',
+    path: '/admin/events',
+    widths: ADMIN_WIDE,
+    signedIn: true,
+    storage: ADMIN,
+    prepare: async (page) => {
+      await page.locator('button[aria-expanded]').first().click()
+      await page.locator('pre').first().waitFor()
+    },
+  },
+  { name: 'admin-narrow', path: '/admin', widths: [390], signedIn: true, storage: ADMIN },
+]
+
+screens.push(...adminScreens)

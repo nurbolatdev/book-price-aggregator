@@ -82,13 +82,15 @@ export default function EventsPage() {
         <AdminSection
           title="События системы"
           className="min-w-0 flex-[999_1_420px]"
+          actions={
+            <FilterChips
+              label="Уровень"
+              options={LEVEL_OPTIONS}
+              value={levelFilter}
+              onChange={(v) => setParam("level", v === "all" ? null : v)}
+            />
+          }
         >
-          <FilterChips
-            label="Уровень"
-            options={LEVEL_OPTIONS}
-            value={levelFilter}
-            onChange={(v) => setParam("level", v === "all" ? null : v)}
-          />
           {journal.isPending && <Skeleton className="h-72 w-full" />}
           {journal.isError && !journal.data && (
             <ErrorBlock onRetry={() => void journal.refetch()} />

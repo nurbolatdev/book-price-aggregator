@@ -57,7 +57,7 @@ export function NotificationsTable({ items, actions }: NotificationsTableProps) 
                     {status.label}
                   </Badge>
                 </td>
-                <td className={`${td} text-[13px] text-danger`}>{n.error || '—'}</td>
+                <td className={`${td} text-[13px] ${n.error ? 'text-danger' : ''}`}>{n.error || '—'}</td>
                 <td className={td}>
                   {n.status === 'FAILED' && id !== undefined && (
                     <Button

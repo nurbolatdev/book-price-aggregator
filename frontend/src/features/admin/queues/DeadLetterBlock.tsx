@@ -47,7 +47,7 @@ export function DeadLetterBlock({ count }: { count: number }) {
   return (
     <AdminSection
       title={`Dead letter: ${count} ${noun}`}
-      className={count > 0 ? 'border-danger-line' : undefined}
+      tone={count > 0 ? 'danger' : undefined}
     >
       <p className="text-[15px] text-ink-soft">
         Сообщения, которые не удалось обработать после повторов. Перед возвратом проверьте журнал
