@@ -13,6 +13,8 @@ import type {
   NotificationDelivery,
   NotificationStatus,
   ParserRunQueued,
+  ReviewOffer,
+  ReviewOfferPage,
   QueueStats,
   RequeueResponse,
   SearchQueryStat,
@@ -150,5 +152,27 @@ export async function fetchAdminNotifications(
 
 export async function retryNotification(id: number): Promise<AdminNotification> {
   const { data } = await api.post<AdminNotification>(`/admin/notifications/${id}/retry`)
+  return data
+}
+
+export async function fetchPendingOffers(
+  page: number,
+  size: number,
+  signal?: AbortSignal,
+): Promise<ReviewOfferPage> {
+  const { data } = await api.get<ReviewOfferPage>('/admin/offers/pending-review', {
+    params: { page, size },
+    signal,
+  })
+  return data
+}
+
+export async function matchOffer(id: number, editionId: number): Promise<ReviewOffer> {
+  const { data } = await api.post<ReviewOffer>(`/admin/offers/${id}/match`, { editionId })
+  return data
+}
+
+export async function rejectOffer(id: number): Promise<ReviewOffer> {
+  const { data } = await api.post<ReviewOffer>(`/admin/offers/${id}/reject`)
   return data
 }

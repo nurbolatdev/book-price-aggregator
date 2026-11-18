@@ -102,5 +102,24 @@ export const adminHandlers = [
     return HttpResponse.json(item)
   }),
 
+  http.get('*/api/v1/admin/offers/pending-review', ({ request }) => {
+    const { page, size } = paging(new URL(request.url), 20)
+    return HttpResponse.json(pageOf(mockAdmin.offers, page, size))
+  }),
+
+  http.post('*/api/v1/admin/offers/:id/match', ({ params }) => {
+    const index = mockAdmin.offers.findIndex((o) => String(o.id) === params.id)
+    if (index < 0) return error(404, 'NOT_FOUND', 'Предложение не найдено')
+    const [offer] = mockAdmin.offers.splice(index, 1)
+    return HttpResponse.json({ ...offer, matchStatus: 'MATCHED' })
+  }),
+
+  http.post('*/api/v1/admin/offers/:id/reject', ({ params }) => {
+    const index = mockAdmin.offers.findIndex((o) => String(o.id) === params.id)
+    if (index < 0) return error(404, 'NOT_FOUND', 'Предложение не найдено')
+    const [offer] = mockAdmin.offers.splice(index, 1)
+    return HttpResponse.json({ ...offer, matchStatus: 'REJECTED' })
+  }),
+
   http.get('*/api/v1/admin/search/top', () => HttpResponse.json(topQueries())),
 ]

@@ -8,6 +8,7 @@ import type {
   AdminStats,
   AdminUser,
   QueueStats,
+  ReviewOffer,
   SearchQueryStat,
 } from '../api/types'
 
@@ -283,12 +284,43 @@ function initialNotifications(): AdminNotification[] {
   })
 }
 
+const OFFER_COUNT = 23
+
+function initialOffers(): ReviewOffer[] {
+  const now = Date.now()
+  const head: [string, string, number, boolean, string, number][] = [
+    ['OZON', 'Булгаков М. Мастер и Маргарита / Михаил Булгаков (тв.)', 3720, true, 'ozon-1182934', 0],
+    ['MELOMAN', 'Мастер и Маргарита. Роман (подарочное изд.)', 10200, true, 'meloman-77120', 1],
+    ['FLIP', 'Блокнот «Мастер и Маргарита» А5', 1990, true, 'flip-30518', 1],
+    ['OZON', 'Атомные привычки. Как приобрести хорошие привычки', 5450, true, 'ozon-2290417', 2],
+  ]
+  const stores = ['FLIP', 'MELOMAN', 'OZON']
+  return Array.from({ length: OFFER_COUNT }, (_, i) => {
+    const known = head[i]
+    const id = 501 + i
+    const seen = iso(now - (known ? known[5] : 2 + (i % 9)) * DAY)
+    return {
+      id,
+      store: (known ? known[0] : stores[i % stores.length]) as ReviewOffer['store'],
+      title: known ? known[1] : `Предложение на проверку №${id}`,
+      price: known ? known[2] : 1500 + i * 130,
+      inStock: known ? known[3] : i % 5 !== 0,
+      externalId: known ? known[4] : `ext-${id}`,
+      url: `https://example.com/offer/${id}`,
+      firstSeenAt: seen,
+      lastSeenAt: seen,
+      matchStatus: 'PENDING_REVIEW',
+    }
+  })
+}
+
 interface MockAdminState {
   parsers: AdminParser[]
   queues: QueueStats[]
   events: AdminEvent[]
   users: AdminUser[]
   notifications: AdminNotification[]
+  offers: ReviewOffer[]
 }
 
 function initialState(): MockAdminState {
@@ -298,6 +330,7 @@ function initialState(): MockAdminState {
     events: initialEvents(),
     users: initialUsers(),
     notifications: initialNotifications(),
+    offers: initialOffers(),
   }
 }
 
@@ -318,6 +351,9 @@ export const mockAdmin = {
   },
   get notifications() {
     return state.notifications
+  },
+  get offers() {
+    return state.offers
   },
 }
 

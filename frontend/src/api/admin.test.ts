@@ -11,7 +11,10 @@ import {
   fetchAdminQueues,
   fetchAdminStats,
   fetchAdminUsers,
+  fetchPendingOffers,
   fetchTopQueries,
+  matchOffer,
+  rejectOffer,
   requeueDeadLetter,
   retryNotification,
   runParser,
@@ -138,6 +141,20 @@ describe('admin monitoring api', () => {
     expect(retried.status).toBe('QUEUED')
     await expect(retryNotification(101)).rejects.toMatchObject({ status: 409 })
     server.events.removeAllListeners()
+  })
+
+  it('pages pending offers and removes a matched one', async () => {
+    const first = await fetchPendingOffers(0, 20)
+    expect(first.content).toHaveLength(20)
+    expect(first.totalElements).toBe(23)
+    const second = await fetchPendingOffers(1, 20)
+    expect(second.content).toHaveLength(3)
+    const matched = await matchOffer(501, 16)
+    expect(matched.matchStatus).toBe('MATCHED')
+    const rejected = await rejectOffer(502)
+    expect(rejected.matchStatus).toBe('REJECTED')
+    expect((await fetchPendingOffers(0, 20)).totalElements).toBe(21)
+    await expect(matchOffer(501, 16)).rejects.toMatchObject({ status: 404 })
   })
 
   it('drops admin data on sign-out', () => {
