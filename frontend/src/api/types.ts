@@ -1,4 +1,4 @@
-import type { components } from './schema'
+import type { components, operations } from './schema'
 
 type Schemas = components['schemas']
 
@@ -41,3 +41,31 @@ export type UpdateBeaconRequest = Schemas['UpdateBeaconRequest']
 export type UnsubscribeResponse = Schemas['UnsubscribeResponse']
 export type BeaconStatus = NonNullable<BeaconResponse['status']>
 export type ConditionType = CreateBeaconRequest['conditionType']
+
+export type AdminStats = Schemas['AdminStatsResponse']
+export type AdminHealth = Schemas['AdminHealthResponse']
+export type AdminParser = Schemas['AdminParserResponse']
+export type AdminActivityDay = Schemas['AdminActivityDay']
+// The generated `details` type has `Record<string, never>` values, which no real payload fits.
+export type AdminEvent = Omit<Schemas['AdminEventResponse'], 'details'> & {
+  details?: Record<string, unknown>
+}
+export type AdminEventPage = Omit<Schemas['PageResponseAdminEventResponse'], 'content'> & {
+  content?: AdminEvent[]
+}
+export type AdminUser = Schemas['AdminUserResponse']
+export type AdminUserPage = Schemas['PageResponseAdminUserResponse']
+export type AdminNotification = Schemas['AdminNotificationResponse']
+export type AdminNotificationPage = Schemas['PageResponseAdminNotificationResponse']
+export type ReviewOffer = Schemas['ReviewOfferResponse']
+export type ReviewOfferPage = Schemas['PageResponseReviewOfferResponse']
+export type QueueStats = Schemas['QueueStats']
+export type RequeueResponse = Schemas['RequeueResponse']
+export type SearchQueryStat = Schemas['SearchQueryStat']
+export type StoreState = Schemas['StoreState']
+export type ParserRunQueued = Schemas['ParserRunQueuedResponse']
+export type AdminPeriod = '24h' | '7d' | '30d'
+export type EventLevel = NonNullable<AdminEvent['level']>
+type NotificationQuery = NonNullable<operations['list_1']['parameters']['query']>
+export type NotificationStatus = NonNullable<NotificationQuery['status']>
+export type NotificationDelivery = NonNullable<NotificationQuery['delivery']>

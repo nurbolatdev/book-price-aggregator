@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
+import { resetMockAdmin } from '../mocks/adminFixtures'
 import { resetMockAuth } from '../mocks/authFixtures'
 import { resetMockBeacons } from '../mocks/beaconFixtures'
 import { server } from '../mocks/server'
@@ -46,6 +47,7 @@ afterEach(() => {
   sessionStorage.clear()
   resetMockAuth()
   resetMockBeacons()
+  resetMockAdmin()
 })
 
 afterAll(() => server.close())
