@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { NotFound } from '../../components/ui/NotFound'
 import { AdminLayout } from '../../features/admin/AdminLayout'
+import MatchingPage from './MatchingPage'
 import NotificationsPage from './NotificationsPage'
 import OverviewPage from './OverviewPage'
 import ParsersPage from './ParsersPage'
@@ -16,6 +17,7 @@ export default function AdminRoutes() {
         <Route path="queues" element={<QueuesPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="matching" element={<MatchingPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
