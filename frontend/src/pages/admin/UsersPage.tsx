@@ -124,7 +124,7 @@ export default function UsersPage() {
 
         {users.isPending && <Skeleton className="h-72 w-full" />}
         {users.isError && !users.data && <ErrorBlock onRetry={() => void users.refetch()} />}
-        {users.data && list.length === 0 && <EmptyState title="Никого не нашли" />}
+        {users.data && list.length === 0 && (users.data.totalElements ?? 0) === 0 && <EmptyState title="Никого не нашли" />}
         {users.data && list.length > 0 && (
           <>
             <div className={tableWrap}>

@@ -11,13 +11,13 @@ export function useStepBackWhenEmpty(
   isPlaceholder: boolean,
   page: number,
   size: number,
-  changePage: (page: number) => void,
+  changePage: (page: number, options?: { replace?: boolean }) => void,
 ): void {
   useEffect(() => {
     if (!data || isPlaceholder || page <= 0) return
     const total = data.totalElements ?? 0
     if ((data.content?.length ?? 0) > 0 || total <= 0) return
     const last = Math.max(0, Math.ceil(total / size) - 1)
-    if (last < page) changePage(last)
+    if (last < page) changePage(last, { replace: true })
   }, [data, isPlaceholder, page, size, changePage])
 }

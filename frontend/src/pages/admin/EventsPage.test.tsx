@@ -182,10 +182,10 @@ describe("EventsPage", () => {
     renderAdmin("/admin/events");
     const retry = await screen.findByRole("button", { name: "Повторить" });
     expect(screen.getByText("событие 3")).toBeInTheDocument();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(log.filter((p) => p === 1).length).toBeLessThanOrEqual(2);
+    await waitFor(() => expect(log.filter((p) => p === 1)).toHaveLength(1));
     failNext = false;
     fireEvent.click(retry);
+    await waitFor(() => expect(log.filter((p) => p === 1)).toHaveLength(2));
     expect(await screen.findByText("событие 0")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Повторить" })).toBeNull();
   });

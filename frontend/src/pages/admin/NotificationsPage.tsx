@@ -125,7 +125,7 @@ export default function NotificationsPage() {
       >
         {list.isPending && <Skeleton className="h-72 w-full" />}
         {list.isError && !list.data && <ErrorBlock onRetry={() => void list.refetch()} />}
-        {list.data && items.length === 0 && <EmptyState title="Писем нет" />}
+        {list.data && items.length === 0 && (list.data.totalElements ?? 0) === 0 && <EmptyState title="Писем нет" />}
         {list.data && items.length > 0 && (
           <>
             <NotificationsTable items={items} actions={actions} />

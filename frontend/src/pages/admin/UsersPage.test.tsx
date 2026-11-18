@@ -55,6 +55,13 @@ describe('UsersPage', () => {
     expect(last(log)?.searchParams.get('page')).toBe('1')
   })
 
+  it('lands on the last page for a past-the-end URL without the empty state', async () => {
+    renderAdmin('/admin/users?page=9')
+    await screen.findByText('Показаны 41–45 из 45 · по 20 на странице')
+    expect(screen.queryByText('Никого не нашли')).toBeNull()
+    expect(getLocation()).toContain('page=3')
+  })
+
   it('debounces the search and resets the page', async () => {
     const log = logUsers()
     renderAdmin('/admin/users?page=2')
