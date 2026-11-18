@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
-export type AlertTone = 'info' | 'warn' | 'danger' | 'offline'
+export type AlertTone = 'info' | 'warn' | 'danger' | 'offline' | 'success'
 
 const tones: Record<AlertTone, string> = {
   info: 'border-link/30 bg-canvas text-ink',
   warn: 'border-warn/30 bg-warn-soft text-warn',
   danger: 'border-danger/30 bg-danger-soft text-danger',
   offline: 'border-line bg-ink text-white',
+  success: 'border-deal/30 bg-deal-soft text-deal',
 }
 
 interface AlertProps {

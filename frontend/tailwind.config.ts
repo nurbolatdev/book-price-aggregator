@@ -31,6 +31,8 @@ export default {
         },
         deal: { DEFAULT: '#0F6B45', soft: '#E7F5EE' },
         link: { DEFAULT: '#1D4ED8', hover: '#1E3A8A' },
+        admin: { nav: '#1F2E44', logo: '#F59E5B' },
+        dot: { ok: '#16A34A', warn: '#D97706', off: '#B8C0CC' },
       },
       fontFamily: {
         display: ['Unbounded', ...defaultTheme.fontFamily.sans],

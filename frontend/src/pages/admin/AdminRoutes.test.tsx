@@ -40,6 +40,8 @@ describe('admin routes', () => {
   it('renders the overview for an ADMIN', async () => {
     renderAdmin('/admin')
     expect(await screen.findByRole('heading', { name: 'Обзор системы' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Админ-меню' })).toBeInTheDocument()
+    expect(document.title).toBe('Обзор системы · Админ-панель | KitapRadar')
     expect(loader.load).toHaveBeenCalled()
   })
 
