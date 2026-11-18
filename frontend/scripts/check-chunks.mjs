@@ -39,12 +39,13 @@ for (const name of initial) {
 if (offenders.length > 0) fail(`Recharts is in the initial chunks:\n  ${offenders.join('\n  ')}`)
 
 const ADMIN = /\/src\/(pages|features)\/admin\/|\/src\/api\/admin\.ts$|node_modules\/@tanstack\/(react-)?virtual/
-const adminChunk = chunks.find((c) => c.facadeModuleId?.endsWith('/src/pages/admin/AdminRoutes.tsx'))
+// The facade is null once another chunk imports a module hoisted into this one, so match by module.
+const adminChunk = chunks.find((c) => c.moduleIds.some((id) => id.endsWith('/src/pages/admin/AdminRoutes.tsx')))
 if (!adminChunk) fail('admin chunk not found, the check would be vacuous')
 
 const userRoots = [
   ...chunks.filter((c) => c.isEntry),
-  ...chunks.filter((c) => c.isDynamicEntry && !(c.facadeModuleId && ADMIN.test(c.facadeModuleId))),
+  ...chunks.filter((c) => c.isDynamicEntry && c !== adminChunk && !(c.facadeModuleId && ADMIN.test(c.facadeModuleId))),
 ]
 const userReach = new Set()
 const walk = (name) => {
