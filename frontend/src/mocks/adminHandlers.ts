@@ -38,6 +38,14 @@ export const adminHandlers = [
     return HttpResponse.json({ queued: true }, { status: 202 })
   }),
 
+  http.patch('*/api/v1/admin/stores/:code', async ({ params, request }) => {
+    const parser = mockAdmin.parsers.find((p) => p.code === params.code)
+    if (!parser) return error(404, 'NOT_FOUND', 'Магазин не найден')
+    const body = (await request.json()) as { enabled: boolean }
+    parser.enabled = body.enabled
+    return HttpResponse.json({ code: parser.code, enabled: parser.enabled })
+  }),
+
   http.get('*/api/v1/admin/queues', () => HttpResponse.json(mockAdmin.queues)),
 
   http.get('*/api/v1/admin/activity', ({ request }) => {

@@ -11,6 +11,7 @@ import type {
   QueueStats,
   SearchQueryStat,
   StoreCode,
+  StoreState,
 } from './types'
 
 export async function fetchAdminStats(
@@ -80,5 +81,10 @@ export async function fetchTopQueries(
     params: { period },
     signal,
   })
+  return data
+}
+
+export async function setStoreEnabled(code: StoreCode, enabled: boolean): Promise<StoreState> {
+  const { data } = await api.patch<StoreState>(`/admin/stores/${code}`, { enabled })
   return data
 }

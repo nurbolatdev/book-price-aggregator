@@ -11,6 +11,7 @@ import {
   fetchAdminStats,
   fetchTopQueries,
   runParser,
+  setStoreEnabled,
 } from './admin'
 import { ApiError, toApiError } from './errors'
 import { USER_SCOPED_KEYS } from './queryKeys'
@@ -56,6 +57,10 @@ describe('admin monitoring api', () => {
     const failure = await runParser('KASPI').catch(toApiError)
     expect(failure).toBeInstanceOf(ApiError)
     expect(failure).toMatchObject({ status: 409, code: 'CONFLICT' })
+  })
+
+  it('switches a store and returns its state', async () => {
+    expect(await setStoreEnabled('FLIP', false)).toEqual({ code: 'FLIP', enabled: false })
   })
 
   it('lists the queues including the dead letter', async () => {

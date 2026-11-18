@@ -2,15 +2,18 @@ import type { AdminParser } from '../../../api/types'
 import { Button } from '../../../components/ui/Button'
 import { formatNumber } from '../../../lib/format'
 import { formatAdminTime } from '../adminFormat'
+import { Switch } from '../Switch'
 import { StatusBadge } from '../StatusBadge'
-import { parserStatus } from '../status'
+import { breakerLabel, parserStatus } from '../status'
 import { row, table, td, th, tableWrap } from '../table'
 import type { ParserActions } from './useParserActions'
+import type { StoreToggle } from './useToggleStore'
 
 interface ParsersTableProps {
   parsers: AdminParser[]
-  variant: 'compact'
+  variant: 'compact' | 'full'
   actions: ParserActions
+  toggle?: StoreToggle
 }
 
 const DASH = '—'
@@ -21,24 +24,30 @@ function disabledReason(p: AdminParser): string | undefined {
   return undefined
 }
 
-export function ParsersTable({ parsers, actions }: ParsersTableProps) {
+export function ParsersTable({ parsers, variant, actions, toggle }: ParsersTableProps) {
   const now = new Date()
+  const full = variant === 'full'
   return (
     <div className={tableWrap}>
-      <table className={`${table} min-w-[760px]`}>
+      <table className={`${table} ${full ? 'min-w-[920px]' : 'min-w-[760px]'}`}>
         <thead>
           <tr>
             <th scope="col" className={th}>
               Магазин
             </th>
+            {full && (
+              <th scope="col" className={th}>
+                Вкл.
+              </th>
+            )}
             <th scope="col" className={th}>
               Статус
             </th>
             <th scope="col" className={th}>
-              Последний запуск
+              {full ? 'Запуск' : 'Последний запуск'}
             </th>
             <th scope="col" className={th}>
-              Успешно
+              {full ? 'Успех 24 ч' : 'Успешно'}
             </th>
             <th scope="col" className={th}>
               Предложений
@@ -46,6 +55,11 @@ export function ParsersTable({ parsers, actions }: ParsersTableProps) {
             <th scope="col" className={th}>
               Ср. время
             </th>
+            {full && (
+              <th scope="col" className={th}>
+                Breaker
+              </th>
+            )}
             <th scope="col" className={th}>
               <span className="sr-only">Действия</span>
             </th>
@@ -61,6 +75,18 @@ export function ParsersTable({ parsers, actions }: ParsersTableProps) {
             return (
               <tr key={code ?? p.name} className={row}>
                 <td className={`${td} font-semibold`}>{p.name}</td>
+                {full && (
+                  <td className={td}>
+                    {code && toggle && (
+                      <Switch
+                        checked={live}
+                        label={`Магазин ${p.name}`}
+                        disabled={toggle.busy.has(code)}
+                        onChange={() => toggle.toggle(p)}
+                      />
+                    )}
+                  </td>
+                )}
                 <td className={td}>
                   <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
                 </td>
@@ -76,6 +102,13 @@ export function ParsersTable({ parsers, actions }: ParsersTableProps) {
                 <td className={td}>
                   {live && p.avgRunSeconds !== undefined ? `${Math.round(p.avgRunSeconds)} с` : DASH}
                 </td>
+                {full && (
+                  <td className={td}>
+                    <span className={breakerLabel(p.circuitBreaker).className}>
+                      {breakerLabel(p.circuitBreaker).label}
+                    </span>
+                  </td>
+                )}
                 <td className={td}>
                   {code && (
                     <Button
@@ -86,7 +119,7 @@ export function ParsersTable({ parsers, actions }: ParsersTableProps) {
                       loading={actions.running.has(code)}
                       onClick={() => void actions.run(code)}
                     >
-                      Перезапустить
+                      {full ? 'Запустить' : 'Перезапустить'}
                     </Button>
                   )}
                   {message && (

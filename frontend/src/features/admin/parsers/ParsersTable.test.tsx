@@ -1,8 +1,9 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { mockAdmin } from '../../../mocks/adminFixtures'
 import { ParsersTable } from './ParsersTable'
 import type { ParserActions } from './useParserActions'
+import type { StoreToggle } from './useToggleStore'
 
 function actions(overrides: Partial<ParserActions> = {}): ParserActions {
   return {
@@ -56,5 +57,45 @@ describe('ParsersTable compact', () => {
     )
     expect(within(rowOf('Flip.kz')).getByRole('alert')).toHaveTextContent('Очередь недоступна')
     expect(within(rowOf('Meloman')).queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('ParsersTable full', () => {
+  const toggle = (): StoreToggle => ({
+    toggle: vi.fn(),
+    confirming: null,
+    cancel: vi.fn(),
+    confirm: vi.fn(),
+    busy: new Set(),
+    pending: false,
+  })
+
+  it('renders switches, breaker state and the run button', () => {
+    const t = toggle()
+    render(<ParsersTable parsers={mockAdmin.parsers} variant="full" actions={actions()} toggle={t} />)
+    expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual([
+      'Магазин',
+      'Вкл.',
+      'Статус',
+      'Запуск',
+      'Успех 24 ч',
+      'Предложений',
+      'Ср. время',
+      'Breaker',
+      'Действия',
+    ])
+    expect(within(rowOf('Flip.kz')).getByRole('switch', { name: 'Магазин Flip.kz' })).toBeChecked()
+    expect(within(rowOf('Kaspi.kz')).getByRole('switch', { name: 'Магазин Kaspi.kz' })).not.toBeChecked()
+    expect(within(rowOf('Flip.kz')).getByText('закрыт')).toBeInTheDocument()
+    expect(within(rowOf('Ozon')).getByText('открыт')).toBeInTheDocument()
+    expect(within(rowOf('Flip.kz')).getByRole('button', { name: 'Запустить' })).toBeEnabled()
+    expect(within(rowOf('Kaspi.kz')).getByRole('button', { name: 'Запустить' })).toBeDisabled()
+  })
+
+  it('reports a switch click', () => {
+    const t = toggle()
+    render(<ParsersTable parsers={mockAdmin.parsers} variant="full" actions={actions()} toggle={t} />)
+    fireEvent.click(within(rowOf('Meloman')).getByRole('switch'))
+    expect(t.toggle).toHaveBeenCalledWith(expect.objectContaining({ code: 'MELOMAN' }))
   })
 })
