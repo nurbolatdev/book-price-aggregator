@@ -9,6 +9,7 @@ import type {
   EventLevel,
   ParserRunQueued,
   QueueStats,
+  RequeueResponse,
   SearchQueryStat,
   StoreCode,
   StoreState,
@@ -86,5 +87,10 @@ export async function fetchTopQueries(
 
 export async function setStoreEnabled(code: StoreCode, enabled: boolean): Promise<StoreState> {
   const { data } = await api.patch<StoreState>(`/admin/stores/${code}`, { enabled })
+  return data
+}
+
+export async function requeueDeadLetter(): Promise<RequeueResponse> {
+  const { data } = await api.post<RequeueResponse>('/admin/queues/dead-letter/requeue')
   return data
 }

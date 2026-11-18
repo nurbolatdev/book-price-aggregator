@@ -10,6 +10,7 @@ import {
   fetchAdminQueues,
   fetchAdminStats,
   fetchTopQueries,
+  requeueDeadLetter,
   runParser,
   setStoreEnabled,
 } from './admin'
@@ -92,6 +93,10 @@ describe('admin monitoring api', () => {
   it('returns the top queries for the period', async () => {
     const top = await fetchTopQueries('24h')
     expect(top[0]?.query).toBe('Мастер и Маргарита')
+  })
+
+  it('requeues the dead-letter queue', async () => {
+    expect(await requeueDeadLetter()).toEqual({ requeued: 6, skipped: 1 })
   })
 
   it('drops admin data on sign-out', () => {

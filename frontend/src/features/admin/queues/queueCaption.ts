@@ -14,3 +14,5 @@ export function queueCaption(name: string | undefined): string | undefined {
       return undefined;
   }
 }
+
+export const DEAD_LETTER = "kr.dead-letter";

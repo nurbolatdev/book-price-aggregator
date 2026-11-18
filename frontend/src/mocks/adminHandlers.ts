@@ -48,6 +48,12 @@ export const adminHandlers = [
 
   http.get('*/api/v1/admin/queues', () => HttpResponse.json(mockAdmin.queues)),
 
+  http.post('*/api/v1/admin/queues/dead-letter/requeue', () => {
+    const dead = mockAdmin.queues.find((q) => q.name === 'kr.dead-letter')
+    if (dead) dead.ready = 0
+    return HttpResponse.json({ requeued: 6, skipped: 1 })
+  }),
+
   http.get('*/api/v1/admin/activity', ({ request }) => {
     const days = Number(new URL(request.url).searchParams.get('days') ?? 14)
     return HttpResponse.json(activity(days))
