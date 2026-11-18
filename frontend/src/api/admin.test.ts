@@ -6,12 +6,14 @@ import {
   fetchAdminActivity,
   fetchAdminEvents,
   fetchAdminHealth,
+  fetchAdminNotifications,
   fetchAdminParsers,
   fetchAdminQueues,
   fetchAdminStats,
   fetchAdminUsers,
   fetchTopQueries,
   requeueDeadLetter,
+  retryNotification,
   runParser,
   setStoreEnabled,
 } from './admin'
@@ -62,7 +64,10 @@ describe('admin monitoring api', () => {
   })
 
   it('switches a store and returns its state', async () => {
-    expect(await setStoreEnabled('FLIP', false)).toEqual({ code: 'FLIP', enabled: false })
+    expect(await setStoreEnabled('FLIP', false)).toEqual({
+      code: 'FLIP',
+      enabled: false,
+    })
   })
 
   it('lists the queues including the dead letter', async () => {
@@ -106,11 +111,32 @@ describe('admin monitoring api', () => {
     expect(all.totalElements).toBe(45)
     expect(urls[0]?.searchParams.has('q')).toBe(false)
     expect(urls[0]?.searchParams.has('verified')).toBe(false)
-    const filtered = await fetchAdminUsers({ q: 'aigerim', verified: false, page: 1, size: 20 })
+    const filtered = await fetchAdminUsers({
+      q: 'aigerim',
+      verified: false,
+      page: 1,
+      size: 20,
+    })
     expect(urls[1]?.searchParams.get('q')).toBe('aigerim')
     expect(urls[1]?.searchParams.get('verified')).toBe('false')
     expect(urls[1]?.searchParams.get('page')).toBe('1')
     expect(filtered.content).toEqual([])
+    server.events.removeAllListeners()
+  })
+
+  it('lists notifications with filters and retries a failed one', async () => {
+    const urls = captureUrls('/admin/notifications')
+    const queued = await fetchAdminNotifications({
+      status: 'QUEUED',
+      page: 0,
+      size: 1,
+    })
+    expect(queued.totalElements).toBe(3)
+    expect(urls[0]?.searchParams.get('status')).toBe('QUEUED')
+    expect(urls[0]?.searchParams.has('delivery')).toBe(false)
+    const retried = await retryNotification(103)
+    expect(retried.status).toBe('QUEUED')
+    await expect(retryNotification(101)).rejects.toMatchObject({ status: 409 })
     server.events.removeAllListeners()
   })
 

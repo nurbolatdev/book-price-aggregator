@@ -1,6 +1,8 @@
 import { api } from './client'
 import type {
   AdminActivityDay,
+  AdminNotification,
+  AdminNotificationPage,
   AdminEventPage,
   AdminHealth,
   AdminParser,
@@ -8,6 +10,8 @@ import type {
   AdminStats,
   AdminUserPage,
   EventLevel,
+  NotificationDelivery,
+  NotificationStatus,
   ParserRunQueued,
   QueueStats,
   RequeueResponse,
@@ -87,7 +91,9 @@ export async function fetchTopQueries(
 }
 
 export async function setStoreEnabled(code: StoreCode, enabled: boolean): Promise<StoreState> {
-  const { data } = await api.patch<StoreState>(`/admin/stores/${code}`, { enabled })
+  const { data } = await api.patch<StoreState>(`/admin/stores/${code}`, {
+    enabled,
+  })
   return data
 }
 
@@ -116,5 +122,33 @@ export async function fetchAdminUsers(
     },
     signal,
   })
+  return data
+}
+
+export interface AdminNotificationsParams {
+  status?: NotificationStatus
+  delivery?: NotificationDelivery
+  page: number
+  size: number
+}
+
+export async function fetchAdminNotifications(
+  { status, delivery, page, size }: AdminNotificationsParams,
+  signal?: AbortSignal,
+): Promise<AdminNotificationPage> {
+  const { data } = await api.get<AdminNotificationPage>('/admin/notifications', {
+    params: {
+      ...(status ? { status } : {}),
+      ...(delivery ? { delivery } : {}),
+      page,
+      size,
+    },
+    signal,
+  })
+  return data
+}
+
+export async function retryNotification(id: number): Promise<AdminNotification> {
+  const { data } = await api.post<AdminNotification>(`/admin/notifications/${id}/retry`)
   return data
 }

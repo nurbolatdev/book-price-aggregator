@@ -2,6 +2,7 @@ import type {
   AdminActivityDay,
   AdminEvent,
   AdminHealth,
+  AdminNotification,
   AdminParser,
   AdminPeriod,
   AdminStats,
@@ -232,11 +233,62 @@ function initialUsers(): AdminUser[] {
   })
 }
 
+const NOTIFICATION_COUNT = 30
+
+function initialNotifications(): AdminNotification[] {
+  const now = Date.now()
+  const head: [number, number, string, string, string, string, string, string | undefined][] = [
+    [101, 12, 'nurbo@example.com', 'Мастер и Маргарита', 'INSTANT', 'SENT', 'sent', undefined],
+    [102, 55, 'daniyar@example.com', 'Чистый код', 'DIGEST', 'QUEUED', 'none', undefined],
+    [
+      103,
+      130,
+      'aigerim.s@example.com',
+      'Атомные привычки',
+      'INSTANT',
+      'FAILED',
+      'none',
+      'SMTP: connection timed out',
+    ],
+    [104, 240, 'nurbo@example.com', 'Сводка за день: 3 книги', 'DIGEST', 'SENT', 'sent', undefined],
+  ]
+  return Array.from({ length: NOTIFICATION_COUNT }, (_, i) => {
+    const known = head[i]
+    if (known) {
+      const [id, minutes, userEmail, title, delivery, status, sent, error] = known
+      return {
+        id,
+        createdAt: iso(now - minutes * MINUTE),
+        sentAt: sent === 'sent' ? iso(now - (minutes - 1) * MINUTE) : undefined,
+        userEmail,
+        title,
+        delivery,
+        status,
+        error,
+      }
+    }
+    const queued = i === 10 ? 'DIGEST' : i === 15 ? 'INSTANT' : undefined
+    const failed = !queued && i % 9 === 0
+    const status = queued ? 'QUEUED' : failed ? 'FAILED' : 'SENT'
+    return {
+      id: 100 - i,
+      createdAt: iso(now - (300 + i * 40) * MINUTE),
+      sentAt: status === 'SENT' ? iso(now - (299 + i * 40) * MINUTE) : undefined,
+      userEmail: `reader${i + 1}@example.com`,
+      title: `Книга №${i + 1}`,
+      delivery: queued ?? (i % 5 === 0 ? 'DIGEST' : 'INSTANT'),
+      status,
+      error: failed ? 'SMTP: connection timed out' : undefined,
+    }
+  })
+}
+
 interface MockAdminState {
   parsers: AdminParser[]
   queues: QueueStats[]
   events: AdminEvent[]
   users: AdminUser[]
+  notifications: AdminNotification[]
 }
 
 function initialState(): MockAdminState {
@@ -245,6 +297,7 @@ function initialState(): MockAdminState {
     queues: initialQueues(),
     events: initialEvents(),
     users: initialUsers(),
+    notifications: initialNotifications(),
   }
 }
 
@@ -262,6 +315,9 @@ export const mockAdmin = {
   },
   get users() {
     return state.users
+  },
+  get notifications() {
+    return state.notifications
   },
 }
 

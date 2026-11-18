@@ -82,5 +82,25 @@ export const adminHandlers = [
     return HttpResponse.json(pageOf(items, page, size))
   }),
 
+  http.get('*/api/v1/admin/notifications', ({ request }) => {
+    const url = new URL(request.url)
+    const status = url.searchParams.get('status')
+    const delivery = url.searchParams.get('delivery')
+    const items = mockAdmin.notifications.filter(
+      (n) => (!status || n.status === status) && (!delivery || n.delivery === delivery),
+    )
+    const { page, size } = paging(url, 20)
+    return HttpResponse.json(pageOf(items, page, size))
+  }),
+
+  http.post('*/api/v1/admin/notifications/:id/retry', ({ params }) => {
+    const item = mockAdmin.notifications.find((n) => String(n.id) === params.id)
+    if (!item) return error(404, 'NOT_FOUND', 'Письмо не найдено')
+    if (item.status !== 'FAILED') return error(409, 'CONFLICT', 'Письмо нельзя повторить')
+    item.status = 'QUEUED'
+    item.error = undefined
+    return HttpResponse.json(item)
+  }),
+
   http.get('*/api/v1/admin/search/top', () => HttpResponse.json(topQueries())),
 ]
