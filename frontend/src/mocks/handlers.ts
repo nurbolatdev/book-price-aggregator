@@ -3,7 +3,7 @@ import { adminHandlers } from './adminHandlers'
 import { authHandlers } from './authHandlers'
 import { beaconHandlers } from './beaconHandlers'
 import { bookDetail, editionDetail, priceHistory, similarFor } from './editionFixtures'
-import { drops, emptySearchPage, facets, popular, searchPage, stores, suggestions } from './fixtures'
+import { drops, emptySearchPage, facets, popular, searchPageFor, stores, suggestions } from './fixtures'
 
 function isEmptyQuery(url: URL): boolean {
   return (url.searchParams.get('q') ?? '').toLowerCase().includes('ничего')
@@ -34,7 +34,20 @@ export const handlers = [
   http.get('*/api/v1/search', ({ request }) => {
     const url = new URL(request.url)
     if (isEmptyQuery(url)) return HttpResponse.json(emptySearchPage)
-    return HttpResponse.json(searchPage(Number(url.searchParams.get('page') ?? 0)))
+    const num = (key: string) => (url.searchParams.has(key) ? Number(url.searchParams.get(key)) : undefined)
+    return HttpResponse.json(
+      searchPageFor(
+        {
+          stores: url.searchParams.getAll('stores').flatMap((v) => v.split(',')),
+          binding: url.searchParams.getAll('binding').flatMap((v) => v.split(',')),
+          minPrice: num('minPrice'),
+          maxPrice: num('maxPrice'),
+          inStock: url.searchParams.get('inStock') === 'true',
+          sort: url.searchParams.get('sort'),
+        },
+        Number(url.searchParams.get('page') ?? 0),
+      ),
+    )
   }),
 
   http.get('*/api/v1/home/drops', ({ request }) => {
