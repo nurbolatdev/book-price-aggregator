@@ -7,7 +7,7 @@ const tones: Record<AlertTone, string> = {
   info: 'border-link/30 bg-canvas text-ink',
   warn: 'border-warn/30 bg-warn-soft text-warn',
   danger: 'border-danger/30 bg-danger-soft text-danger',
-  offline: 'border-line bg-ink text-white',
+  offline: 'border-ink bg-ink text-white',
   success: 'border-deal/30 bg-deal-soft text-deal',
 }
 
