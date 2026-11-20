@@ -7,9 +7,11 @@ interface EmptyStateProps {
   text?: string
   action?: ReactNode
   className?: string
+  headingLevel?: 2 | 3
 }
 
-export function EmptyState({ icon, title, text, action, className }: EmptyStateProps) {
+export function EmptyState({ icon, title, text, action, className, headingLevel = 2 }: EmptyStateProps) {
+  const Heading = `h${headingLevel}` as const
   return (
     <div className={cn('flex flex-col items-center gap-3 px-4 py-12 text-center', className)}>
       {icon && (
@@ -20,7 +22,7 @@ export function EmptyState({ icon, title, text, action, className }: EmptyStateP
           {icon}
         </div>
       )}
-      <h2 className="font-display text-[22px] font-medium text-ink">{title}</h2>
+      <Heading className="font-display text-[22px] font-medium text-ink">{title}</Heading>
       {text && <p className="max-w-md text-[15px] text-muted">{text}</p>}
       {action}
     </div>

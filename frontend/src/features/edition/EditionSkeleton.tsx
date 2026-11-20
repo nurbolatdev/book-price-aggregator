@@ -1,4 +1,6 @@
+import { RouteFallback, ROUTE_MIN_HEIGHT } from "../../components/layout/RouteFallback";
 import { Skeleton } from "../../components/ui/Skeleton";
+import { useMediaQuery } from "../../lib/useMediaQuery";
 import { CHART_BOX } from "./PriceHistory";
 
 export function EditionBarSkeleton() {
@@ -10,13 +12,18 @@ export function EditionBarSkeleton() {
   );
 }
 
-// Reserves the height of the loaded page so the footer stays below the fold while
-// the chunk and the data load (avoids a footer shift on the edition page).
-export const RESERVED = "min-h-[1200px]";
-
 export function EditionRouteFallback() {
+  const desktop = useMediaQuery("(min-width: 768px)");
   return (
-    <div role="status" aria-label="Загрузка" className={RESERVED} />
+    <RouteFallback>
+      {desktop ? (
+        <div className="mx-auto flex w-full max-w-page flex-col gap-6 px-4 pb-16 pt-5 md:px-6">
+          <EditionSkeleton />
+        </div>
+      ) : (
+        <EditionSkeleton variant="mobile" />
+      )}
+    </RouteFallback>
   );
 }
 
@@ -30,7 +37,7 @@ export function EditionSkeleton({
       <div
         role="status"
         aria-label="Загружаем издание"
-        className={`flex flex-col ${RESERVED}`}
+        className={`flex flex-col ${ROUTE_MIN_HEIGHT}`}
       >
         <div className="flex flex-col gap-3.5">
           <div className="flex gap-3.5">
@@ -60,7 +67,7 @@ export function EditionSkeleton({
     <div
       role="status"
       aria-label="Загружаем издание"
-      className={`flex flex-col gap-6 ${RESERVED}`}
+      className={`flex flex-col gap-6 ${ROUTE_MIN_HEIGHT}`}
     >
       <Skeleton className="h-5 w-64 max-w-full" />
       <div className="flex flex-wrap items-start gap-8">

@@ -28,6 +28,7 @@ function WeeklyDrops() {
         <ErrorBlock message="Не удалось загрузить подборку." onRetry={() => void refetch()} />
       ) : !data || data.length === 0 ? (
         <EmptyState
+          headingLevel={3}
           title="За неделю цены не снижались"
           text="Загляните позже или найдите книгу в каталоге."
           className="rounded-xl border border-dashed border-line"

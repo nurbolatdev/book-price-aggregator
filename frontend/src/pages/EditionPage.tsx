@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { isNotFound } from "../api/errors";
 import type { EditionDetailResponse } from "../api/types";
+import { ROUTE_MIN_HEIGHT } from "../components/layout/RouteFallback";
 import { ErrorBlock } from "../components/ui/ErrorBlock";
 import { NotFound } from "../components/ui/NotFound";
 import { EditionDesktop } from "../features/edition/EditionDesktop";
@@ -9,7 +10,6 @@ import { EditionMobileHeader } from "../features/edition/EditionMobileHeader";
 import {
   EditionBarSkeleton,
   EditionSkeleton,
-  RESERVED,
 } from "../features/edition/EditionSkeleton";
 import { storeNameOf } from "../features/edition/offers";
 import { EditionBeaconModal } from "../features/edition/EditionBeaconModal";
@@ -118,7 +118,7 @@ export default function EditionPage() {
   let state: React.ReactNode;
   if (id === 0 || isNotFound(error))
     state = (
-      <div className={RESERVED}>
+      <div className={ROUTE_MIN_HEIGHT}>
         <NotFound />
       </div>
     );
@@ -126,7 +126,7 @@ export default function EditionPage() {
     state = <EditionSkeleton variant={desktop ? "desktop" : "mobile"} />;
   else
     state = (
-      <div className={RESERVED}>
+      <div className={ROUTE_MIN_HEIGHT}>
         <ErrorBlock
           message="Не удалось загрузить издание."
           onRetry={() => void refetch()}

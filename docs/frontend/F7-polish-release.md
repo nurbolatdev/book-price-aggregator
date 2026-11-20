@@ -22,7 +22,7 @@
 
 ### 3. Скорость
 - [x] Проверить приёмы из ROADMAP §1–11 (prefetch, debounce, staleTime, code splitting, lazy-картинки, виртуализация, опрос только на видимой вкладке).
-- [ ] Бюджет: LCP < 2.5 с, CLS < 0.1, начальный JS главной ≤ 200 КБ gzip; Lighthouse (mobile) ≥ 90 по Performance, Accessibility, Best Practices, SEO для `/`, `/search`, `/editions/:id`. (JS 102.7 КБ и CLS проверены; Performance главной и поиска на моках 89 и 87, перемерить на настоящем стеке)
+- [ ] Бюджет: LCP < 2.5 с, CLS < 0.1, начальный JS главной ≤ 200 КБ gzip; Lighthouse (mobile) ≥ 90 по Performance, Accessibility, Best Practices, SEO для `/`, `/search`, `/editions/:id`. (JS 102.7 КБ; CLS на моках: главная 0.072, поиск 0.035, карточка 0; Performance главной и поиска на моках 82–88, LCP 3.4–3.7 с из-за задержки MSW, перемерить на настоящем стеке)
 - [ ] Шрифты: `font-display: swap`, предзагрузка Onest 400/700 и Unbounded 700 (latin + cyrillic); nginx: gzip/brotli, долгий кэш для `assets/*` с хэшем, без кэша для `index.html`. (шрифты, gzip и кэш сделаны; brotli нет: в `nginx:alpine` нет модуля)
 - [x] SEO: `title`/`description` на страницах, `robots.txt`, `og:`-теги главной и карточки.
 
