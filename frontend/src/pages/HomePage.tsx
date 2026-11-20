@@ -24,8 +24,12 @@ function WeeklyDrops() {
         <DropGridSkeleton />
       ) : isError ? (
         <ErrorBlock message="Не удалось загрузить подборку." onRetry={() => void refetch()} />
+      ) : !data || data.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-line p-5 text-muted">
+          За неделю цены не снижались. Загляните позже или найдите книгу в каталоге.
+        </p>
       ) : (
-        <DropGrid drops={data ?? []} phoneLimit={4} />
+        <DropGrid drops={data} phoneLimit={4} />
       )}
     </section>
   )
