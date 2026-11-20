@@ -29,7 +29,7 @@ export function AdminLayout() {
       <SkipLink />
       <ScrollToTop />
       <div className="flex min-h-screen min-w-[1024px]">
-        <nav aria-label="Админ-меню" className="flex w-[240px] shrink-0 flex-col gap-1 bg-ink px-3.5 py-5 text-white">
+        <nav aria-label="Админ-меню" className="flex w-[220px] shrink-0 flex-col gap-1 bg-ink px-3.5 py-5 text-white">
           <div className="flex items-center gap-2.5 px-2 pb-[18px]">
             <svg
               width="24"
