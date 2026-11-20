@@ -5,6 +5,7 @@ import { RequireGuest } from '../components/auth/RequireGuest'
 import { RequireAuth } from '../components/auth/RequireAuth'
 import { AppLayout } from '../components/layout/AppLayout'
 import { PageSkeleton } from '../components/layout/PageSkeleton'
+import { EditionRouteFallback } from '../features/edition/EditionSkeleton'
 import { loadEditionPage } from '../features/edition/loadEditionPage'
 import { loadAdminRoutes } from './loadAdminRoutes'
 
@@ -49,7 +50,14 @@ export default function App() {
         <Route path="search" element={<SearchPage />} />
         <Route path="catalog" element={<SearchPage />} />
         <Route path="deals" element={<DealsPage />} />
-        <Route path="editions/:id" element={<EditionPage />} />
+        <Route
+          path="editions/:id"
+          element={
+            <Suspense fallback={<EditionRouteFallback />}>
+              <EditionPage />
+            </Suspense>
+          }
+        />
         <Route path="books/:id" element={<BookRedirectPage />} />
         <Route element={<RequireGuest />}>
           <Route path="login" element={<LoginPage />} />

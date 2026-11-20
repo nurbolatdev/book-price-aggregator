@@ -10,6 +10,16 @@ export function EditionBarSkeleton() {
   );
 }
 
+// Reserves the height of the loaded page so the footer stays below the fold while
+// the chunk and the data load (avoids a footer shift on the edition page).
+const RESERVED = "min-h-[1200px]";
+
+export function EditionRouteFallback() {
+  return (
+    <div role="status" aria-label="Загрузка" className={RESERVED} />
+  );
+}
+
 export function EditionSkeleton({
   variant = "desktop",
 }: {
@@ -20,7 +30,7 @@ export function EditionSkeleton({
       <div
         role="status"
         aria-label="Загружаем издание"
-        className="flex flex-col"
+        className={`flex flex-col ${RESERVED}`}
       >
         <div className="flex flex-col gap-3.5">
           <div className="flex gap-3.5">
@@ -50,7 +60,7 @@ export function EditionSkeleton({
     <div
       role="status"
       aria-label="Загружаем издание"
-      className="flex flex-col gap-6"
+      className={`flex flex-col gap-6 ${RESERVED}`}
     >
       <Skeleton className="h-5 w-64 max-w-full" />
       <div className="flex flex-wrap items-start gap-8">
