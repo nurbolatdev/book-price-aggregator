@@ -25,6 +25,11 @@ describe("DealsPage", () => {
     expect(limits).toEqual(["48"]);
   });
 
+  it("sets the document title", () => {
+    renderWithProviders(<DealsPage />, { route: "/deals" });
+    expect(document.title).toBe("Скидки недели | KitapRadar");
+  });
+
   it("shows the empty state with a link to the catalog", async () => {
     server.use(http.get("*/api/v1/home/drops", () => HttpResponse.json([])));
     renderWithProviders(<DealsPage />, { route: "/deals" });

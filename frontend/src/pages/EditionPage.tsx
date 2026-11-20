@@ -43,6 +43,7 @@ function metaFor(edition: EditionDetailResponse) {
   return {
     title: `${title} — цены в магазинах Казахстана | KitapRadar`,
     description,
+    image: edition.coverUrl || undefined,
   };
 }
 

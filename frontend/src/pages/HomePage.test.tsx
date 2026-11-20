@@ -11,6 +11,11 @@ describe('HomePage', () => {
     useAuthStore.getState().clearSession()
   })
 
+  it('sets the document title', () => {
+    renderWithProviders(<HomePage />)
+    expect(document.title).toBe('KitapRadar — сравнение цен на книги в Казахстане')
+  })
+
   it('links popular chips to search', async () => {
     renderWithProviders(<HomePage />)
     const chip = await screen.findByRole('link', { name: 'Атомные привычки' })

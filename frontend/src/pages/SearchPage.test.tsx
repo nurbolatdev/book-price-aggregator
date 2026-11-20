@@ -23,6 +23,16 @@ describe("SearchPage", () => {
     useAuthStore.getState().clearSession();
   });
 
+  it("sets the title for a query", () => {
+    renderWithProviders(<SearchPage />, { route: ROUTE });
+    expect(document.title).toBe("«Мастер и Маргарита» — поиск книг | KitapRadar");
+  });
+
+  it("sets the title for the catalog", () => {
+    renderWithProviders(<SearchPage />, { route: "/catalog" });
+    expect(document.title).toBe("Каталог книг | KitapRadar");
+  });
+
   it("renders heading, total and result cards", async () => {
     renderWithProviders(<SearchPage />, { route: ROUTE });
     expect(

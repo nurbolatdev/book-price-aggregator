@@ -8,6 +8,7 @@ import { useDrops } from '../features/home/useDrops'
 import { PopularChips } from '../features/search/PopularChips'
 import { SearchBox } from '../features/search/SearchBox'
 import { focusRing } from '../components/ui/focusRing'
+import { usePageMeta } from '../lib/usePageMeta'
 import { useAuthStore } from '../stores/auth'
 
 function WeeklyDrops() {
@@ -36,6 +37,10 @@ function WeeklyDrops() {
 }
 
 export default function HomePage() {
+  usePageMeta({
+    title: 'KitapRadar — сравнение цен на книги в Казахстане',
+    description: 'Сравниваем цены книжных магазинов Казахстана и сообщаем на почту, когда книга подешевеет.',
+  })
   const anonymous = useAuthStore((s) => s.status === 'anonymous')
   return (
     <>
