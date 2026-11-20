@@ -4,6 +4,7 @@ import { ErrorBoundary } from '../../components/ErrorBoundary'
 import { PageErrorFallback } from '../../components/PageErrorFallback'
 import { OfflineBanner } from '../../components/layout/OfflineBanner'
 import { ScrollToTop } from '../../components/layout/ScrollToTop'
+import { SkipLink } from '../../components/layout/SkipLink'
 import { Alert } from '../../components/ui/Alert'
 import { focusRing } from '../../components/ui/focusRing'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -25,6 +26,7 @@ export function AdminLayout() {
   const wide = useMediaQuery('(min-width: 1024px)')
   return (
     <div className="min-h-screen overflow-x-auto bg-canvas text-ink">
+      <SkipLink />
       <ScrollToTop />
       <div className="flex min-h-screen min-w-[1024px]">
         <nav aria-label="Админ-меню" className="flex w-[240px] shrink-0 flex-col gap-1 bg-ink px-3.5 py-5 text-white">
@@ -67,7 +69,7 @@ export function AdminLayout() {
             ← На сайт
           </Link>
         </nav>
-        <main className="flex min-w-0 flex-1 flex-col gap-[22px] p-7">
+        <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col gap-[22px] p-7 focus:outline-none">
           {!wide && <Alert tone="info">Админ-панель рассчитана на экран от 1024 px</Alert>}
           <OfflineBanner />
           <ErrorBoundary

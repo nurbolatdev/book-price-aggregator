@@ -7,14 +7,16 @@ import { Header } from './Header'
 import { OfflineBanner } from './OfflineBanner'
 import { PageSkeleton } from './PageSkeleton'
 import { ScrollToTop } from './ScrollToTop'
+import { SkipLink } from './SkipLink'
 
 export function AppLayout({ children }: { children?: ReactNode }) {
   const { pathname } = useLocation()
   return (
     <div className="flex min-h-screen flex-col">
+      <SkipLink />
       <ScrollToTop />
       <Header />
-      <main className="flex-1">
+      <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
         <div className="mx-auto w-full max-w-page px-4 pt-4 empty:hidden md:px-6">
           <OfflineBanner />
         </div>

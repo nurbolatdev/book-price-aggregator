@@ -31,7 +31,11 @@ describe("SearchPage", () => {
         name: "«Мастер и Маргарита»",
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText("Найдено 12 изданий")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent("Найдено 12 изданий"),
+    );
+    const visible = screen.getByText("Найдено 12 изданий", { selector: "p[aria-hidden]" });
+    expect(visible).toHaveAttribute("aria-hidden", "true");
     const links = screen.getAllByRole("link", { name: "Мастер и Маргарита" });
     expect(links[0]).toHaveAttribute("href", "/editions/12");
     expect(screen.getAllByRole("article")).toHaveLength(3);
@@ -92,6 +96,7 @@ describe("SearchPage", () => {
         "По запросу «Мастер и Маргарита» ничего не нашли",
       ),
     ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Ничего не нашли");
     expect(
       screen.getByRole("button", { name: "Сбросить фильтры" }),
     ).toBeInTheDocument();

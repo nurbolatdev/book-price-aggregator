@@ -36,10 +36,17 @@ function SearchResults({ mode }: { mode: SearchMode }) {
               {mode === 'catalog' ? 'Каталог' : `«${q}»`}
             </h1>
             {query.isSuccess && total > 0 && (
-              <p className="text-sm text-muted md:text-[15px]">
+              <p aria-hidden="true" className="text-sm text-muted md:text-[15px]">
                 Найдено {total} {pluralRu(total, EDITIONS)}
               </p>
             )}
+            <p role="status" className="sr-only">
+              {query.isSuccess
+                ? total > 0
+                  ? `Найдено ${total} ${pluralRu(total, EDITIONS)}`
+                  : 'Ничего не нашли'
+                : ''}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <SearchFiltersSheet mode={mode} filters={filters} onApply={(next) => setFilters(next)} />
