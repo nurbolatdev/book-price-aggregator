@@ -17,7 +17,7 @@ function WeeklyDrops() {
     <section className="mx-auto w-full max-w-page px-4 pb-10 md:px-6 md:pb-14">
       <div className="mb-4 flex flex-nowrap items-start justify-between gap-3 md:mb-6">
         <h2 className="min-w-0 font-display text-xl font-bold md:text-[26px] md:font-medium">Сильнее всего подешевели за неделю</h2>
-        <Link to="/deals" className={'font-semibold text-link hover:text-link-hover ' + focusRing}>
+        <Link to="/deals" className={'font-semibold text-link underline hover:text-link-hover ' + focusRing}>
           Все скидки
         </Link>
       </div>

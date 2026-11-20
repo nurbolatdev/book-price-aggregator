@@ -5,7 +5,7 @@ import { readSearchOrigin } from './searchOrigin'
 
 export function EditionBreadcrumbs({ title }: { title: string }) {
   const origin = readSearchOrigin(useLocation().state)
-  const link = cn('hover:text-link', focusRing)
+  const link = cn('underline hover:text-link', focusRing)
   return (
     <nav aria-label="Хлебные крошки" className="text-sm text-muted">
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
