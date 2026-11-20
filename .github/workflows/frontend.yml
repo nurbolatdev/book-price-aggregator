@@ -23,7 +23,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: frontend
@@ -39,6 +39,20 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run analyze
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end flows
+        run: npm run e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Check generated API types are up to date
         run: |
           npm run gen:api
