@@ -21,6 +21,7 @@ test('home, search, edition and admin sign-in on the real stack', async ({ page 
   await page.getByLabel('Email').fill(adminEmail)
   await page.getByRole('textbox', { name: 'Пароль' }).fill(adminPassword)
   await page.getByRole('button', { name: 'Войти', exact: true }).click()
+  await expect(page).not.toHaveURL(/\/login/)
   await page.goto('/admin')
   await expect(page.getByRole('heading', { level: 1, name: 'Обзор системы' })).toBeVisible()
 })
