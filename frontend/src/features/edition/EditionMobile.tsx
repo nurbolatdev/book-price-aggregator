@@ -31,6 +31,7 @@ export function EditionMobile({ edition, editionId }: EditionMobileProps) {
             title={book?.title ?? ''}
             coverUrl={edition.coverUrl}
             size="detail"
+            priority
             className="h-[140px] w-24 rounded-lg"
           />
           <div className="flex min-w-0 flex-col gap-1.5">
