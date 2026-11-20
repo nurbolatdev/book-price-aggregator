@@ -15,6 +15,7 @@
     "test": "vitest run",
     "dev:mock": "vite --mode mock",
     "e2e": "playwright test -c e2e/flows.config.ts",
+    "e2e:live": "playwright test -c e2e/live.config.ts",
     "screens": "playwright test -c e2e/playwright.config.ts",
     "lighthouse": "node scripts/lighthouse.mjs",
     "gen:api": "openapi-typescript ../docs/api/openapi.json -o src/api/schema.d.ts"
