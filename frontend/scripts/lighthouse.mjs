@@ -18,7 +18,7 @@ async function findEditionId() {
     const res = await fetch(`${base}/api/v1/search?q=${encodeURIComponent(QUERY)}&size=1`)
     if (res.ok) {
       const body = await res.json()
-      const id = body?.items?.[0]?.editionId ?? body?.content?.[0]?.editionId
+      const id = body?.content?.[0]?.editionId
       if (id) return String(id)
     }
   } catch {
@@ -40,7 +40,7 @@ const rows = []
 let failed = false
 
 for (const page of pages) {
-  const outBase = join(outDir, `${page.name}.report`)
+  const outBase = join(outDir, page.name)
   const run = spawnSync(
     'npx',
     [

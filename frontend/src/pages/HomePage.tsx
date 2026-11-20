@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { EmptyState } from '../components/ui/EmptyState'
 import { ErrorBlock } from '../components/ui/ErrorBlock'
 import { buttonClasses } from '../components/ui/Button'
 import { DropGrid, DropGridSkeleton } from '../features/home/DropGrid'
@@ -26,9 +27,11 @@ function WeeklyDrops() {
       ) : isError ? (
         <ErrorBlock message="Не удалось загрузить подборку." onRetry={() => void refetch()} />
       ) : !data || data.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-line p-5 text-muted">
-          За неделю цены не снижались. Загляните позже или найдите книгу в каталоге.
-        </p>
+        <EmptyState
+          title="За неделю цены не снижались"
+          text="Загляните позже или найдите книгу в каталоге."
+          className="rounded-xl border border-dashed border-line"
+        />
       ) : (
         <DropGrid drops={data} phoneLimit={4} />
       )}

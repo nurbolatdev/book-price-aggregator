@@ -12,7 +12,7 @@ export function EditionBarSkeleton() {
 
 // Reserves the height of the loaded page so the footer stays below the fold while
 // the chunk and the data load (avoids a footer shift on the edition page).
-const RESERVED = "min-h-[1200px]";
+export const RESERVED = "min-h-[1200px]";
 
 export function EditionRouteFallback() {
   return (

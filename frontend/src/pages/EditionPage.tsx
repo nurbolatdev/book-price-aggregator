@@ -9,6 +9,7 @@ import { EditionMobileHeader } from "../features/edition/EditionMobileHeader";
 import {
   EditionBarSkeleton,
   EditionSkeleton,
+  RESERVED,
 } from "../features/edition/EditionSkeleton";
 import { storeNameOf } from "../features/edition/offers";
 import { EditionBeaconModal } from "../features/edition/EditionBeaconModal";
@@ -115,15 +116,22 @@ export default function EditionPage() {
   }
 
   let state: React.ReactNode;
-  if (id === 0 || isNotFound(error)) state = <NotFound />;
+  if (id === 0 || isNotFound(error))
+    state = (
+      <div className={RESERVED}>
+        <NotFound />
+      </div>
+    );
   else if (isPending)
     state = <EditionSkeleton variant={desktop ? "desktop" : "mobile"} />;
   else
     state = (
-      <ErrorBlock
-        message="Не удалось загрузить издание."
-        onRetry={() => void refetch()}
-      />
+      <div className={RESERVED}>
+        <ErrorBlock
+          message="Не удалось загрузить издание."
+          onRetry={() => void refetch()}
+        />
+      </div>
     );
   return desktop ? (
     <Container>{state}</Container>
