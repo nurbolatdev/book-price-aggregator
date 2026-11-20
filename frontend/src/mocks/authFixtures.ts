@@ -13,11 +13,19 @@ function verifiedFlag(): boolean {
   }
 }
 
+function adminFlag(): boolean {
+  try {
+    return sessionStorage.getItem('kr.mock.role') === 'ADMIN'
+  } catch {
+    return false
+  }
+}
+
 const initialUser: UserResponse = {
   id: 7,
   email: 'nurbo@example.com',
   name: 'Нурболат',
-  role: 'USER',
+  role: adminFlag() ? 'ADMIN' : 'USER',
   emailVerified: verifiedFlag(),
   notifyFrequency: 'INSTANT',
   weeklyDigest: true,

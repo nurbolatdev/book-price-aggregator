@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useOnline } from '../../lib/useOnline'
 import { ErrorBoundary } from '../ErrorBoundary'
@@ -8,7 +8,7 @@ import { Header } from './Header'
 import { PageSkeleton } from './PageSkeleton'
 import { ScrollToTop } from './ScrollToTop'
 
-export function AppLayout() {
+export function AppLayout({ children }: { children?: ReactNode }) {
   const { pathname } = useLocation()
   const online = useOnline()
   return (
@@ -37,7 +37,7 @@ export function AppLayout() {
           )}
         >
           <Suspense fallback={<PageSkeleton />}>
-            <Outlet />
+            {children ?? <Outlet />}
           </Suspense>
         </ErrorBoundary>
       </main>

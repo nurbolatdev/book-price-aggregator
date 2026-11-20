@@ -1,0 +1,5 @@
+export const tableWrap = 'overflow-x-auto'
+export const table = 'w-full border-collapse text-sm'
+export const th = 'px-2.5 py-2 text-left text-xs font-semibold text-muted'
+export const td = 'px-2.5 py-3'
+export const row = 'border-t border-divider'

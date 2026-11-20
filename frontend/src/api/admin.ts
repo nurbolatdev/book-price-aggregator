@@ -1,0 +1,189 @@
+import { api } from './client'
+import type {
+  AdminActivityDay,
+  AdminNotification,
+  AdminNotificationPage,
+  AdminEventPage,
+  AdminHealth,
+  AdminParser,
+  AdminPeriod,
+  AdminStats,
+  AdminUserPage,
+  EventLevel,
+  NotificationDelivery,
+  NotificationStatus,
+  ParserRunQueued,
+  ReviewOffer,
+  ReviewOfferPage,
+  QueueStats,
+  RequeueResponse,
+  SearchQueryStat,
+  StoreCode,
+  StoreState,
+} from './types'
+
+export async function fetchAdminStats(
+  period: AdminPeriod,
+  signal?: AbortSignal,
+): Promise<AdminStats> {
+  const { data } = await api.get<AdminStats>('/admin/stats', {
+    params: { period },
+    signal,
+  })
+  return data
+}
+
+export async function fetchAdminHealth(signal?: AbortSignal): Promise<AdminHealth> {
+  const { data } = await api.get<AdminHealth>('/admin/health', { signal })
+  return data
+}
+
+export async function fetchAdminParsers(signal?: AbortSignal): Promise<AdminParser[]> {
+  const { data } = await api.get<AdminParser[]>('/admin/parsers', { signal })
+  return data
+}
+
+export async function runParser(code: StoreCode): Promise<ParserRunQueued> {
+  const { data } = await api.post<ParserRunQueued>(`/admin/parsers/${code}/run`)
+  return data
+}
+
+export async function fetchAdminQueues(signal?: AbortSignal): Promise<QueueStats[]> {
+  const { data } = await api.get<QueueStats[]>('/admin/queues', { signal })
+  return data
+}
+
+export async function fetchAdminActivity(
+  days: number,
+  signal?: AbortSignal,
+): Promise<AdminActivityDay[]> {
+  const { data } = await api.get<AdminActivityDay[]>('/admin/activity', {
+    params: { days },
+    signal,
+  })
+  return data
+}
+
+export interface AdminEventsParams {
+  level?: EventLevel
+  page: number
+  size: number
+}
+
+export async function fetchAdminEvents(
+  { level, page, size }: AdminEventsParams,
+  signal?: AbortSignal,
+): Promise<AdminEventPage> {
+  const { data } = await api.get<AdminEventPage>('/admin/events', {
+    params: { ...(level ? { level } : {}), page, size },
+    signal,
+  })
+  return data
+}
+
+export async function fetchTopQueries(
+  period: AdminPeriod,
+  signal?: AbortSignal,
+): Promise<SearchQueryStat[]> {
+  const { data } = await api.get<SearchQueryStat[]>('/admin/search/top', {
+    params: { period },
+    signal,
+  })
+  return data
+}
+
+export async function fetchZeroResults(
+  period: AdminPeriod,
+  signal?: AbortSignal,
+): Promise<SearchQueryStat[]> {
+  const { data } = await api.get<SearchQueryStat[]>('/admin/search/zero-results', {
+    params: { period },
+    signal,
+  })
+  return data
+}
+
+export async function setStoreEnabled(code: StoreCode, enabled: boolean): Promise<StoreState> {
+  const { data } = await api.patch<StoreState>(`/admin/stores/${code}`, {
+    enabled,
+  })
+  return data
+}
+
+export async function requeueDeadLetter(): Promise<RequeueResponse> {
+  const { data } = await api.post<RequeueResponse>('/admin/queues/dead-letter/requeue')
+  return data
+}
+
+export interface AdminUsersParams {
+  q?: string
+  verified?: boolean
+  page: number
+  size: number
+}
+
+export async function fetchAdminUsers(
+  { q, verified, page, size }: AdminUsersParams,
+  signal?: AbortSignal,
+): Promise<AdminUserPage> {
+  const { data } = await api.get<AdminUserPage>('/admin/users', {
+    params: {
+      ...(q ? { q } : {}),
+      ...(verified === undefined ? {} : { verified }),
+      page,
+      size,
+    },
+    signal,
+  })
+  return data
+}
+
+export interface AdminNotificationsParams {
+  status?: NotificationStatus
+  delivery?: NotificationDelivery
+  page: number
+  size: number
+}
+
+export async function fetchAdminNotifications(
+  { status, delivery, page, size }: AdminNotificationsParams,
+  signal?: AbortSignal,
+): Promise<AdminNotificationPage> {
+  const { data } = await api.get<AdminNotificationPage>('/admin/notifications', {
+    params: {
+      ...(status ? { status } : {}),
+      ...(delivery ? { delivery } : {}),
+      page,
+      size,
+    },
+    signal,
+  })
+  return data
+}
+
+export async function retryNotification(id: number): Promise<AdminNotification> {
+  const { data } = await api.post<AdminNotification>(`/admin/notifications/${id}/retry`)
+  return data
+}
+
+export async function fetchPendingOffers(
+  page: number,
+  size: number,
+  signal?: AbortSignal,
+): Promise<ReviewOfferPage> {
+  const { data } = await api.get<ReviewOfferPage>('/admin/offers/pending-review', {
+    params: { page, size },
+    signal,
+  })
+  return data
+}
+
+export async function matchOffer(id: number, editionId: number): Promise<ReviewOffer> {
+  const { data } = await api.post<ReviewOffer>(`/admin/offers/${id}/match`, { editionId })
+  return data
+}
+
+export async function rejectOffer(id: number): Promise<ReviewOffer> {
+  const { data } = await api.post<ReviewOffer>(`/admin/offers/${id}/reject`)
+  return data
+}

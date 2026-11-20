@@ -1,4 +1,5 @@
 import { HttpResponse, delay, http } from 'msw'
+import { adminHandlers } from './adminHandlers'
 import { authHandlers } from './authHandlers'
 import { beaconHandlers } from './beaconHandlers'
 import { bookDetail, editionDetail, priceHistory, similarFor } from './editionFixtures'
@@ -14,6 +15,7 @@ function notFound(message: string) {
 
 export const handlers = [
   ...authHandlers,
+  ...adminHandlers,
 
   http.get('*/api/v1/stores', () => HttpResponse.json(stores)),
 
