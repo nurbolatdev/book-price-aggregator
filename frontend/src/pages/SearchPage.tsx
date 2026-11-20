@@ -15,6 +15,7 @@ import {
 } from '../features/search/useSearchFilters'
 import { useSearchResults } from '../features/search/useSearchResults'
 import { pluralRu } from '../lib/format'
+import { usePageMeta } from '../lib/usePageMeta'
 
 const EDITIONS: [string, string, string] = ['издание', 'издания', 'изданий']
 
@@ -25,6 +26,17 @@ function SearchResults({ mode }: { mode: SearchMode }) {
   const total = query.data?.pages[0]?.totalElements ?? 0
   const left = Math.max(total - items.length, 0)
   const q = filters.q.trim()
+  usePageMeta(
+    mode === 'catalog'
+      ? {
+          title: 'Каталог книг | KitapRadar',
+          description: 'Каталог книг с ценами в магазинах Казахстана: фильтры по магазинам, цене и наличию.',
+        }
+      : {
+          title: `«${q}» — поиск книг | KitapRadar`,
+          description: `Цены на «${q}» в книжных магазинах Казахстана на одном экране.`,
+        },
+  )
 
   return (
     <div className="mx-auto flex w-full max-w-page items-start gap-7 px-4 pb-14 pt-7 md:px-6">
@@ -36,10 +48,17 @@ function SearchResults({ mode }: { mode: SearchMode }) {
               {mode === 'catalog' ? 'Каталог' : `«${q}»`}
             </h1>
             {query.isSuccess && total > 0 && (
-              <p className="text-sm text-muted md:text-[15px]">
+              <p aria-hidden="true" className="text-sm text-muted md:text-[15px]">
                 Найдено {total} {pluralRu(total, EDITIONS)}
               </p>
             )}
+            <p role="status" className="sr-only">
+              {query.isSuccess
+                ? total > 0
+                  ? `Найдено ${total} ${pluralRu(total, EDITIONS)}`
+                  : 'Ничего не нашли'
+                : ''}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <SearchFiltersSheet mode={mode} filters={filters} onApply={(next) => setFilters(next)} />

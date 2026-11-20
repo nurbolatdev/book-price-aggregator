@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { isNotFound } from "../api/errors";
 import type { EditionDetailResponse } from "../api/types";
+import { ROUTE_MIN_HEIGHT } from "../components/layout/RouteFallback";
 import { ErrorBlock } from "../components/ui/ErrorBlock";
 import { NotFound } from "../components/ui/NotFound";
 import { EditionDesktop } from "../features/edition/EditionDesktop";
@@ -43,6 +44,7 @@ function metaFor(edition: EditionDetailResponse) {
   return {
     title: `${title} — цены в магазинах Казахстана | KitapRadar`,
     description,
+    image: edition.coverUrl || undefined,
   };
 }
 
@@ -114,15 +116,22 @@ export default function EditionPage() {
   }
 
   let state: React.ReactNode;
-  if (id === 0 || isNotFound(error)) state = <NotFound />;
+  if (id === 0 || isNotFound(error))
+    state = (
+      <div className={ROUTE_MIN_HEIGHT}>
+        <NotFound />
+      </div>
+    );
   else if (isPending)
     state = <EditionSkeleton variant={desktop ? "desktop" : "mobile"} />;
   else
     state = (
-      <ErrorBlock
-        message="Не удалось загрузить издание."
-        onRetry={() => void refetch()}
-      />
+      <div className={ROUTE_MIN_HEIGHT}>
+        <ErrorBlock
+          message="Не удалось загрузить издание."
+          onRetry={() => void refetch()}
+        />
+      </div>
     );
   return desktop ? (
     <Container>{state}</Container>

@@ -5,8 +5,13 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorBlock } from "../components/ui/ErrorBlock";
 import { DropGrid, DropGridSkeleton } from "../features/home/DropGrid";
 import { useDrops } from "../features/home/useDrops";
+import { usePageMeta } from "../lib/usePageMeta";
 
 export default function DealsPage() {
+  usePageMeta({
+    title: "Скидки недели | KitapRadar",
+    description: "Книги, которые сильнее всего подешевели в магазинах Казахстана за последние 7 дней.",
+  });
   const { data, isPending, isError, refetch } = useDrops(48);
 
   return (

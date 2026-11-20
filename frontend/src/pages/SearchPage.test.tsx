@@ -23,6 +23,16 @@ describe("SearchPage", () => {
     useAuthStore.getState().clearSession();
   });
 
+  it("sets the title for a query", () => {
+    renderWithProviders(<SearchPage />, { route: ROUTE });
+    expect(document.title).toBe("«Мастер и Маргарита» — поиск книг | KitapRadar");
+  });
+
+  it("sets the title for the catalog", () => {
+    renderWithProviders(<SearchPage />, { route: "/catalog" });
+    expect(document.title).toBe("Каталог книг | KitapRadar");
+  });
+
   it("renders heading, total and result cards", async () => {
     renderWithProviders(<SearchPage />, { route: ROUTE });
     expect(
@@ -31,7 +41,11 @@ describe("SearchPage", () => {
         name: "«Мастер и Маргарита»",
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText("Найдено 12 изданий")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent("Найдено 12 изданий"),
+    );
+    const visible = screen.getByText("Найдено 12 изданий", { selector: "p[aria-hidden]" });
+    expect(visible).toHaveAttribute("aria-hidden", "true");
     const links = screen.getAllByRole("link", { name: "Мастер и Маргарита" });
     expect(links[0]).toHaveAttribute("href", "/editions/12");
     expect(screen.getAllByRole("article")).toHaveLength(3);
@@ -92,6 +106,7 @@ describe("SearchPage", () => {
         "По запросу «Мастер и Маргарита» ничего не нашли",
       ),
     ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Ничего не нашли");
     expect(
       screen.getByRole("button", { name: "Сбросить фильтры" }),
     ).toBeInTheDocument();

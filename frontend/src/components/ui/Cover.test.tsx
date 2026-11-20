@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { coverColor } from '../../lib/cover'
 import { Cover } from './Cover'
 
@@ -18,6 +18,25 @@ describe('Cover', () => {
       <Cover editionId={1} title="T" coverUrl="http://x/c.jpg" />,
     )
     expect(container.querySelector('img')).toHaveAttribute('loading', 'lazy')
+  })
+
+  it('priority loads the image eagerly with high fetch priority and no warning', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { container } = render(
+      <Cover editionId={1} title="T" coverUrl="http://x/c.jpg" priority />,
+    )
+    const img = container.querySelector('img')!
+    expect(img).toHaveAttribute('loading', 'eager')
+    expect(img).toHaveAttribute('fetchpriority', 'high')
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
+  })
+
+  it('does not set fetch priority by default', () => {
+    const { container } = render(
+      <Cover editionId={1} title="T" coverUrl="http://x/c.jpg" />,
+    )
+    expect(container.querySelector('img')).not.toHaveAttribute('fetchpriority')
   })
 
   it('falls back to the plate on image error', () => {

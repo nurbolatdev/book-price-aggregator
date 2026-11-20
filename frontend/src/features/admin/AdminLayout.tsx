@@ -1,7 +1,10 @@
 import { Suspense } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
+import { PageErrorFallback } from '../../components/PageErrorFallback'
+import { OfflineBanner } from '../../components/layout/OfflineBanner'
 import { ScrollToTop } from '../../components/layout/ScrollToTop'
+import { SkipLink } from '../../components/layout/SkipLink'
 import { Alert } from '../../components/ui/Alert'
 import { focusRing } from '../../components/ui/focusRing'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -23,9 +26,10 @@ export function AdminLayout() {
   const wide = useMediaQuery('(min-width: 1024px)')
   return (
     <div className="min-h-screen overflow-x-auto bg-canvas text-ink">
+      <SkipLink />
       <ScrollToTop />
       <div className="flex min-h-screen min-w-[1024px]">
-        <nav aria-label="Админ-меню" className="flex w-[240px] shrink-0 flex-col gap-1 bg-ink px-3.5 py-5 text-white">
+        <nav aria-label="Админ-меню" className="flex w-[220px] shrink-0 flex-col gap-1 bg-ink px-3.5 py-5 text-white">
           <div className="flex items-center gap-2.5 px-2 pb-[18px]">
             <svg
               width="24"
@@ -65,22 +69,12 @@ export function AdminLayout() {
             ← На сайт
           </Link>
         </nav>
-        <main className="flex min-w-0 flex-1 flex-col gap-[22px] p-7">
+        <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col gap-[22px] p-7 focus:outline-none">
           {!wide && <Alert tone="info">Админ-панель рассчитана на экран от 1024 px</Alert>}
+          <OfflineBanner />
           <ErrorBoundary
             resetKey={pathname}
-            fallback={(_error, reset) => (
-              <div>
-                <p className="mb-4">Не удалось показать страницу</p>
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="min-h-touch rounded-control border border-line bg-surface px-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-link"
-                >
-                  Попробовать снова
-                </button>
-              </div>
-            )}
+            fallback={(_error, reset) => <PageErrorFallback onRetry={reset} />}
           >
             <Suspense fallback={<Skeleton className="h-64 w-full" />}>
               <Outlet />

@@ -70,6 +70,20 @@ describe('EditionPage (desktop)', () => {
     expect(description).toContain(`от ${formatPrice(3150)}`)
   })
 
+  it('sets og:image to the cover url', async () => {
+    const detail = editionDetail(41)
+    server.use(
+      http.get('*/api/v1/editions/:id', () =>
+        HttpResponse.json({ ...detail, coverUrl: 'https://img.test/cover.jpg' }),
+      ),
+    )
+    renderEdition()
+    await screen.findByRole('heading', { level: 1 })
+    expect(document.querySelector('meta[property="og:image"]')?.getAttribute('content')).toBe(
+      'https://img.test/cover.jpg',
+    )
+  })
+
   it('shows the loading status', () => {
     renderEdition()
     expect(screen.getByRole('status', { name: 'Загружаем издание' })).toBeInTheDocument()

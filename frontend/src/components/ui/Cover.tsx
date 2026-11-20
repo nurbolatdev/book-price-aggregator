@@ -8,6 +8,7 @@ interface CoverProps {
   coverUrl?: string | null
   size?: 'drop' | 'result' | 'detail'
   className?: string
+  priority?: boolean
 }
 
 const PLATE_SIZE = {
@@ -16,12 +17,16 @@ const PLATE_SIZE = {
   detail: 'max-md:p-0 md:p-6 md:font-display md:text-2xl md:leading-[1.2]',
 } as const
 
+// React 18 warns on the camelCase fetchPriority prop; the lowercase attribute reaches the DOM as is.
+const PRIORITY_ATTRS = { fetchpriority: 'high' } as Record<string, string>
+
 export function Cover({
   editionId,
   title,
   coverUrl,
   size = 'drop',
   className,
+  priority = false,
 }: CoverProps) {
   const [failed, setFailed] = useState(false)
   const box = cn('relative shrink-0 overflow-hidden', className)
@@ -31,7 +36,8 @@ export function Cover({
         <img
           src={coverUrl}
           alt=""
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          {...(priority ? PRIORITY_ATTRS : {})}
           decoding="async"
           className="h-full w-full object-cover"
           onError={() => setFailed(true)}

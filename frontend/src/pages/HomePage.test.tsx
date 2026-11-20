@@ -11,6 +11,11 @@ describe('HomePage', () => {
     useAuthStore.getState().clearSession()
   })
 
+  it('sets the document title', () => {
+    renderWithProviders(<HomePage />)
+    expect(document.title).toBe('KitapRadar — сравнение цен на книги в Казахстане')
+  })
+
   it('links popular chips to search', async () => {
     renderWithProviders(<HomePage />)
     const chip = await screen.findByRole('link', { name: 'Атомные привычки' })
@@ -61,5 +66,12 @@ describe('HomePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
     await waitFor(() => expect(screen.getAllByText(/за 7 дней/)).toHaveLength(4))
     expect(getLocation()).toBe('/')
+  })
+
+  it('shows a note instead of an empty grid when nothing got cheaper', async () => {
+    server.use(http.get('*/api/v1/home/drops', () => HttpResponse.json([])))
+    renderWithProviders(<HomePage />)
+    expect(await screen.findByText(/За неделю цены не снижались/)).toBeInTheDocument()
+    expect(screen.queryByText(/за 7 дней/)).not.toBeInTheDocument()
   })
 })

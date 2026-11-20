@@ -11,6 +11,7 @@
 # KitapRadar (Book Price Aggregator)
 
 [![Backend CI](https://github.com/nurbolatdev/book-price-aggregator/actions/workflows/backend.yml/badge.svg)](https://github.com/nurbolatdev/book-price-aggregator/actions/workflows/backend.yml)
+[![Frontend CI](https://github.com/nurbolatdev/book-price-aggregator/actions/workflows/frontend.yml/badge.svg)](https://github.com/nurbolatdev/book-price-aggregator/actions/workflows/frontend.yml)
 
 Агрегатор цен на книги в магазинах Казахстана. Пользователь ищет книгу и видит цены всех магазинов на одном экране; можно поставить «маячок» и получить письмо, когда цена упадёт до нужного уровня. Для администратора есть панель: здоровье системы, парсеры, очереди, статистика.
 
@@ -18,7 +19,18 @@
 
 ## Скриншоты
 
-Появятся после реализации нового интерфейса (frontend-вехи F1–F7).
+Главная (1280 px) и карточка издания:
+
+![Главная](docs/screenshots/home.jpg)
+
+![Карточка издания](docs/screenshots/edition.jpg)
+
+«Мои маячки» на телефоне (390 px) и админ-панель:
+
+<p>
+  <img src="docs/screenshots/beacons-mobile.jpg" alt="Мои маячки на телефоне" width="260">
+  <img src="docs/screenshots/admin.jpg" alt="Админ-панель, обзор" width="640">
+</p>
 
 ## Архитектура
 
@@ -149,6 +161,28 @@ curl -X POST localhost:8080/api/v1/admin/parsers/FLIP/run -H "Authorization: Bea
 
 В демо-профиле за запуск обходится немного страниц (см. `application-demo.yml`).
 
+## Frontend
+
+SPA в `frontend/`: React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, Zustand, Recharts (лениво, только карточка и админка), шрифты Onest и Unbounded лежат в `frontend/public/fonts/` (лицензия OFL). Раздаётся nginx из образа `frontend`.
+
+```bash
+cd frontend && npm ci
+npm run dev        # с настоящим backend, http://localhost:5173 (/api проксируется на 8080)
+npm run dev:mock   # без backend, на моках MSW: вход с любым email и паролем password123
+docker compose up  # весь стек, интерфейс на http://localhost
+```
+
+| Команда | Что делает |
+|---|---|
+| `npm run lint`, `npm test`, `npm run build` | линтер, unit-тесты (Vitest), типы и production-сборка |
+| `npm run e2e` | сквозные сценарии Playwright на моках (маячок, регистрация, пароль, админка) и проверка доступности axe; один раз нужен `npx playwright install chromium` |
+| `npm run e2e:live` | ручной набор против `docker compose up` (демо-профиль): главная, поиск, карточка, вход админа. Переменные: `E2E_BASE_URL` (по умолчанию `http://localhost`), `E2E_QUERY`, `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` (по умолчанию `admin@example.com` / `change_me_admin_password`) |
+| `npm run screens` | снимки экранов при 1280 и 390 px в `frontend/screens/` для сверки с макетами |
+| `npm run analyze` | сборка и бюджет: начальный JS главной ≤ 200 КБ gzip, Recharts не в начальных чанках |
+| `npm run lighthouse -- http://localhost` | Lighthouse (mobile) для `/`, `/search`, `/editions/:id`, отчёты в `frontend/lighthouse/` |
+
+Замеры скорости и бюджеты — [docs/performance.md](docs/performance.md).
+
 ## Разработка
 
 ```bash
@@ -159,7 +193,7 @@ docker compose up -d postgres redis rabbitmq mailpit
 
 Две последние команды запускаются в разных терминалах и друг от друга не зависят.
 
-- Frontend (`cd frontend`): `npm run lint`, `npm test`, `npm run build`, `npm run gen:api` (перегенерировать `src/api/schema.d.ts` после изменения `docs/api/openapi.json`), `npm run dev:mock` (приложение без backend, на фикстурах MSW; войти можно с любым email и паролем `password123`, `limit@example.com` показывает состояние «слишком много попыток»; в «Моих маячках» пять примеров маячков, у издания 41 маячка нет — поставьте его там; `/unsubscribe?token=valid` и `?token=expired`; флаги сессии `kr.mock.beacons=empty` и `kr.mock.emailVerified=1` использует `npm run screens`), `npm run analyze` (production-сборка и проверка, что Recharts не попадает в начальные чанки), `npm run screens` (снимки экранов при 1280 и 390 px в `frontend/screens/`; один раз нужен `npx playwright install chromium`).
+- Frontend (`cd frontend`): `npm run lint`, `npm test`, `npm run build`, `npm run gen:api` (перегенерировать `src/api/schema.d.ts` после изменения `docs/api/openapi.json`), `npm run dev:mock` (приложение без backend, на фикстурах MSW; войти можно с любым email и паролем `password123`, `limit@example.com` показывает состояние «слишком много попыток»; в «Моих маячках» пять примеров маячков, у издания 41 маячка нет — поставьте его там; `/unsubscribe?token=valid` и `?token=expired`; флаги сессии `kr.mock.beacons=empty` и `kr.mock.emailVerified=1` использует `npm run screens`), `npm run analyze` (production-сборка, проверка, что Recharts не попадает в начальные чанки, и бюджет начального JS главной — не больше 200 КБ gzip), `npm run screens` (снимки экранов при 1280 и 390 px в `frontend/screens/`; один раз нужен `npx playwright install chromium`).
 - Refresh-токен хранится в cookie `kr_refresh`; при разработке по обычному http (не localhost-профиль `local`) нужен `REFRESH_COOKIE_SECURE=false`, в профиле `local` он уже выключен.
 - Тесты: `cd backend && ./mvnw verify` (нужен Docker для Testcontainers). Отчёт покрытия — `backend/target/site/jacoco/index.html`; порог для сервисов — 70% строк.
 - Нагрузочный тест k6 и результаты — [docs/performance.md](docs/performance.md).

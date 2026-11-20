@@ -1,6 +1,7 @@
 // Fails if the charting library ends up in the initial chunks (entry + edition page chunk),
 // or if admin code ends up in a chunk reachable without the admin entry.
 import { readFileSync } from 'node:fs'
+import { gzipSync } from 'node:zlib'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -68,3 +69,27 @@ console.log('Initial chunks (no Recharts):')
 for (const name of [...initial].sort()) console.log(`  ${name}`)
 console.log(`Recharts lives in: ${holders.map((c) => c.fileName).join(', ')}`)
 console.log(`Admin code lives in: ${adminChunk.fileName}`)
+
+// Home initial JS budget: entry + home page chunk + their static imports, gzip level 6 (as nginx).
+const BUDGET = 200 * 1024
+const homeChunk = chunks.find((c) => c.moduleIds.some((id) => id.endsWith('/src/pages/HomePage.tsx')))
+if (!homeChunk) fail('home page chunk not found, the budget check would be vacuous')
+
+const homeInitial = new Set()
+const collect = (name) => {
+  if (homeInitial.has(name)) return
+  const chunk = byName.get(name)
+  if (!chunk) return
+  homeInitial.add(name)
+  chunk.imports.forEach(collect)
+}
+chunks.filter((c) => c.isEntry).forEach((c) => collect(c.fileName))
+collect(homeChunk.fileName)
+
+let total = 0
+for (const name of homeInitial) {
+  if (!name.endsWith('.js')) continue
+  total += gzipSync(readFileSync(resolve(root, 'dist', name)), { level: 6 }).length
+}
+console.log(`Initial JS for /: ${(total / 1024).toFixed(1)} KB gzip (budget ${BUDGET / 1024} KB)`)
+if (total > BUDGET) fail(`home initial JS ${total} bytes gzip exceeds ${BUDGET}`)

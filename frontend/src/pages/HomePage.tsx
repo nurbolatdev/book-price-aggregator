@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { EmptyState } from '../components/ui/EmptyState'
 import { ErrorBlock } from '../components/ui/ErrorBlock'
 import { buttonClasses } from '../components/ui/Button'
 import { DropGrid, DropGridSkeleton } from '../features/home/DropGrid'
@@ -8,6 +9,7 @@ import { useDrops } from '../features/home/useDrops'
 import { PopularChips } from '../features/search/PopularChips'
 import { SearchBox } from '../features/search/SearchBox'
 import { focusRing } from '../components/ui/focusRing'
+import { usePageMeta } from '../lib/usePageMeta'
 import { useAuthStore } from '../stores/auth'
 
 function WeeklyDrops() {
@@ -16,7 +18,7 @@ function WeeklyDrops() {
     <section className="mx-auto w-full max-w-page px-4 pb-10 md:px-6 md:pb-14">
       <div className="mb-4 flex flex-nowrap items-start justify-between gap-3 md:mb-6">
         <h2 className="min-w-0 font-display text-xl font-bold md:text-[26px] md:font-medium">Сильнее всего подешевели за неделю</h2>
-        <Link to="/deals" className={'font-semibold text-link hover:text-link-hover ' + focusRing}>
+        <Link to="/deals" className={'font-semibold text-link underline hover:text-link-hover ' + focusRing}>
           Все скидки
         </Link>
       </div>
@@ -24,14 +26,25 @@ function WeeklyDrops() {
         <DropGridSkeleton />
       ) : isError ? (
         <ErrorBlock message="Не удалось загрузить подборку." onRetry={() => void refetch()} />
+      ) : !data || data.length === 0 ? (
+        <EmptyState
+          headingLevel={3}
+          title="За неделю цены не снижались"
+          text="Загляните позже или найдите книгу в каталоге."
+          className="rounded-xl border border-dashed border-line"
+        />
       ) : (
-        <DropGrid drops={data ?? []} phoneLimit={4} />
+        <DropGrid drops={data} phoneLimit={4} />
       )}
     </section>
   )
 }
 
 export default function HomePage() {
+  usePageMeta({
+    title: 'KitapRadar — сравнение цен на книги в Казахстане',
+    description: 'Сравниваем цены книжных магазинов Казахстана и сообщаем на почту, когда книга подешевеет.',
+  })
   const anonymous = useAuthStore((s) => s.status === 'anonymous')
   return (
     <>

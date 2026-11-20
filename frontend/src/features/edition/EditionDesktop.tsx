@@ -25,6 +25,7 @@ export function EditionDesktop({ edition, editionId }: EditionDesktopProps) {
           title={book?.title ?? ''}
           coverUrl={edition.coverUrl}
           size="detail"
+          priority
           className="h-[380px] w-[260px] max-w-full rounded-[14px]"
         />
         <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-3.5">

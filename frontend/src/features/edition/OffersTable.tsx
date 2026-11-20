@@ -60,7 +60,7 @@ export function OffersTable({ edition }: { edition: EditionDetailResponse }) {
                       <ExternalLink
                         href={o.url}
                         aria-label={`В магазин ${o.storeName ?? o.store}`}
-                        className={cn('font-semibold text-link', focusRing)}
+                        className={cn('font-semibold text-link underline', focusRing)}
                       >
                         В магазин
                       </ExternalLink>

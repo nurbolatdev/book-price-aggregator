@@ -25,6 +25,15 @@ export const screens: ScreenEntry[] = [
     },
   },
   { name: 'not-found', path: '/nope' },
+  {
+    name: 'offline',
+    path: '/',
+    widths: [1280, 390],
+    prepare: async (page) => {
+      await page.context().setOffline(true)
+      await page.getByRole('status').filter({ hasText: 'Нет подключения к интернету' }).waitFor()
+    },
+  },
   { name: 'edition', path: '/editions/41' },
   {
     name: 'edition-skeleton',

@@ -83,7 +83,7 @@ export function SearchFiltersSheet({ mode, filters, onApply }: SearchFiltersShee
 
   return (
     <>
-      <Button variant="secondary" size="sm" className="md:hidden" onClick={() => setOpen(true)}>
+      <Button variant="secondary" size="md" className="md:hidden" onClick={() => setOpen(true)}>
         <ListFilter aria-hidden="true" className="h-4 w-4" />
         {active > 0 ? `Фильтры · ${active}` : 'Фильтры'}
       </Button>
